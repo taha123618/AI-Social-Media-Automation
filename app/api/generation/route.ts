@@ -5,6 +5,8 @@ import { SchedulerService } from '@/features/scheduler/services/scheduler.servic
 import { z } from 'zod';
 import { ContentIntent, Platform } from '@/app/generated/prisma/enums';
 import prisma from '@/lib/prisma';
+import { EntitlementGuard } from '@/lib/guards/entitlement.guard';
+import { UsageService } from '@/features/billing/services/usage.service';
 
 const generateSchema = z.object({
     intent: z.enum(Object.values(ContentIntent) as [string, ...string[]]),
@@ -13,7 +15,6 @@ const generateSchema = z.object({
     customInstructions: z.string().optional(),
     async: z.boolean().optional().default(false)
 });
-
 
 export const POST = apiHandler(async (req, { businessId, user }) => {
     // Handle placeholder business ID
@@ -45,11 +46,17 @@ export const POST = apiHandler(async (req, { businessId, user }) => {
         }
     }
 
+    // 1. Enforce Entitlement Usage Quota for AI Posts
+    const quotaError = await EntitlementGuard.requireUsageLimit(targetBusinessId, 'ai_posts', 1);
+    if (quotaError) {
+        return quotaError;
+    }
+
     // Validate Body
     const body = await parseBody(req, generateSchema);
     const { intent, platforms, topic, customInstructions } = body;
 
-    // 1. Create a "Generating" draft immediately for UX visibility
+    // 2. Create a "Generating" draft immediately for UX visibility
     const draft = await prisma.contentDraft.create({
         data: {
             businessId: targetBusinessId,
@@ -63,7 +70,10 @@ export const POST = apiHandler(async (req, { businessId, user }) => {
         }
     });
 
-    // 2. Queue Job for background processing
+    // 3. Atomically consume 1 AI post credit
+    await UsageService.consume(targetBusinessId, 'ai_posts', 1);
+
+    // 4. Queue Job for background processing
     const job = await SchedulerService.queueGenerationTask({
         businessId: targetBusinessId,
         creatorId: user.id,
