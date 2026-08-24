@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "social-automation.fullname" . }}-web
+  labels:
+    {{- include "social-automation.labels" . | nindent 4 }}
+    app: app-web
+spec:
+  replicas: {{ .Values.replicaCount.web }}
+  selector:
+    matchLabels:
+      {{- include "social-automation.selectorLabels" . | nindent 6 }}
+      app: app-web
+  template:
+    metadata:
+      labels:
+        {{- include "social-automation.selectorLabels" . | nindent 8 }}
+        app: app-web
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: nextjs-app
+          image: "{{ .Values.image.repository }}-app:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources.web | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "social-automation.fullname" . }}-worker
+  labels:
+    {{- include "social-automation.labels" . | nindent 4 }}
+    app: app-worker
+spec:
+  replicas: {{ .Values.replicaCount.worker }}
+  selector:
+    matchLabels:
+      {{- include "social-automation.selectorLabels" . | nindent 6 }}
+      app: app-worker
+  template:
+    metadata:
+      labels:
+        {{- include "social-automation.selectorLabels" . | nindent 8 }}
+        app: app-worker
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+        - name: bullmq-worker
+          image: "{{ .Values.image.repository }}-worker:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources.worker | nindent 12 }}
