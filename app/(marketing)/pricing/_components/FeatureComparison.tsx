@@ -2,33 +2,47 @@
 
 import { Check, Minus } from "lucide-react";
 import React from "react";
+import { PLANS } from "@/features/billing/config/plans.config";
 
-const features = [
+const comparisonSections = [
   {
-    category: "AI Generation",
+    category: "AI Content Generation",
     items: [
-      { name: "AI Post Generator", free: "5/mo", starter: "50/mo", pro: "Unlimited" },
-      { name: "Brand Voice Training", free: false, starter: "1 voice", pro: "Unlimited" },
-      { name: "AI Image Generation", free: false, starter: true, pro: true },
-      { name: "Video Hooks & Scripts", free: false, starter: true, pro: true },
+      { name: "AI Social Posts", free: "5 / mo", starter: "50 / mo", pro: "Unlimited" },
+      { name: "AI Blog Articles", free: "20 / mo", starter: "100 / mo", pro: "Unlimited" },
+      { name: "Article Word Limit", free: "3,000 words", starter: "8,000 words", pro: "Unlimited" },
+      { name: "Brand Voice Profiles", free: "1 profile", starter: "5 profiles", pro: "Unlimited" },
+      { name: "AI Voice Training", free: false, starter: false, pro: true },
+      { name: "AI Detection Bypass", free: false, starter: true, pro: true },
     ]
   },
   {
-    category: "Social Management",
+    category: "SEO & Growth Engine",
     items: [
-      { name: "Supported Platforms", free: "2", starter: "All", pro: "All" },
-      { name: "Content Scheduler", free: false, starter: true, pro: true },
-      { name: "Bulk Importing", free: false, starter: false, pro: true },
-      { name: "Analytics Dashboard", free: "Basic", starter: "Advanced", pro: "Enterprise" },
+      { name: "Real-time SEO Scoring", free: true, starter: true, pro: true },
+      { name: "Topical Cluster Mapping", free: false, starter: true, pro: true },
+      { name: "Topical Cluster Strategy", free: false, starter: false, pro: true },
+      { name: "Auto Internal Linking", free: false, starter: true, pro: true },
+      { name: "Google Search Console Sync", free: false, starter: true, pro: true },
     ]
   },
   {
-    category: "Support & Security",
+    category: "Publishing, Social & CMS",
     items: [
-      { name: "Support Response", free: "48 hours", starter: "24 hours", pro: "Under 1 hour" },
-      { name: "Team Collaboration", free: false, starter: false, pro: "Up to 5 members" },
-      { name: "API Access", free: false, starter: false, pro: true },
-      { name: "Custom Domain", free: false, starter: false, pro: true },
+      { name: "Social Post Scheduling", free: false, starter: true, pro: true },
+      { name: "WordPress & Ghost Export", free: true, starter: true, pro: true },
+      { name: "1-Click CMS Publishing (Webflow, Shopify)", free: false, starter: true, pro: true },
+      { name: "Analytics Dashboard", free: "Basic", starter: "Advanced", pro: "Advanced + Attribution" },
+    ]
+  },
+  {
+    category: "Collaboration, API & Support",
+    items: [
+      { name: "Team Collaboration & Seats", free: false, starter: false, pro: true },
+      { name: "White-Label Reports & Exports", free: false, starter: false, pro: true },
+      { name: "Developer REST API Access", free: false, starter: false, pro: true },
+      { name: "Custom Model Fine-Tuning", free: false, starter: false, pro: true },
+      { name: "Support Tier", free: "Standard", starter: "Priority", pro: "Dedicated CSM + SLA" },
     ]
   }
 ];
@@ -46,12 +60,12 @@ export const FeatureComparison = () => {
             <tr className="border-b border-slate-100 dark:border-slate-800">
               <th className="py-6 font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest text-[10px] w-1/3">Features</th>
               <th className="py-6 font-black text-slate-950 dark:text-white px-4 text-center">Free</th>
-              <th className="py-6 font-black text-[#2D46FF] dark:text-blue-400 px-4 text-center">Starter</th>
-              <th className="py-6 font-black text-slate-400 dark:text-slate-600 px-4 text-center">Pro</th>
+              <th className="py-6 font-black text-[#2D46FF] dark:text-blue-400 px-4 text-center">Starter ($29/mo)</th>
+              <th className="py-6 font-black text-indigo-600 dark:text-indigo-400 px-4 text-center">Pro ($99/mo)</th>
             </tr>
           </thead>
           <tbody>
-            {features.map((section, idx) => (
+            {comparisonSections.map((section, idx) => (
               <React.Fragment key={idx}>
                 <tr className="bg-slate-50/50 dark:bg-slate-900/50">
                   <td colSpan={4} className="py-4 px-6 font-black text-slate-950 dark:text-white text-xs uppercase tracking-widest">
@@ -67,8 +81,8 @@ export const FeatureComparison = () => {
                     <td className="py-5 px-4 text-center text-sm font-bold text-slate-950 dark:text-white">
                       {typeof item.starter === 'string' ? item.starter : (item.starter ? <Check className="w-4 h-4 mx-auto text-[#2D46FF] dark:text-blue-400" /> : <Minus className="w-4 h-4 mx-auto text-slate-200 dark:text-slate-800" />)}
                     </td>
-                    <td className="py-5 px-4 text-center text-sm font-bold text-slate-500 dark:text-slate-500">
-                      {typeof item.pro === 'string' ? item.pro : (item.pro ? <Check className="w-4 h-4 mx-auto text-slate-400 dark:text-slate-500" /> : <Minus className="w-4 h-4 mx-auto text-slate-200 dark:text-slate-800" />)}
+                    <td className="py-5 px-4 text-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                      {typeof item.pro === 'string' ? item.pro : (item.pro ? <Check className="w-4 h-4 mx-auto text-indigo-600 dark:text-indigo-400" /> : <Minus className="w-4 h-4 mx-auto text-slate-200 dark:text-slate-800" />)}
                     </td>
                   </tr>
                 ))}
