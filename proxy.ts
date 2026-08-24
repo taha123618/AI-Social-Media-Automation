@@ -90,7 +90,7 @@ export async function proxy(request: NextRequest) {
     const cookieHeader = request.headers.get("cookie") || "";
     const ipHeader = request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip") || "127.0.0.1";
     const status = await getMaintenanceStatus(origin, cookieHeader, ipHeader);
-    
+
     if (!status.isEnabled || status.bypassed) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -119,31 +119,31 @@ export async function proxy(request: NextRequest) {
 
   // Protected User Routes check
   const PROTECTED_PREFIXES = [
-    "/dashboard",
-    "/contents",
-    "/schedule",
-    "/settings",
-    "/team",
-    "/workflow",
-    "/videos",
-    "/image",
-    "/gallery",
-    "/reviews",
-    "/analytics",
-    "/knowledge",
-    "/posts",
-    "/post-schedule",
-    "/social",
-    "/api/dashboard",
-    "/api/user",
-    "/api/contents",
-    "/api/schedule",
-    "/api/settings",
-    "/api/team",
-    "/api/workflow",
-    "/api/videos",
-    "/api/image",
-    "/api/gallery",
+    "/dashboard/:path*",
+    "/contents/:path*",
+    "/schedule/:path*",
+    "/settings/:path*",
+    "/team/:path*",
+    "/workflow/:path*",
+    "/videos/:path*",
+    "/image/:path*",
+    "/gallery/:path*",
+    "/reviews/:path*",
+    "/analytics/:path*",
+    "/knowledge/:path*",
+    "/posts/:path*",
+    "/post-schedule/:path*",
+    "/social/:path*",
+    "/api/dashboard/:path*",
+    "/api/user/:path*",
+    "/api/contents/:path*",
+    "/api/schedule/:path*",
+    "/api/settings/:path*",
+    "/api/team/:path*",
+    "/api/workflow/:path*",
+    "/api/videos/:path*",
+    "/api/image/:path*",
+    "/api/gallery/:path*",
   ];
 
   const isProtected = PROTECTED_PREFIXES.some(
