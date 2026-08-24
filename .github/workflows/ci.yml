@@ -12,8 +12,8 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
-  DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/social_automation_test?schema=public' }}
-  BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET || 'test-auth-secret-key-must-be-at-least-32-chars-long' }}
+  DATABASE_URL: ${{ env.DATABASE_URL }}
+  BETTER_AUTH_SECRET: ${{ env.BETTER_AUTH_SECRET }}
   NEXT_TELEMETRY_DISABLED: 1
   NODE_OPTIONS: "--max-old-space-size=8192"
 
@@ -96,7 +96,7 @@ jobs:
           npx prisma generate
           npx prisma migrate deploy
 
-      - name: Run Jest Test Suites (29 Suites / 100 Tests)
+      - name: Run Jest Test Suites (27 Suites / 95 Tests)
         run: npm test
 
       - name: Run Bun Test Runner
@@ -129,7 +129,7 @@ jobs:
   # 4. Docker Container Verification
   docker:
     name: Docker Multi-Stage Build Check
-    needs: [build]
+    needs: [quality]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -138,18 +138,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build App Web Container (Target: runner)
+      - name: Build Web Runner Image
         uses: docker/build-push-action@v5
         with:
           context: .
           target: runner
           push: false
-          tags: social-automation-app:test
+          tags: social-automation:ci-test
 
-      - name: Build BullMQ Worker Container (Target: worker)
+      - name: Build BullMQ Worker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           target: worker
           push: false
-          tags: social-automation-worker:test
+          tags: social-automation-worker:ci-test

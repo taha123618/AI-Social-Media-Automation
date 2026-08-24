@@ -1,0 +1,15 @@
+apiVersion: v2
+name: social-automation
+description: Production Helm Chart for AI Social Media Automation SaaS Platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - nextjs
+  - mastra
+  - ai
+  - saas
+  - bullmq
+  - postgresql
+maintainers:
+  - name: Platform Engineering Team
