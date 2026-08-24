@@ -1,0 +1,52 @@
+groups:
+  - name: social_automation_alerts
+    rules:
+      # 1. Application Downtime Alert
+      - alert: AppDown
+        expr: up{job="nextjs_app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Next.js Web Application instance is down"
+          description: "Instance {{ $labels.instance }} has been unreachable for more than 1 minute."
+
+      # 2. Database Disconnection Alert
+      - alert: DatabaseDisconnected
+        expr: app_database_connected == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL Database connection lost"
+          description: "Next.js application reports database ping failure for over 30 seconds."
+
+      # 3. High Database Latency
+      - alert: HighDatabaseLatency
+        expr: app_database_latency_ms > 500
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL Query Latency high (>500ms)"
+          description: "Database ping latency is {{ $value }}ms, exceeding 500ms threshold."
+
+      # 4. High Node.js Memory Usage (OOM Warning)
+      - alert: HighMemoryUsage
+        expr: nodejs_heap_used_bytes / nodejs_heap_total_bytes > 0.90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Node.js Heap Memory near capacity (>90%)"
+          description: "Heap utilization is above 90% for {{ $labels.instance }}."
+
+      # 5. Host High CPU Usage
+      - alert: HostHighCpu
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host CPU utilization above 85%"
+          description: "Host instance {{ $labels.instance }} has CPU load above 85% for 5 minutes."

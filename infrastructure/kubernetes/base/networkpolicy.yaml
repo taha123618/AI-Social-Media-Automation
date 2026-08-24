@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: app-network-policy
+  namespace: social-automation
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only allow connections to PostgreSQL from App Web and Worker pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app: app-web
+        - podSelector:
+            matchLabels:
+              app: app-worker
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-network-policy
+  namespace: social-automation
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only allow connections to Redis from App Web and Worker pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app: app-web
+        - podSelector:
+            matchLabels:
+              app: app-worker
+      ports:
+        - protocol: TCP
+          port: 6379

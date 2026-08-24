@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // Disable static prerendering for dynamic pages with real-time data
   staticPageGenerationTimeout: 120,
   images: {

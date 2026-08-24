@@ -25,56 +25,11 @@ A high-performance enterprise SaaS platform for automated social media schedulin
 | **Backend & APIs** | Next.js Route Handlers, Server Actions, Zod Validation, Auth.js / NextAuth (Prisma Adapter) |
 | **AI Framework & Engines** | Mastra Framework (`mastra/`), Vercel AI SDK (`ai`, `@ai-sdk/*`), LangChain (`@langchain/*`) |
 | **Model Providers** | OpenAI (`gpt-4o`, `gpt-4o-mini`), Anthropic (`claude-3-5-sonnet`), Google Gemini (`gemini-2.0-flash`), Groq, OpenRouter, Ollama |
-| **Database & ORM** | PostgreSQL 16+ with `pgvector` extension, Prisma 7 (`@prisma/client` 7.9.1, output `app/generated/prisma`) |
+| **Database & ORM** | PostgreSQL 18 with `pgvector` extension, Prisma 7 (`@prisma/client` 7.9.1, output `app/generated/prisma`) |
 | **Queue & Cache** | BullMQ, Redis (`ioredis`), TSX background worker processes |
 | **Cloud Storage** | AWS S3 / Cloudflare R2 presigned URLs, S3 client |
-| **Observability** | Pino structured logger, `@mastra/observability` with DuckDB span storage |
-
----
-
-## 📁 Project Directory Structure
-
-```text
-├── app/                        # Next.js 16 App Router
-│   ├── (admin)/                # Admin operations dashboard & AI blog templates
-│   ├── (auth)/                 # Auth.js login, register, reset, verification
-│   ├── (marketing)/            # High-conversion marketing pages (GSAP animations)
-│   ├── (user)/                 # SaaS user portal (social, scheduler, CRM, knowledge)
-│   ├── api/                    # REST API routes & platform webhooks
-│   └── generated/prisma/       # Generated Prisma 7 client
-├── features/                   # Domain feature modules
-│   ├── ad-campaigns/           # Ad generation, campaign launch, sync workers
-│   ├── admin/                  # Admin state & metrics services
-│   ├── ai-blog/                # AI Blog Writer, TipTap editor, serializers, workers
-│   ├── analytics/              # Multi-platform social analytics & charts
-│   ├── billing/                # Stripe subscription checkout & customer portal
-│   ├── compliance/             # Brand safety & forbidden keyword audits
-│   ├── crm/                    # Lead management, demo bookings & review booster
-│   ├── generation/             # Core prompt synthesis
-│   ├── image_generation/       # Flux/SD image workers & S3 storage
-│   ├── knowledge/              # pgvector RAG embeddings & document ingestion
-│   ├── multi-location/         # Multi-branch franchise management
-│   ├── organization/           # Team members, invitations, RBAC
-│   ├── post-creation/          # Multi-platform post composer & media attach
-│   ├── scheduler/              # Cron scheduler & BullMQ posting queues
-│   ├── settings/               # Business profiles & brand voice settings
-│   ├── social/                 # OAuth connectors & social publishing adapters
-│   ├── system/                 # Activity logs, job logs, error logs
-│   ├── video_generation/       # Video generation jobs & status workers
-│   └── workflow/               # Multi-step business automation workflows
-├── mastra/                     # Mastra Multi-Agent Engine
-│   ├── index.ts                # Mastra initialization & central registration
-│   ├── agents/                 # 13 autonomous marketing agents
-│   ├── tools/                  # Tools (analytics, social, weather, youtube)
-│   └── workflows/              # Multi-step agent workflows
-├── prisma/                     # Database layer
-│   ├── schema.prisma           # Datasource & client generator config
-│   ├── models/                 # Modular domain schema models
-│   └── migrations/             # SQL migrations (PostgreSQL + pgvector)
-├── scripts/                    # Worker startup scripts & cron runners
-├── .agents/skills/             # AI Agent skill definitions
-└── docs/                       # Architectural decisions, API docs & guides
-```
+| **Containers & Deploy** | Multi-stage Docker, Docker Compose, NGINX Reverse Proxy, PM2 Cluster Mode |
+| **Observability** | Enterprise Health Checks (`/api/health`, `/api/health/ready`), Pino Logger, DuckDB spans |
 
 ---
 
@@ -87,8 +42,8 @@ A high-performance enterprise SaaS platform for automated social media schedulin
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone <repository-url>
-cd ai_social_media_automation
+git clone https://github.com/taha123618/AI-Social-Media-Automation.git
+cd AI-Social-Media-Automation
 
 # Install dependencies with bun or npm
 bun install
@@ -98,18 +53,6 @@ bun install
 Copy `.env.example` to `.env` and configure your credentials:
 ```bash
 cp .env.example .env
-```
-
-Key environment variables:
-```dotenv
-DATABASE_URL="postgresql://user:password@127.0.0.1:5432/social_automation_db"
-REDIS_HOST="localhost"
-REDIS_PORT="6379"
-AUTH_SECRET="your-auth-secret-here"
-OPENAI_API_KEY="sk-..."
-AWS_ACCESS_KEY_ID=""
-AWS_SECRET_ACCESS_KEY=""
-AWS_BUCKET_NAME=""
 ```
 
 ### 3. Initialize Database & Run Migrations
@@ -132,6 +75,25 @@ npm run dev
 
 ---
 
+## 🐳 Docker & Container Deployment
+
+### Local Development (Dependencies Only)
+```bash
+# Start PostgreSQL 18 with pgvector & Redis 7 in background
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+### Full Production Container Stack
+```bash
+# Build and run Web App, BullMQ Worker, PostgreSQL, and Redis
+docker-compose up --build -d
+
+# Verify Container Health
+./scripts/healthcheck.sh
+```
+
+---
+
 ## 📜 Available Scripts
 
 | Script | Command | Description |
@@ -140,23 +102,22 @@ npm run dev
 | `build` | `NODE_OPTIONS='--max-old-space-size=8192' next build` | Production bundle build |
 | `start` | `next start` | Start production server |
 | `setup` | `prisma generate && prisma migrate deploy` | Generate Prisma client & apply migrations |
-| `test` | `jest` (or `bun test`) | Run complete automated test suite (55 tests) |
+| `test` | `jest` (or `bun test`) | Run complete automated test suite (95 tests) |
 | `workers` | `tsx scripts/start-scheduler.ts` | Start all BullMQ workers & schedulers |
-| `worker:blog` | `tsx features/ai-blog/workers/blog-generation.worker.ts` | Start AI blog generation worker |
-| `worker:posting` | `tsx features/scheduler/workers/posting.worker.ts` | Start social posting worker |
-| `worker:image` | `tsx features/image_generation/workers/image-generation.worker.ts` | Start image generation worker |
-| `worker:video` | `tsx features/video_generation/workers/video-status.worker.ts` | Start video polling worker |
+| `health` | `./scripts/healthcheck.sh` | Run system & database health check probe |
+| `backup:db` | `./scripts/backup-db.sh` | Run gzip-compressed PostgreSQL database backup |
+| `restore:db`| `./scripts/restore-db.sh <file>` | Restore database from backup archive |
 | `skills:sync` | `bash scripts/sync-agent-skills.sh` | Sync `.agents/skills/*` into IDE agents (`.cursor`, `.claude`, `.trae`, etc.) |
 
 ---
 
 ## 📖 Further Documentation
 
-- [QA & Test Report](file:///Users/taha/projects/ai_social_media_automation/QA_REPORT.md) — Comprehensive SQA report, test matrix (55 tests), bug fixes, and security audit.
+- [DevOps Assessment & Guide](file:///Users/taha/projects/ai_social_media_automation/DEVOPS_REPORT.md) — Production architecture, Docker, CI/CD, and disaster recovery.
+- [QA & Test Report](file:///Users/taha/projects/ai_social_media_automation/QA_REPORT.md) — Comprehensive SQA report, test matrix (95 tests across 27 suites), bug fixes, and security audit.
 - [Features Matrix & Status](file:///Users/taha/projects/ai_social_media_automation/FEATURES.md) — Comprehensive feature matrix for all 19 modules.
 - [Mastra & Agent Guidelines](file:///Users/taha/projects/ai_social_media_automation/AGENTS.md) — AI agent conventions and boundaries.
 - [Architecture Decisions](file:///Users/taha/projects/ai_social_media_automation/docs/architecture/decisions/) — ADRs for BullMQ, multi-tenancy, and feature structures.
-- [Dashboard API Guide](file:///Users/taha/projects/ai_social_media_automation/docs/DASHBOARD_API.md) — REST API specifications and integration guides.
 
 ---
 

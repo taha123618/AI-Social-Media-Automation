@@ -1,0 +1,76 @@
+name: Kubernetes Deployment Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      overlay:
+        description: 'Target K8s Overlay'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: k8s-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # 1. Validate Kubernetes Manifests
+  validate-manifests:
+    name: Validate Kustomize Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Validate Base Manifests
+        run: kustomize build infrastructure/kubernetes/base
+
+      - name: Validate Staging Overlay
+        run: kustomize build infrastructure/kubernetes/overlays/staging
+
+      - name: Validate Production Overlay
+        run: kustomize build infrastructure/kubernetes/overlays/production
+
+  # 2. Deploy to Kubernetes Cluster
+  deploy-to-k8s:
+    name: Deploy to Cluster (${{ github.event.inputs.overlay || 'production' }})
+    needs: [validate-manifests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Kubectl Context
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+
+      - name: Apply Kustomize Overlay
+        run: |
+          OVERLAY="${{ github.event.inputs.overlay || 'production' }}"
+          echo "☸️ Applying infrastructure/kubernetes/overlays/${OVERLAY}..."
+          kubectl apply -k "infrastructure/kubernetes/overlays/${OVERLAY}"
+
+      - name: Verify Rollout Status
+        run: |
+          NAMESPACE="social-automation-${{ github.event.inputs.overlay || 'production' }}"
+          echo "⏳ Waiting for App Web deployment rollout..."
+          kubectl rollout status deployment/app-web -n "${NAMESPACE}" --timeout=180s
+          echo "⏳ Waiting for App Worker deployment rollout..."
+          kubectl rollout status deployment/app-worker -n "${NAMESPACE}" --timeout=180s
+
+      - name: Post-Deployment Health Check
+        run: |
+          NAMESPACE="social-automation-${{ github.event.inputs.overlay || 'production' }}"
+          echo "🩺 Checking Pod readiness in ${NAMESPACE}..."
+          kubectl get pods -n "${NAMESPACE}" -l app.kubernetes.io/part-of=ai-social-media-automation

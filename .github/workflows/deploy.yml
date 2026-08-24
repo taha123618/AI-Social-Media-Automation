@@ -1,0 +1,73 @@
+name: CD Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Hostinger VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          port: ${{ secrets.PROD_SERVER_PORT || 22 }}
+          script_stop: true
+          script: |
+            echo "🚀 Starting deployment on $(hostname)..."
+            cd /var/www/html/ai_social_media_automation || exit 1
+
+            # 1. Pull latest verified commits
+            echo "📥 Pulling latest release..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 2. Install production dependencies
+            echo "📦 Installing dependencies..."
+            npm ci --production=false
+
+            # 3. Run database migrations safely
+            echo "🗄️ Running Prisma migrations..."
+            npx prisma generate
+            npx prisma migrate deploy
+
+            # 4. Build Next.js 16 standalone bundle
+            echo "🏗️ Building Next.js application..."
+            NODE_OPTIONS="--max-old-space-size=8192" npm run build
+
+            # 5. Reload PM2 processes with zero downtime
+            echo "🔄 Reloading PM2 services..."
+            pm2 reload ecosystem.config.cjs --update-env || pm2 start ecosystem.config.cjs
+
+            # 6. Post-deployment health verification probe
+            echo "🩺 Probing /api/health..."
+            sleep 5
+            HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health)
+            if [ "$HEALTH_STATUS" != "200" ]; then
+              echo "❌ Health check failed with status $HEALTH_STATUS! Rolling back..."
+              pm2 reload ecosystem.config.cjs
+              exit 1
+            fi
+
+            echo "✅ Deployment completed successfully!"

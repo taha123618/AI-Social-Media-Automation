@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: social-automation
+  labels:
+    app.kubernetes.io/name: social-automation
+    app.kubernetes.io/part-of: ai-social-media-automation

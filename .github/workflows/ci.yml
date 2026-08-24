@@ -1,65 +1,155 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
-    branches: [main]
+    branches: [main, staging]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   NODE_VERSION: "22"
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_URL: "postgresql://postgres:password@localhost:5432/social_automation_test?schema=public"
+  BETTER_AUTH_SECRET: "test-secret-key-minimum-32-characters-required-for-ci"
+  NEXT_TELEMETRY_DISABLED: 1
+  NODE_OPTIONS: "--max-old-space-size=8192"
 
 jobs:
-  lint-and-typecheck:
+  # 1. Code Quality & Type Integrity
+  quality:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npx tsc --noEmit
 
-  db-migrate:
-    name: Database Migration Check
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript Typecheck (8GB Heap)
+        run: node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
+
+  # 2. Automated Test Matrix (Jest & Bun)
+  tests:
+    name: Automated Unit & Integration Tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: social_automation_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
-      - run: npx prisma generate
-      - run: npx prisma migrate deploy
 
-  test:
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - run: npx prisma generate
-      - run: npm test -- --passWithNoTests
+          bun-version: latest
 
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client & Migrate Test DB
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+
+      - name: Run Jest Test Suites (27 Suites / 95 Tests)
+        run: npm test
+
+      - name: Run Bun Test Runner
+        run: bun test
+
+  # 3. Production Build Validation
   build:
-    name: Build
-    needs: [lint-and-typecheck, db-migrate, test]
+    name: Production Standalone Build
+    needs: [quality, tests]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
-      - run: npx prisma generate
-      - run: npm run build
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build Next.js 16 Standalone Bundle
+        run: npm run build
+
+  # 4. Docker Container Verification
+  docker:
+    name: Docker Multi-Stage Build Check
+    needs: [quality]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Web Runner Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: runner
+          push: false
+          tags: social-automation:ci-test
+
+      - name: Build BullMQ Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: worker
+          push: false
+          tags: social-automation-worker:ci-test

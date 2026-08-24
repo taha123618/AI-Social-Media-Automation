@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: app-web-pdb
+  namespace: social-automation
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: app-web
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: app-worker-pdb
+  namespace: social-automation
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: app-worker
