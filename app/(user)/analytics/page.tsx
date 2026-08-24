@@ -1,0 +1,269 @@
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { ConsistencyScoreUI } from './_components/consistency-score-ui';
+import { LeadStatsUI } from './_components/lead-stats-ui';
+import { AnalyticsOverview } from './_components/analytics-overview';
+import { GrowthEngineUI } from './_components/growth-engine-ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart3, TrendingUp, Activity, Rocket } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useCurrentBusiness } from '@/hooks/use-current-business';
+import { useAnalyticsOverview, useConsistencyScore, useLeadAnalytics, useAnalyticsInsights, useGrowthAnalytics } from '@/hooks/api-hooks';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface ConsistencyData {
+  overall: number;
+  frequency: number;
+  streak: number;
+  optimalTiming: number;
+  recommendation: string;
+  trend: 'improving' | 'stable' | 'declining';
+}
+
+interface LeadData {
+  totalLeads: number;
+  estimatedValue: number;
+  byType: Record<string, number>;
+  conversionRate: {
+    conversionRate: string;
+    postsWithLeads: number;
+    totalPosts: number;
+  };
+}
+
+export default function AnalyticsDashboard() {
+  const [activeTab, setActiveTab] = useState('overview');
+  const { businessId, isLoading: businessLoading } = useCurrentBusiness();
+
+  // Fetch analytics data using React Query
+  const { data: overviewData, isLoading: overviewLoading, error: overviewError } = useAnalyticsOverview(
+    businessId || '',
+    30
+  );
+
+  const { data: consistencyData, isLoading: consistencyLoading, error: consistencyError } = useConsistencyScore(
+    businessId || '',
+    90
+  );
+
+  const { data: leadData, isLoading: leadLoading, error: leadError } = useLeadAnalytics(
+    businessId || '',
+    30
+  );
+
+  const { data: insightsData, isLoading: insightsLoading, error: insightsError } = useAnalyticsInsights(
+    businessId || '',
+    30
+  );
+
+  const { data: growthData, isLoading: growthLoading } = useGrowthAnalytics(businessId || '');
+
+  // Loading state
+  if (businessLoading || (!businessId && !businessLoading)) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <Activity className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-lg font-medium">Loading workspace...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!businessId) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <BarChart3 className="h-12 w-12 mx-auto mb-4 text-slate-400" />
+          <p className="text-lg font-medium text-slate-600">No workspace selected</p>
+          <p className="text-sm text-slate-500">Please select a workspace to view analytics</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-4 mb-8"
+      >
+        <BarChart3 className="h-10 w-10 text-blue-600" />
+        <div>
+          <h1 className="text-3xl font-bold">Growth Analytics</h1>
+          <p className="text-slate-500">Track your social media performance and ROI</p>
+        </div>
+      </motion.div>
+
+      {/* Main Content Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="growth">
+            <Rocket className="h-4 w-4 mr-2" />
+            Growth Engine
+          </TabsTrigger>
+          <TabsTrigger value="insights">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            AI Insights
+          </TabsTrigger>
+          <TabsTrigger value="consistency">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Consistency Score
+          </TabsTrigger>
+          <TabsTrigger value="leads">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Lead Tracking
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="insights" className="mt-6">
+          {insightsLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+          ) : insightsError ? (
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-slate-500">Failed to load insights data</p>
+              </CardContent>
+            </Card>
+          ) : insightsData?.data ? (
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>AI Insights</CardTitle>
+                      <CardDescription>Intelligent analysis of your performance</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {insightsData.data.insights.map((insight: any, index: number) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className={`w-2 h-2 rounded-full ${insight.priority === 'high' ? 'bg-red-500' :
+                                insight.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                                }`} />
+                              <h4 className="font-semibold">{insight.title}</h4>
+                            </div>
+                            <p className="text-sm text-slate-600">{insight.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recommendations</CardTitle>
+                      <CardDescription>Actionable suggestions to improve performance</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {insightsData.data.recommendations.map((rec: any, index: number) => (
+                          <div key={index} className="p-4 border rounded-lg">
+                            <h4 className="font-semibold mb-2">{rec.title}</h4>
+                            <p className="text-sm text-slate-600 mb-2">{rec.description}</p>
+                            <Badge variant="outline" className="text-xs">
+                              {rec.action === 'content' ? 'Content Strategy' :
+                                rec.action === 'scheduling' ? 'Posting Schedule' :
+                                  rec.action === 'analysis' ? 'Performance Analysis' : 'General'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+          ) : null}
+        </TabsContent>
+
+        <TabsContent value="consistency" className="mt-6">
+          {consistencyLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+          ) : consistencyError ? (
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-slate-500">Failed to load consistency data</p>
+              </CardContent>
+            </Card>
+          ) : consistencyData?.data ? (
+            <ConsistencyScoreUI
+              overall={consistencyData.data.overall}
+              frequency={consistencyData.data.frequency}
+              streak={consistencyData.data.streak}
+              optimalTiming={consistencyData.data.optimalTiming}
+              recommendation={consistencyData.data.recommendation}
+              trend={consistencyData.data.trend}
+              totalPosts={overviewData?.data?.totalPosts || 0}
+              averagePerWeek={((overviewData?.data?.totalPosts || 0) / 30) * 7}
+              bestDay={consistencyData.data.bestDay || 'Wednesday'}
+              bestTime={consistencyData.data.bestTime || 18}
+            />
+          ) : null}
+        </TabsContent>
+
+        <TabsContent value="leads" className="mt-6">
+          {leadLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+          ) : leadError ? (
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-slate-500">Failed to load lead data</p>
+              </CardContent>
+            </Card>
+          ) : leadData?.data ? (
+            <LeadStatsUI
+              totalLeads={leadData.data.totalLeads}
+              estimatedValue={leadData.data.estimatedValue}
+              byType={leadData.data.byType}
+              conversionRate={parseFloat(leadData.data.conversionRate?.conversionRate || '0')}
+              totalPosts={leadData.data.conversionRate?.totalPosts || 0}
+              postsWithLeads={leadData.data.conversionRate?.postsWithLeads || 0}
+                  topPerformingPosts={leadData.data.topPerformingPosts}
+            />
+          ) : null}
+        </TabsContent>
+
+        <TabsContent value="overview" className="mt-6">
+          {overviewLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-32 w-full" />
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-48 w-full" />
+              </div>
+            </div>
+          ) : overviewError ? (
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-center text-slate-500">Failed to load overview data</p>
+              </CardContent>
+            </Card>
+          ) : overviewData?.data ? (
+                <AnalyticsOverview aggregate={overviewData.data} />
+          ) : null}
+        </TabsContent>
+
+        <TabsContent value="growth" className="mt-6">
+          <GrowthEngineUI data={growthData} isLoading={growthLoading} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

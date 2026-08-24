@@ -1,0 +1,196 @@
+model BlogProject {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  businessId  String
+  creatorId   String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  articles    BlogArticle[]
+  business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  creator     User           @relation("BlogProjectCreator", fields: [creatorId], references: [id])
+  templates   BlogTemplate[]
+
+  @@index([businessId])
+  @@index([creatorId])
+}
+
+model BlogArticle {
+  id                String               @id @default(cuid())
+  projectId         String?
+  businessId        String
+  creatorId         String
+  title             String?
+  slug              String?
+  content           String?
+  contentMarkdown   String?
+  contentJson       Json?
+  metaTitle         String?
+  metaDescription   String?
+  excerpt           String?
+  featuredImageUrl  String?
+  status            BlogArticleStatus    @default(DRAFT)
+  targetKeywords    String[]             @default([])
+  secondaryKeywords String[]             @default([])
+  tone              BlogTone             @default(PROFESSIONAL)
+  language          String               @default("en")
+  wordCount         Int                  @default(0)
+  readingTime       Int                  @default(0)
+  seoScore          Int?
+  readabilityScore  Float?
+  aiModel           String?
+  generationPrompt  String?
+  outline           Json?
+  faqItems          Json?
+  ctaContent        Json?
+  internalLinks     Json?
+  tokenUsage        Json?
+  publishedAt       DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  business          Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  creator           User                 @relation("BlogArticleCreator", fields: [creatorId], references: [id])
+  project           BlogProject?         @relation(fields: [projectId], references: [id])
+  versions          BlogArticleVersion[]
+  generations       BlogGenerationLog[]
+  seoReports        BlogSEOReport[]
+
+  @@index([businessId, status])
+  @@index([creatorId])
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+model BlogArticleVersion {
+  id            String      @id @default(cuid())
+  articleId     String
+  versionNumber Int
+  title         String?
+  content       String?
+  contentJson   Json?
+  changedBy     String
+  changeNote    String?
+  createdAt     DateTime    @default(now())
+  article       BlogArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, versionNumber])
+  @@index([articleId])
+}
+
+model BlogSEOReport {
+  id                    String      @id @default(cuid())
+  articleId             String
+  overallScore          Int
+  titleScore            Int
+  metaDescriptionScore  Int
+  headingStructureScore Int
+  keywordDensityScore   Int
+  readabilityScore      Int
+  contentLengthScore    Int
+  internalLinkScore     Int
+  imageOptScore         Int
+  issues                Json
+  suggestions           Json
+  serpPreview           Json?
+  analyzedAt            DateTime    @default(now())
+  article               BlogArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([analyzedAt])
+}
+
+model BlogTemplate {
+  id           String       @id @default(cuid())
+  name         String
+  description  String?
+  category     String?
+  structure    Json
+  systemPrompt String?
+  projectId    String?
+  businessId   String?
+  isGlobal     Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  business     Business?    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  project      BlogProject? @relation(fields: [projectId], references: [id])
+
+  @@index([businessId])
+  @@index([category])
+}
+
+model BlogGenerationLog {
+  id            String        @id @default(cuid())
+  articleId     String?
+  businessId    String
+  action        BlogGenAction
+  inputPrompt   String
+  outputPreview String?
+  model         String
+  tokenUsage    Json?
+  durationMs    Int?
+  status        BlogGenStatus @default(COMPLETED)
+  error         String?
+  createdAt     DateTime      @default(now())
+  article       BlogArticle?  @relation(fields: [articleId], references: [id])
+
+  @@index([businessId, createdAt])
+  @@index([articleId])
+  @@index([action])
+}
+
+model BlogSavedPrompt {
+  id         String   @id @default(cuid())
+  name       String
+  prompt     String
+  category   String?
+  businessId String
+  creatorId  String
+  usageCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([businessId])
+  @@index([creatorId])
+}
+
+enum BlogArticleStatus {
+  DRAFT
+  GENERATING
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BlogTone {
+  PROFESSIONAL
+  CONVERSATIONAL
+  ACADEMIC
+  CASUAL
+  PERSUASIVE
+  STORYTELLING
+  HUMOROUS
+  AUTHORITATIVE
+  INSPIRATIONAL
+  TECHNICAL
+}
+
+enum BlogGenAction {
+  GENERATE_OUTLINE
+  GENERATE_ARTICLE
+  GENERATE_TITLE
+  GENERATE_META
+  GENERATE_FAQ
+  GENERATE_CTA
+  EXPAND_SECTION
+  REWRITE_SECTION
+  HUMANIZE
+  SUMMARIZE
+  SEO_OPTIMIZE
+}
+
+enum BlogGenStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

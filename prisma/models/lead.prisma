@@ -1,0 +1,42 @@
+model Lead {
+  id             String     @id @default(cuid())
+  businessId     String
+  postId         String?
+  leadType       LeadType
+  source         String     @default("SOCIAL_MEDIA")
+  status         LeadStatus @default(NEW)
+  estimatedValue Float      @default(25.0)
+  actualValue    Float?
+  notes          String?
+  contactedAt    DateTime?
+  convertedAt    DateTime?
+  metadata       Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  business       Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  post           Post?      @relation(fields: [postId], references: [id])
+
+  @@index([businessId])
+  @@index([leadType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum LeadType {
+  PHONE_CALL
+  MESSAGE
+  WEBSITE_VISIT
+  BOOKING
+  DIRECTIONS
+  FORM_SUBMISSION
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+  SYNCED
+}

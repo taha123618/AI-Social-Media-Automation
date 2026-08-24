@@ -1,0 +1,33 @@
+---
+trigger: always_on
+description: "Global system constraints and routing architecture for Cascade Flow"
+---
+
+# Global Windsurf / Cascade Guardrails
+
+You are assisting on the ai_social_media_automation workspace. To maintain data isolation and prevent context bloating, you must respect the specialized workspace boundaries mapped inside the project.
+
+## 🚨 Critical Guardrails (UNCONDITIONAL)
+- **Multi-Tenancy:** Every database read, write, update, and delete operation MUST be explicitly filtered and scoped by `organizationId`. Never run raw or unscoped collection queries.
+- **Asynchronous Tasking:** Never execute long-running AI generation, processing, or multi-platform posting loops inside synchronous Next.js API Route Handlers. Offload them via BullMQ workers immediately.
+
+## 📖 Skill Files
+Load the relevant `.agents/skills/*/SKILL.md` file when working in a specific domain. Each contains domain-specific patterns, code examples, and project conventions.
+
+- **Backend / API / Validation:** `.agents/skills/api-and-core-backend/SKILL.md`
+- **Database / Prisma / Migrations:** `.agents/skills/database-and-migrations/SKILL.md`
+- **Frontend / UI / Components:** `.agents/skills/frontend-ui-development/SKILL.md`
+- **Queues / Workers / BullMQ:** `.agents/skills/background-processing/SKILL.md`
+- **Storage / S3 / Assets:** `.agents/skills/cloud-storage/SKILL.md`
+- **AI Agents / Mastra:** `.agents/skills/ai-agent-development/SKILL.md`
+- **AI Providers / Models:** `.agents/skills/ai-provider-development/SKILL.md`
+- **Auth / Security:** `.agents/skills/authentication-and-security/SKILL.md`
+- **Architecture / Design:** `.agents/skills/architecture-and-system-design/SKILL.md`
+- **Deployment / Ops:** `.agents/skills/deployment-and-operations/SKILL.md`
+- **Code Review:** `.agents/skills/code-review/SKILL.md`
+- **Code Refactoring:** `.agents/skills/code-refactoring/SKILL.md`
+- **Testing / Quality:** `.agents/skills/testing-and-quality/SKILL.md`
+- **Prompt Engineering:** `.agents/skills/prompt-engineering/SKILL.md`
+- **Logging / Monitoring:** `.agents/skills/logging-and-monitoring/SKILL.md`
+- **SEO / Content:** `.agents/skills/seo-and-content/SKILL.md`
+- **Documentation:** `.agents/skills/documentation/SKILL.md`

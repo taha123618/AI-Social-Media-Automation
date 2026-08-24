@@ -1,0 +1,73 @@
+model Campaign {
+  id             String            @id @default(cuid())
+  businessId     String
+  name           String
+  objective      CampaignObjective
+  platform       AdPlatform
+  status         AdStatus          @default(DRAFT)
+  dailyBudget    Float?
+  lifetimeBudget Float?
+  startDate      DateTime?
+  endDate        DateTime?
+  platformId     String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  adAnalytics    AdAnalytics[]
+  adSets         AdSet[]
+  business       Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  launches       CampaignLaunch[]
+
+  @@index([businessId])
+  @@index([platform])
+  @@index([status])
+}
+
+model AdSet {
+  id          String        @id @default(cuid())
+  campaignId  String
+  name        String
+  status      AdStatus      @default(DRAFT)
+  audience    Json?
+  dailyBudget Float?
+  platformId  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  ads         Ad[]
+  adAnalytics AdAnalytics[]
+  campaign    Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+}
+
+model Ad {
+  id          String        @id @default(cuid())
+  adSetId     String
+  name        String
+  status      AdStatus      @default(DRAFT)
+  creative    Json?
+  platformId  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  adSet       AdSet         @relation(fields: [adSetId], references: [id], onDelete: Cascade)
+  adAnalytics AdAnalytics[]
+  adVariants  AdVariant[]
+
+  @@index([adSetId])
+}
+
+model AdVariant {
+  id          String   @id @default(cuid())
+  adId        String
+  headline    String?
+  primaryText String?
+  description String?
+  cta         String?
+  performance Json?
+  isWinner    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  imageUrl    String?
+  ad          Ad       @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  @@index([adId])
+}

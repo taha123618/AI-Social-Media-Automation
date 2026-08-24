@@ -1,0 +1,57 @@
+model VideoGenerationJob {
+  id           String         @id
+  businessId   String
+  provider     VideoProvider
+  prompt       String
+  status       VideoJobStatus
+  videoUrl     String?
+  thumbnailUrl String?
+  duration     Int
+  aspectRatio  String
+  quality      String
+  createdAt    DateTime       @default(now())
+  completedAt  DateTime?
+  error        String?
+  userId       String?
+  executionId  String?
+  workflowId   String?
+  business     Business       @relation(fields: [businessId], references: [id])
+  user         User?          @relation(fields: [userId], references: [id])
+  workflow     Workflow?      @relation(fields: [workflowId], references: [id])
+
+  @@index([businessId, status])
+  @@index([createdAt])
+}
+
+model ImageGenerationJob {
+  id             String    @id @default(cuid())
+  userId         String?
+  prompt         String
+  imageUrl       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  businessId     String
+  aspectRatio    String?
+  completedAt    DateTime?
+  error          String?
+  model          String?
+  quality        String?
+  status         String    @default("PENDING")
+  style          String?
+  variations     Int?
+  brandId        String?
+  colors         String[]
+  imageType      String?
+  referenceImage String?
+  providerJobId  String?   @unique
+  executionId    String?
+  workflowId     String?
+  business       Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user           User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workflow       Workflow? @relation(fields: [workflowId], references: [id])
+
+  @@index([businessId, status])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("image_generation_jobs")
+}

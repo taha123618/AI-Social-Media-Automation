@@ -1,0 +1,14 @@
+model BrandProfile {
+  id           String          @id @default(cuid())
+  businessId   String
+  name         String
+  writingStyle String?
+  tone         TonePreference?
+  vocabulary   String[]        @default([])
+  ctaStyle     String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  business     Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}

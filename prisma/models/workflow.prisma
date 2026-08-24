@@ -1,0 +1,107 @@
+model Workflow {
+  id                  String                @id @default(cuid())
+  name                String
+  description         String?
+  trigger             Json
+  isActive            Boolean               @default(true)
+  runCount            Int                   @default(0)
+  lastRunAt           DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  businessId          String
+  creatorId           String
+  contentDrafts       ContentDraft[]
+  posts               Post[]
+  videoGenerationJobs VideoGenerationJob[]
+  business            Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  creator             User                  @relation(fields: [creatorId], references: [id])
+  executions          WorkflowExecution[]
+  runs                WorkflowRun[]
+  steps               WorkflowStep[]
+  imageGenerationJobs ImageGenerationJob[]
+  uploadConfig        WorkflowUploadConfig?
+}
+
+model WorkflowStep {
+  id         String        @id @default(cuid())
+  name       String
+  type       String
+  config     Json
+  order      Int
+  conditions Json          @default("[]")
+  workflowId String
+  runs       WorkflowRun[]
+  workflow   Workflow      @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowExecution {
+  id          String                  @id @default(cuid())
+  workflowId  String
+  status      WorkflowExecutionStatus
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+  result      Json?
+  triggerData Json                    @default("{}")
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  workflow    Workflow                @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  runs        WorkflowRun[]
+}
+
+model WorkflowRun {
+  id          String            @id @default(cuid())
+  workflowId  String
+  executionId String
+  stepId      String
+  status      WorkflowRunStatus
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+  result      Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  execution   WorkflowExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  step        WorkflowStep      @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  workflow    Workflow          @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([executionId])
+  @@index([workflowId])
+}
+
+model WorkflowUploadConfig {
+  id                    String         @id @default(cuid())
+  workflowId            String         @unique
+  uploadCategory        UploadCategory
+  autoCaption           Boolean        @default(true)
+  autoSchedule          Boolean        @default(false)
+  scheduleOffsetMinutes Int            @default(60)
+  platform              String         @default("INSTAGRAM")
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  workflow              Workflow       @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_upload_configs")
+}
+
+enum WorkflowExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum UploadCategory {
+  JOB_PHOTO
+  BEFORE_AFTER
+  PRODUCT
+}
+
+enum WorkflowRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+}

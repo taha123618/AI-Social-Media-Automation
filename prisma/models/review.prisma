@@ -1,0 +1,90 @@
+model Review {
+  id              String       @id @default(cuid())
+  businessId      String
+  source          ReviewSource
+  externalId      String?
+  reviewerName    String
+  reviewerEmail   String?
+  rating          Int
+  reviewText      String?
+  reviewDate      DateTime
+  responseText    String?
+  respondedAt     DateTime?
+  respondedBy     String?
+  platformUrl     String?
+  isVerified      Boolean      @default(false)
+  sentiment       Sentiment    @default(NEUTRAL)
+  convertedToPost Boolean      @default(false)
+  socialPostId    String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  business        Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([source])
+  @@index([rating])
+  @@index([sentiment])
+}
+
+model ReviewRequest {
+  id             String               @id @default(cuid())
+  businessId     String
+  customerName   String
+  customerEmail  String
+  customerPhone  String?
+  status         ReviewRequestStatus  @default(PENDING)
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  submittedAt    DateTime?
+  channel        ReviewRequestChannel
+  messageId      String?
+  followUpCount  Int                  @default(0)
+  lastFollowUpAt DateTime?
+  reviewId       String?
+  rating         Int?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  token          String?              @unique
+  business       Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([status])
+  @@index([channel])
+}
+
+enum ReviewSource {
+  GOOGLE
+  YELP
+  FACEBOOK
+  TRIPADVISOR
+  DIRECT
+  OTHER
+}
+
+enum Sentiment {
+  VERY_POSITIVE
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+  VERY_NEGATIVE
+}
+
+enum ReviewRequestStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  SUBMITTED
+  BOUNCED
+  UNSUBSCRIBED
+}
+
+enum ReviewRequestChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  IN_PERSON
+}

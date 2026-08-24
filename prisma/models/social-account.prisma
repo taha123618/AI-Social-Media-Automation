@@ -1,0 +1,43 @@
+model SocialAccount {
+  id             String    @id @default(cuid())
+  platform       Platform
+  platformId     String
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  name           String?
+  avatar         String?
+  businessId     String
+  isActive       Boolean   @default(true)
+  profileUrl     String?
+  posts          Post[]
+  business       Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, platform, platformId])
+}
+
+model ThirdPartyService {
+  id         String   @id @default(cuid())
+  platform   Platform
+  apiKey     String
+  apiSecret  String
+  apiTier    String?  @default("free")
+  isActive   Boolean  @default(true)
+  businessId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, platform])
+}
+
+model OAuthState {
+  id         String   @id @default(cuid())
+  businessId String
+  platform   Platform
+  tokenData  Json
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([businessId])
+}

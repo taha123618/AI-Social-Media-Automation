@@ -1,0 +1,42 @@
+model DemoBooking {
+  id               String        @id @default(cuid())
+  leadId           String        @unique
+  meetingLink      String?
+  meetingStatus    MeetingStatus @default(PENDING)
+  calendarProvider String?
+  calendarEventId  String?
+  scheduledAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  lead             DemoLead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("demo_bookings")
+}
+
+model SalesSettings {
+  id                   String   @id @default("default")
+  enabled              Boolean  @default(true)
+  notificationEmails   String[]
+  autoAssignLead       Boolean  @default(true)
+  confirmationTemplate Json?
+  adminTemplate        Json?
+  thankYouPage         String   @default("/thank-you")
+  meetingDuration      Int      @default(30)
+  dateRangeDays        Int      @default(90)
+  crmProvider          String?
+  calendarProvider     String?
+  slackWebhook         String?
+  discordWebhook       String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("sales_settings")
+}
+
+enum MeetingStatus {
+  PENDING
+  CONFIRMED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+}

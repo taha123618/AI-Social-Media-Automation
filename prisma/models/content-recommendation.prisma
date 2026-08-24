@@ -1,0 +1,16 @@
+model ContentRecommendation {
+  id              String   @id @default(cuid())
+  businessId      String
+  postId          String?
+  recommendations Json
+  basedOnMetrics  Json?
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  post            Post?    @relation(fields: [postId], references: [id])
+
+  @@index([businessId])
+  @@index([postId])
+  @@index([status])
+}

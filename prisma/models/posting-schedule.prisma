@@ -1,0 +1,35 @@
+model PostingSchedule {
+  id         String                @id @default(cuid())
+  businessId String                @unique
+  timezone   String                @default("Asia/Karachi")
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  slots      PostingScheduleSlot[]
+  business   Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("posting_schedules")
+}
+
+model PostingScheduleSlot {
+  id         String          @id @default(cuid())
+  scheduleId String
+  dayOfWeek  DayOfWeek
+  hour       Int
+  minute     Int
+  enabled    Boolean         @default(true)
+  createdAt  DateTime        @default(now())
+  schedule   PostingSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, dayOfWeek, hour, minute])
+  @@map("posting_schedule_slots")
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}

@@ -1,0 +1,11 @@
+model JobLog {
+  id         String   @id @default(cuid())
+  jobId      String
+  queueName  String
+  status     String
+  result     Json?
+  error      String?
+  createdAt  DateTime @default(now())
+  businessId String?
+  userId     String?
+}

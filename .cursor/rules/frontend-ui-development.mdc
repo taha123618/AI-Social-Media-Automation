@@ -1,0 +1,11 @@
+---
+description: Triggered when editing or creating user interfaces, UI layout components, pages, or styling components.
+globs: app/**/*page.tsx, app/**/*layout.tsx, components/**/*.tsx, features/**/*.tsx
+---
+
+# Frontend UI Development Principles
+
+- Framework Stack: Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS, `shadcn` UI, Tanstack Query, Tanstack Table, Gsap, ThreeJs, React-three/Fiber, React-three/Drei, Framer-Motion, Rive.
+- Lean on Next.js Server Components for initial structural data fetching while keeping Client Components interactive and performance-lean.
+- Enforce strict type-safety across all component props (no explicit or implicit `any`).
+- Animations, 3D designs, micro-interactions and UI/UX engineering with AI tools and libraries like (Gsap, ThreeJs, React-three/Fiber, React-three/Drei, Framer-Motion, Rive).

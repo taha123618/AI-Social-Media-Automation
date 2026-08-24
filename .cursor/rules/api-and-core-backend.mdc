@@ -1,0 +1,10 @@
+---
+description: Triggered when writing backend routes, route handlers, middleware, validation logic, or AI/LLM SDK orchestrations.
+globs: app/api/**/*, proxy.ts, middleware.ts, features/**/*.orchestrator.ts
+---
+
+# API & Core Backend Principles
+
+- Validate all incoming external data using `zod` schemas. Fail fast and return clean, structured error responses on validation failure.
+- When receiving requests for heavy operations, validate the payload, enqueue the task via BullMQ, and immediately return a `202 Accepted` status with the job identifier.
+- Environment variables (OpenRouter, Runway, AWS, Stripe, Redis) must be strictly validated at runtime startup using Zod. Never log or leak these keys.

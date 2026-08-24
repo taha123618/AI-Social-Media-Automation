@@ -1,0 +1,25 @@
+model AdAnalytics {
+  id          String     @id @default(cuid())
+  businessId  String
+  campaignId  String?
+  adSetId     String?
+  adId        String?
+  platform    AdPlatform
+  date        DateTime   @default(now())
+  impressions Int        @default(0)
+  reach       Int        @default(0)
+  clicks      Int        @default(0)
+  spend       Float      @default(0.0)
+  revenue     Float      @default(0.0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  ad          Ad?        @relation(fields: [adId], references: [id])
+  adSet       AdSet?     @relation(fields: [adSetId], references: [id])
+  business    Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  campaign    Campaign?  @relation(fields: [campaignId], references: [id])
+
+  @@index([businessId, date])
+  @@index([campaignId])
+  @@index([adSetId])
+  @@index([adId])
+}

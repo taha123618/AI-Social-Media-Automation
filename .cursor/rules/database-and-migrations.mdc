@@ -1,0 +1,12 @@
+---
+description: Triggered when writing database queries, modifying schemas, handling Prisma migrations, or writing pgvector operations.
+globs: prisma/**/*, features/**/*.service.ts, features/**/*.repository.ts
+---
+
+# Database & Migrations Core Principles
+
+- **Multi-tenancy / Data Scoping (CRITICAL):** All database reads, writes, updates, and deletes MUST be explicitly scoped to `organizationId`.
+- **Anti-pattern:** `prisma.contentDraft.findMany()`
+- **Correct pattern:** `prisma.contentDraft.findMany({ where: { organizationId } })`
+- If you only have a `businessId`, use the shared helper `features/multi-location/services/multi-location.service.ts` to resolve the `organizationId` first.
+- Chunk text documents to <= 1000 characters with controlled overlap when ingesting into the vector store. Use raw queries for advanced `pgvector` operations.

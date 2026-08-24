@@ -1,0 +1,150 @@
+model BusinessProfile {
+  id                     String                   @id @default(cuid())
+  mission                String?
+  vision                 String?
+  uvp                    String?
+  targetAudience         String?
+  tone                   String?
+  industry               String?
+  forbiddenWords         String[]
+  businessId             String                   @unique
+  autoRequestReviews     Boolean                  @default(false)
+  brandTone              BrandTone?
+  colorPalette           Json?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  usp                    String?
+  watermark              String?
+  businessModel          BusinessModel?
+  competitiveAdvantages  String[]
+  coreValues             String[]
+  geographicMarkets      String[]
+  keyBenefits            String[]
+  productsServices       Json?
+  slogan                 String?
+  tagline                String?
+  targetAudienceDetails  Json?
+  tonePreferences        TonePreference[]
+  uniqueValueProposition String?
+  business               Business                 @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  versions               BusinessProfileVersion[]
+  summaries              BusinessSummary?
+}
+
+model BusinessSummary {
+  id                   String          @id @default(cuid())
+  businessProfileId    String          @unique
+  shortSummary         String
+  detailedOverview     String
+  elevatorPitch        String
+  marketingPositioning String
+  generatedAt          DateTime        @default(now())
+  generatedBy          String
+  isApproved           Boolean         @default(false)
+  approvedBy           String?
+  approvedAt           DateTime?
+  updatedAt            DateTime        @updatedAt
+  businessProfile      BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+}
+
+model BusinessProfileVersion {
+  id                String          @id @default(cuid())
+  businessProfileId String
+  versionNumber     Int
+  changes           Json
+  changedBy         String
+  changedAt         DateTime        @default(now())
+  reason            String?
+  businessProfile   BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([businessProfileId, versionNumber])
+}
+
+model ContentGenerationContext {
+  id                      String       @id @default(cuid())
+  contentDraftId          String
+  businessProfileSnapshot Json
+  businessId              String
+  generationPrompt        String
+  generationParameters    Json
+  modelUsed               String       @default("openai/gpt-4-turbo")
+  generatedAt             DateTime     @default(now())
+  contentDraft            ContentDraft @relation(fields: [contentDraftId], references: [id], onDelete: Cascade)
+
+  @@index([contentDraftId])
+  @@index([businessId])
+}
+
+model ContentUniquenessLog {
+  id             String       @id @default(cuid())
+  businessId     String
+  contentHash    String
+  contentDraftId String
+  generatedAt    DateTime     @default(now())
+  platform       String?
+  contentPreview String
+  contentDraft   ContentDraft @relation(fields: [contentDraftId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([contentHash])
+  @@index([contentDraftId])
+}
+
+model ContentScheduleRecurrence {
+  id                String         @id @default(cuid())
+  businessId        String
+  recurrenceType    RecurrenceType
+  recurrencePattern Json
+  startDate         DateTime
+  endDate           DateTime?
+  timezone          String         @default("UTC")
+  autoOptimize      Boolean        @default(false)
+  lastOptimizedAt   DateTime?
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([businessId])
+  @@index([startDate])
+}
+
+model KnowledgeBase {
+  id         String              @id @default(cuid())
+  businessId String              @unique
+  business   Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  chunks     KnowledgeChunk[]
+  documents  KnowledgeDocument[]
+}
+
+model KnowledgeDocument {
+  id              String           @id @default(cuid())
+  filename        String
+  fileType        String
+  s3Key           String?
+  sourceUrl       String?
+  uploadedAt      DateTime         @default(now())
+  knowledgeBaseId String
+  status          String           @default("PENDING")
+  chunks          KnowledgeChunk[]
+  knowledgeBase   KnowledgeBase    @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+}
+
+model KnowledgeChunk {
+  id              String                @id @default(cuid())
+  content         String
+  embedding       Unsupported("vector")
+  metadata        Json?
+  documentId      String
+  knowledgeBaseId String
+  document        KnowledgeDocument     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  knowledgeBase   KnowledgeBase         @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+}
+
+enum BrandTone {
+  PROFESSIONAL
+  FRIENDLY
+  CREATIVE
+  TECHNICAL
+  LUXURY
+  CASUAL
+}

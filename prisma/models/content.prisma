@@ -1,0 +1,85 @@
+model ContentDraft {
+  id                 String                     @id @default(cuid())
+  title              String?
+  intent             ContentIntent
+  platforms          Platform[]
+  customPrompt       String?
+  contextUsed        Json?
+  mediaUrl           String?
+  status             ContentStatus              @default(DRAFT)
+  scheduledFor       DateTime?
+  postedAt           DateTime?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  businessId         String
+  creatorId          String
+  assetStatus        AssetStatus                @default(PENDING)
+  contentJson        Json?
+  videoScript        Json?
+  visualPrompt       String?
+  executionId        String?
+  workflowId         String?
+  content            String?
+  approvals          ApprovalLog[]
+  business           Business                   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  creator            User                       @relation(fields: [creatorId], references: [id])
+  workflow           Workflow?                  @relation(fields: [workflowId], references: [id])
+  generationContexts ContentGenerationContext[]
+  uniquenessLogs     ContentUniquenessLog[]
+  comments           DraftComment[]
+  manualOverrides    ManualOverride[]
+  posts              Post[]
+}
+
+model ApprovalLog {
+  id         String        @id @default(cuid())
+  status     ContentStatus
+  comment    String?
+  reviewedAt DateTime      @default(now())
+  userId     String
+  draftId    String
+  draft      ContentDraft  @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id])
+}
+
+enum ContentIntent {
+  SALES
+  EDUCATION
+  EVENT
+  ENGAGEMENT
+  BRAND_AWARENESS
+}
+
+enum ContentStatus {
+  GENERATED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SCHEDULED
+  POSTED
+  FAILED
+  DRAFT
+}
+
+enum Platform {
+  LINKEDIN
+  TWITTER
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
+  YOUTUBE
+  MASTODON
+  BLUESKY
+  PINTEREST
+  GOOGLE_BUSINESS
+  GOHIGHLEVEL
+  HUBSPOT
+  SALESFORCE
+}
+
+enum AssetStatus {
+  PENDING
+  GENERATING
+  COMPLETED
+  FAILED
+}

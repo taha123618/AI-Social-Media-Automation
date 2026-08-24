@@ -1,0 +1,46 @@
+model Post {
+  id                    String                  @id @default(cuid())
+  businessId            String
+  creatorId             String
+  draftId               String
+  externalPostId        String?
+  platform              Platform
+  postedAt              DateTime?
+  publishedUrl          String?
+  socialAccountId       String
+  scheduledFor          DateTime?
+  executionId           String?
+  workflowId            String?
+  status                ContentStatus           @default(DRAFT)
+  analyticsUpdatedAt    DateTime                @default(now()) @updatedAt
+  bookingClicks         Int                     @default(0)
+  clicks                Int                     @default(0)
+  comments              Int                     @default(0)
+  directionRequests     Int                     @default(0)
+  impressions           Int                     @default(0)
+  likes                 Int                     @default(0)
+  messageClicks         Int                     @default(0)
+  phoneClicks           Int                     @default(0)
+  profileVisits         Int                     @default(0)
+  reach                 Int                     @default(0)
+  reelWatchTime         Int                     @default(0)
+  saves                 Int                     @default(0)
+  shares                Int                     @default(0)
+  storyExits            Int                     @default(0)
+  storyTaps             Int                     @default(0)
+  videoCompletionRate   Float?
+  videoViews            Int                     @default(0)
+  websiteClicks         Int                     @default(0)
+  ContentRecommendation ContentRecommendation[]
+  leads                 Lead[]
+  business              Business                @relation(fields: [businessId], references: [id])
+  creator               User                    @relation(fields: [creatorId], references: [id])
+  draft                 ContentDraft            @relation(fields: [draftId], references: [id])
+  socialAccount         SocialAccount           @relation(fields: [socialAccountId], references: [id])
+  workflow              Workflow?               @relation(fields: [workflowId], references: [id])
+  SuccessfulPattern     SuccessfulPattern[]
+
+  @@index([businessId, scheduledFor])
+  @@index([scheduledFor])
+  @@index([businessId, postedAt])
+}

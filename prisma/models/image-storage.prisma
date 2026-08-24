@@ -1,0 +1,26 @@
+model ImageStorage {
+  id           String             @id @default(cuid())
+  businessId   String?
+  userId       String?
+  originalName String
+  fileName     String
+  fileSize     BigInt
+  mimeType     String
+  url          String
+  isPublic     Boolean            @default(false)
+  tags         String[]
+  metadata     Json?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  data         Bytes?
+  errorMessage String?
+  status       ImageStorageStatus @default(PENDING)
+  business     Business?          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user         User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([userId])
+  @@index([mimeType])
+  @@index([isPublic])
+  @@index([createdAt])
+}

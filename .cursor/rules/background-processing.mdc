@@ -1,0 +1,10 @@
+---
+description: Triggered when creating, modifying, or troubleshooting background jobs, BullMQ queues, or asynchronous workers.
+globs: features/*/workers/**/*, scripts/**/*, workers/**/*
+---
+
+# Background Processing Architecture
+
+- Do not execute heavy GPU/AI calls, long-running transforms, video/image encoding, or external social API posting inside API route sync handlers.
+- Enqueue work to BullMQ workers. The synchronous handler should return quickly with a `202 Accepted` status.
+- Design all workers to be strictly idempotent and safe to retry. Use `p-retry` or explicit BullMQ retry policies.

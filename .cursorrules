@@ -1,0 +1,91 @@
+---
+name: copilot-instructions
+description: Global project-wide constraints, structural tech stack facts, and workspace isolation boundaries for ai_social_media_automation.
+---
+
+# Global Project Memory & Guardrails
+
+You are acting as a Senior Full-Stack AI Engineer pairing on the `ai_social_media_automation` codebase. This workspace is a multi-tenant social media automation SaaS with Next.js, Prisma, and a background processing queue.
+
+## 🛠️ Unified Tech Stack
+- **Frontend:**  Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS, `shadcn` UI, Tanstack Query, Tanstack Table, Gsap, ThreeJs, React-three/Fiber, React-three/Drei, Framer-Motion, Rive.
+- **Backend:** Next.js Route Handlers (API API Routes) and Server Components
+- **ORM & DB:** Prisma Client with PostgreSQL & `pgvector`
+- **Asynchronous Processing:** BullMQ + Redis for worker execution loops
+- **Cloud Storage:** AWS SDK for JavaScript v3 (`@aws-sdk/client-s3`)
+
+---
+
+## 🚨 Critical Architecture Mandates (UNCONDITIONAL)
+
+### 1) Multi-Tenancy Data Isolation
+- Every single database read, write, update, and delete operation MUST be explicitly filtered and scoped by `organizationId` to completely eliminate the risk of cross-tenant data leakage.
+- **Anti-Pattern:** `prisma.contentDraft.findMany()`
+- **Correct Pattern:** `prisma.contentDraft.findMany({ where: { organizationId } })`
+- If a payload provides only a `businessId`, always use the shared repository helper (`features/multi-location/services/multi-location.service.ts`) to resolve the matching `organizationId` first.
+
+### 2) Background-First For Heavy Workloads
+- Never execute long-running transforms, heavy GPU/AI prompt loops, multi-platform social API postings, or image/video encoding directly inside synchronous API Route Handlers.
+- Always ingest payloads quickly, run a schema verification, enqueue the task into a BullMQ queue, and immediately return a `202 Accepted` status with the job identifier and minimal metadata.
+- All asynchronous worker tasks must be written to be completely idempotent and resilient against network dropouts using `p-retry` or native BullMQ retry backoff loops.
+
+---
+
+## 📖 Workspace Skill Router
+Load the relevant skill file when working in a specific domain. Each skill contains domain-specific principles, code patterns, review checklists, and project conventions.
+
+### 🏗 Architecture & Design
+- **System architecture, ADRs, design decisions:**
+  📂 `.agents/skills/architecture-and-system-design/SKILL.md`
+
+### ⚙️ Backend & API
+- **Route Handlers, validation, services, error handling:**
+  📂 `.agents/skills/api-and-core-backend/SKILL.md`
+
+### 🗄️ Database
+- **Prisma, queries, migrations, multi-tenancy, pgvector:**
+  📂 `.agents/skills/database-and-migrations/SKILL.md`
+
+### 🎨 Frontend
+- **Components, Server/Client patterns, Tailwind, animations:**
+  📂 `.agents/skills/frontend-ui-development/SKILL.md`
+
+### ⏳ Background Processing
+- **BullMQ, workers, queues, idempotency, retries:**
+  📂 `.agents/skills/background-processing/SKILL.md`
+
+### ☁️ Cloud Storage
+- **S3, presigned URLs, CDN, asset management:**
+  📂 `.agents/skills/cloud-storage/SKILL.md`
+
+### 🤖 AI & Agents
+- **Mastra agents, tools, workflows:**
+  📂 `.agents/skills/ai-agent-development/SKILL.md`
+- **AI provider config, OpenRouter, OpenAI, LangChain:**
+  📂 `.agents/skills/ai-provider-development/SKILL.md`
+- **Prompt design for AI generation features:**
+  📂 `.agents/skills/prompt-engineering/SKILL.md`
+
+### 🔐 Security & Auth
+- **Better Auth, RBAC, multi-tenancy isolation, audit logging:**
+  📂 `.agents/skills/authentication-and-security/SKILL.md`
+
+### 🚀 DevOps & Deploy
+- **Docker Compose, environment setup, CI/CD, deployment:**
+  📂 `.agents/skills/deployment-and-operations/SKILL.md`
+
+### 🧪 Code Quality
+- **Code review checklist and standards:**
+  📂 `.agents/skills/code-review/SKILL.md`
+- **Safe refactoring patterns:**
+  📂 `.agents/skills/code-refactoring/SKILL.md`
+- **Jest testing, mocking, coverage:**
+  📂 `.agents/skills/testing-and-quality/SKILL.md`
+
+### 📊 Observability & Content
+- **Structured logging, audit trails, monitoring:**
+  📂 `.agents/skills/logging-and-monitoring/SKILL.md`
+- **SEO metadata, structured data, Core Web Vitals:**
+  📂 `.agents/skills/seo-and-content/SKILL.md`
+- **Writing documentation, guides, API references:**
+  📂 `.agents/skills/documentation/SKILL.md`

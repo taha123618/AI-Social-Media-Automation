@@ -1,0 +1,75 @@
+model User {
+  id                      String               @id @default(cuid())
+  email                   String               @unique
+  name                    String
+  createdAt               DateTime             @default(now())
+  image                   String?
+  updatedAt               DateTime             @updatedAt
+  emailVerified           Boolean?             @default(false)
+  resetToken              String?              @unique
+  resetTokenExpiry        DateTime?
+  activityLogs            ActivityLog[]
+  approvals               ApprovalLog[]
+  auditLogs               AuditLog[]
+  blogArticles            BlogArticle[]        @relation("BlogArticleCreator")
+  blogProjects            BlogProject[]        @relation("BlogProjectCreator")
+  memberships             BusinessMember[]
+  commentAIHistory        CommentAIHistory[]
+  draftsCreated           ContentDraft[]
+  draftComments           DraftComment[]
+  imageStorage            ImageStorage[]
+  manualOverrides         ManualOverride[]
+  notifications           Notification[]
+  ownedOrganizations      Organization[]
+  organizationMemberships OrganizationMember[]
+  postsCreated            Post[]
+  invitationsCreated      TeamInvitation[]
+  videoGenerationJobs     VideoGenerationJob[]
+  workflows               Workflow[]
+  accounts                Account[]
+  imageGenerationJobs     ImageGenerationJob[]
+  sessions                Session[]
+}
+
+model Account {
+  id            String   @id @default(cuid())
+  userId        String
+  type          String   @default("credentials")
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
+  token_type    String?
+  scope         String?
+  id_token      String?
+  session_state String?
+  accountId     String
+  createdAt     DateTime @default(now())
+  password      String?
+  providerId    String
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("accounts")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  ipAddress String?
+  token     String   @unique
+  updatedAt DateTime @updatedAt
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}

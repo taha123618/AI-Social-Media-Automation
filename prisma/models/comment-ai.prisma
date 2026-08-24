@@ -1,0 +1,14 @@
+model CommentAIHistory {
+  id         String   @id @default(cuid())
+  prompt     String
+  response   String
+  tone       String?
+  userId     String
+  businessId String
+  createdAt  DateTime @default(now())
+  business   Business @relation(fields: [businessId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([businessId, createdAt])
+  @@index([userId])
+}

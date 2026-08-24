@@ -1,0 +1,10 @@
+---
+description: Triggered when handling media asset uploads, managing AWS S3 SDK integration, or generating pre-signed URLs.
+globs: features/**/*.storage.ts, services/storage/**/*, app/api/upload/**/*
+---
+
+# Cloud Storage & Asset Management Principles
+
+- All uploaded files, paths, and keys MUST be partitioned clearly by organization ID to avoid cross-tenant security breaches.
+- **Path Pattern:** `organizations/{organizationId}/{feature}/{filename}`
+- Do not download massive file buffers directly to serverless API memory. Use pre-signed URLs for client-side uploads or pass file streams to background workers.

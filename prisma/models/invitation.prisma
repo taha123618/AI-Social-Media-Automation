@@ -1,0 +1,15 @@
+model TeamInvitation {
+  id          String    @id @default(cuid())
+  email       String
+  role        UserRole  @default(VIEWER)
+  token       String    @unique
+  acceptedAt  DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  businessId  String
+  invitedById String
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation(fields: [invitedById], references: [id])
+
+  @@unique([businessId, email])
+}

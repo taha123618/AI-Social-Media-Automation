@@ -1,0 +1,47 @@
+model DemoLead {
+  id            String         @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String
+  company       String
+  phone         String
+  country       String
+  teamSize      String
+  jobTitle      String
+  useCase       String
+  preferredDate String
+  preferredTime String
+  notes         String?
+  status        DemoLeadStatus @default(NEW)
+  source        DemoLeadSource @default(MARKETING_PAGE)
+  assignedTo    String?
+  metadata      Json?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  booking       DemoBooking?
+  assignedAdmin Admin?         @relation(fields: [assignedTo], references: [id])
+
+  @@index([email])
+  @@index([status])
+  @@index([assignedTo])
+  @@index([createdAt])
+  @@map("demo_leads")
+}
+
+enum DemoLeadSource {
+  MARKETING_PAGE
+  DIRECT_LINK
+  REFERRAL
+  AD_CAMPAIGN
+  OTHER
+}
+
+enum DemoLeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  SCHEDULED
+  COMPLETED
+  CONVERTED
+  LOST
+}

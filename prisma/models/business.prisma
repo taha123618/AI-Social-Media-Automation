@@ -1,0 +1,63 @@
+model Business {
+  id                      String                   @id @default(cuid())
+  name                    String
+  slug                    String                   @unique
+  website                 String?
+  logo                    String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  businessType            BusinessType?
+  googleBusinessProfileId String?
+  location                Json?
+  operatingHours          Json?
+  organizationId          String?
+  services                String[]                 @default([])
+  websiteScrapedAt        DateTime?
+  preferences             Json                     @default("{}")
+  adAccounts              AdAccount[]
+  adAnalytics             AdAnalytics[]
+  blogArticles            BlogArticle[]
+  blogProjects            BlogProject[]
+  blogTemplates           BlogTemplate[]
+  brandProfiles           BrandProfile[]
+  organization            Organization?            @relation(fields: [organizationId], references: [id])
+  members                 BusinessMember[]
+  profile                 BusinessProfile?
+  campaigns               Campaign[]
+  campaignLaunches        CampaignLaunch[]
+  commentAIHistory        CommentAIHistory[]
+  contentDrafts           ContentDraft[]
+  contentRecommendations  ContentRecommendation[]
+  imageStorage            ImageStorage[]
+  knowledgeBase           KnowledgeBase?
+  leads                   Lead[]
+  notifications           Notification[]
+  optimizationRules       OptimizationRule[]
+  optimizationSuggestions OptimizationSuggestion[]
+  platformCredentials     PlatformCredential[]
+  posts                   Post[]
+  reviews                 Review[]
+  reviewRequests          ReviewRequest[]
+  socialAccounts          SocialAccount[]
+  successfulPatterns      SuccessfulPattern[]
+  invitations             TeamInvitation[]
+  thirdPartyServices      ThirdPartyService[]
+  videoGenerationJobs     VideoGenerationJob[]
+  workflows               Workflow[]
+  apiKeys                 ApiKey[]
+  imageGenerationJobs     ImageGenerationJob[]
+  postingSchedule         PostingSchedule?
+  webhooks                Webhook[]
+}
+
+model BusinessMember {
+  id         String   @id @default(cuid())
+  role       UserRole @default(VIEWER)
+  joinedAt   DateTime @default(now())
+  userId     String
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+}

@@ -1,0 +1,71 @@
+model ActivityLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  details   Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  message   String
+  stack     String?
+  source    String
+  context   Json?
+  path      String?
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([source])
+  @@index([resolved])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  resource  String
+  userId    String?
+  ipAddress String?
+  userAgent String?
+  status    String
+  details   Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model SystemMetric {
+  id        String   @id @default(uuid())
+  name      String
+  value     Float
+  unit      String
+  tags      Json?
+  timestamp DateTime @default(now())
+
+  @@index([name, timestamp])
+}
+
+model MaintenanceConfig {
+  id                  String    @id @default("default")
+  isEnabled           Boolean   @default(false)
+  message             String    @default("We are currently undergoing scheduled maintenance. Please check back soon.")
+  estimatedCompletion DateTime?
+  allowlistIps        String[]  @default([])
+  allowlistEmails     String[]  @default([])
+  apiBlocked          Boolean   @default(true)
+  updatedAt           DateTime  @updatedAt
+  updatedBy           String?
+
+  @@map("maintenance_config")
+}

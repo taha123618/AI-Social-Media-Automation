@@ -1,0 +1,190 @@
+model Organization {
+  id            String               @id @default(cuid())
+  name          String
+  slug          String               @unique
+  ownerId       String
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  businesses    Business[]
+  owner         User                 @relation(fields: [ownerId], references: [id])
+  members       OrganizationMember[]
+  subscriptions Subscription?
+
+  @@index([slug])
+  @@index([ownerId])
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           OrgRole      @default(MEMBER)
+  joinedAt       DateTime     @default(now())
+  invitedBy      String?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+}
+
+model Subscription {
+  id                   String              @id @default(cuid())
+  organizationId       String              @unique
+  planId               String
+  status               SubscriptionStatus
+  startDate            DateTime            @default(now())
+  endDate              DateTime?
+  currentPeriodStart   DateTime            @default(now())
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean             @default(false)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  organization         Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  usage                SubscriptionUsage[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model SubscriptionUsage {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  feature        FeatureType
+  used           Int          @default(0)
+  limit          Int
+  period         UsagePeriod
+  resetDate      DateTime     @default(now())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, feature, period])
+}
+
+model DraftComment {
+  id        String         @id @default(cuid())
+  draftId   String
+  authorId  String
+  content   String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  parentId  String?
+  resolved  Boolean        @default(false)
+  author    User           @relation(fields: [authorId], references: [id])
+  draft     ContentDraft   @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  parent    DraftComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   DraftComment[] @relation("CommentReplies")
+
+  @@index([draftId, createdAt])
+  @@index([authorId])
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  type       NotificationType
+  title      String
+  message    String
+  read       Boolean          @default(false)
+  entityId   String?
+  entityType EntityType?
+  createdAt  DateTime         @default(now())
+  businessId String?
+  business   Business?        @relation(fields: [businessId], references: [id])
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([businessId])
+  @@index([createdAt])
+}
+
+model ManualOverride {
+  id              String       @id @default(cuid())
+  draftId         String
+  userId          String
+  originalContent String
+  modifiedContent String
+  reason          String?
+  createdAt       DateTime     @default(now())
+  draft           ContentDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id])
+
+  @@index([draftId])
+  @@index([userId, createdAt])
+}
+
+model SuccessfulPattern {
+  id                String   @id @default(cuid())
+  businessId        String
+  postId            String
+  patterns          Json
+  engagementMetrics Json
+  createdAt         DateTime @default(now())
+  business          Business @relation(fields: [businessId], references: [id])
+  post              Post     @relation(fields: [postId], references: [id])
+
+  @@index([businessId, createdAt])
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+enum FeatureType {
+  AI_POSTS
+  VIDEO_GENERATIONS
+  TEAM_MEMBERS
+  STORAGE_GB
+  API_CALLS
+  AI_BLOG_ARTICLES
+  AD_GENERATIONS
+  CAMPAIGN_LAUNCHES
+}
+
+enum UsagePeriod {
+  MONTHLY
+  ANNUALLY
+}
+
+enum NotificationType {
+  DRAFT_ASSIGNED
+  DRAFT_APPROVED
+  DRAFT_REJECTED
+  COMMENT_MENTION
+  COMMENT_REPLY
+  SUBSCRIPTION_EXPIRING
+  USAGE_LIMIT_WARNING
+  SYSTEM
+}
+
+enum EntityType {
+  CONTENT_DRAFT
+  DRAFT_COMMENT
+  BUSINESS
+  ORGANIZATION
+  PLATFORM_CREDENTIAL
+  AD_ACCOUNT
+  CAMPAIGN
+}
+
+enum VideoProvider {
+  RUNWAY
+  LUMA
+}
+
+enum VideoJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}

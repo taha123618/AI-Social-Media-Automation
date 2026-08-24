@@ -1,0 +1,63 @@
+model AdAccount {
+  id                String               @id @default(cuid())
+  businessId        String
+  platform          AdPlatform
+  name              String
+  platformAccountId String?
+  status            String               @default("ACTIVE")
+  isPrimary         Boolean              @default(false)
+  details           Json?
+  pageId            String?
+  balance           Float?
+  currency          String?
+  timezone          String?
+  lastSyncedAt      DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  business          Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  credentials       PlatformCredential[]
+
+  @@index([businessId])
+  @@index([platform])
+}
+
+model PlatformCredential {
+  id             String     @id @default(cuid())
+  businessId     String
+  adAccountId    String?
+  platform       AdPlatform
+  providerUserId String?
+  accessToken    String
+  refreshToken   String?
+  scopes         String[]   @default([])
+  expiresAt      DateTime?
+  meta           Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  adAccount      AdAccount? @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  business       Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([adAccountId])
+  @@index([platform])
+}
+
+model CampaignLaunch {
+  id                 String    @id @default(cuid())
+  campaignId         String
+  businessId         String
+  launchedByUserId   String?
+  status             String    @default("PENDING")
+  platformCampaignId String?
+  platformDetails    Json?
+  startedAt          DateTime?
+  finishedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  business           Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  campaign           Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([campaignId])
+  @@index([status])
+}
