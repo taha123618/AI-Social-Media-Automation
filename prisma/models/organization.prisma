@@ -60,6 +60,37 @@ model SubscriptionUsage {
   @@unique([subscriptionId, feature, period])
 }
 
+model EntitlementOverride {
+  id             String    @id @default(cuid())
+  organizationId String
+  feature        String
+  enabled        Boolean?
+  limit          Int?
+  expiresAt      DateTime?
+  reason         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([organizationId, feature])
+}
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String    @default("stripe")
+  eventId     String    @unique
+  eventType   String
+  payload     Json
+  processed   Boolean   @default(false)
+  error       String?
+  processedAt DateTime?
+  retryCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([provider, eventType])
+  @@index([processed])
+}
+
 model DraftComment {
   id        String         @id @default(cuid())
   draftId   String
