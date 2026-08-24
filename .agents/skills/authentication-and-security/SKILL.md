@@ -3,85 +3,66 @@ name: authentication-and-security
 description: Use this skill for implementing authentication, authorization, security measures, and access control across the application.
 ---
 
-# Authentication and Security
+# Authentication, Authorization and Application Security
 
-You are operating as a Security Engineer responsible for securing user authentication, multi-tenant authorization, session protection, and API endpoints.
+You are operating as a Senior Cybersecurity Engineer responsible for multi-tenant isolation, RBAC authorization, authentication flows (Better-Auth), input sanitization, file upload defenses, and OWASP Top 10 mitigation.
 
-## Authentication Framework
-- **Core Library**: `better-auth` with Prisma Adapter (`better-auth/adapters/prisma`)
-- **Server Auth Config**: `lib/auth.ts` (`export const auth = betterAuth({...})`)
-- **Client Auth Client**: `lib/auth-client.ts` (`createAuthClient({...})` from `better-auth/react`)
-- **API Catch-all**: `app/api/auth/[...all]/route.ts`
-- **Adapters**: Prisma Adapter connecting to PostgreSQL `User`, `Session`, `Account`, and `Verification` models.
-- **Providers**: Email/Password (with bcrypt hashing, 12 rounds), Google OAuth (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`).
-- **Lifecycle Hooks**: Automatic welcome email delivery, default business/workspace provisioning, and audit log generation on user signup.
+## Security Architecture & Core Libraries
+- **Authentication Engine**: Better-Auth (`lib/auth.ts`) with bcrypt (12 rounds) and OAuth2 Google linking
+- **Security Utilities**: `SecurityService` in [`lib/security.ts`](file:///Users/taha/projects/ai_social_media_automation/lib/security.ts)
+- **Multi-Tenant Scoping**: All Prisma queries must include `businessId` filtering
+- **Secure File Storage**: S3 presigned URLs with magic byte validation and filename sanitization in [`lib/s3.ts`](file:///Users/taha/projects/ai_social_media_automation/lib/s3.ts)
+- **HTTP Security Headers**: HSTS, CSP, X-Frame-Options (`DENY`), X-Content-Type-Options (`nosniff`) in [`next.config.ts`](file:///Users/taha/projects/ai_social_media_automation/next.config.ts)
 
-## Security Architecture
+---
 
-### 1) Role-Based Access Control (RBAC)
-User access is partitioned by system roles and organizational permissions:
-- **System Roles**: `USER`, `ADMIN`, `SUPER_ADMIN`
-- **Business/Organization Roles**: `OWNER`, `ADMIN`, `EDITOR`, `VIEWER`
+## 1. Secure Coding Standards
 
+### 1.1 Input Sanitization & XSS Defense
 ```typescript
-// Checking permission in Server Actions or Route Handlers
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import prisma from '@/lib/prisma';
+import { SecurityService } from '@/lib/security';
 
-export async function verifyBusinessAccess(businessId: string, allowedRoles: string[] = ['OWNER', 'ADMIN', 'EDITOR']) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+// Escape HTML special characters
+const cleanText = SecurityService.escapeHtml(userInput);
 
-  if (!session?.user?.id) {
-    throw new Error('Unauthorized');
-  }
+// Sanitize rich HTML markup (strips <script>, javascript: URIs, on* event handlers)
+const safeHtml = SecurityService.sanitizeHtml(rawHtml);
+```
 
-  // Super admins bypass tenant restrictions
-  if (session.user.role === 'SUPER_ADMIN') {
-    return session.user;
-  }
+### 1.2 File Upload & MIME Spoofing Protection
+- Always validate binary magic bytes before accepting or uploading files to S3:
+```typescript
+import { SecurityService } from '@/lib/security';
 
-  const membership = await prisma.businessMember.findFirst({
-    where: {
-      businessId,
-      userId: session.user.id,
-      role: { in: allowedRoles as any },
-    },
-  });
+if (!SecurityService.validateMagicBytes(fileBuffer, mimeType)) {
+  throw new Error('File signature mismatch (MIME spoofing detected)');
+}
 
-  if (!membership) {
-    throw new Error('Forbidden: Insufficient business permissions');
-  }
+// Generate sanitized safe key
+const safeKey = generateS3Key('uploads', file.name);
+```
 
-  return session.user;
+### 1.3 Multi-Tenant Isolation
+- Never query tenant data without verifying membership and including `businessId`:
+```typescript
+const membership = await prisma.businessMember.findFirst({
+  where: {
+    businessId,
+    userId: session.user.id,
+    role: { in: ['OWNER', 'ADMIN', 'EDITOR'] },
+  },
+});
+if (!membership) {
+  throw new Error('Forbidden: Unauthorized tenant access');
 }
 ```
 
-### 2) Middleware & Route Protection (`middleware.ts`)
-Next.js edge middleware safeguards protected paths:
-- `/admin/*` -> Requires `ADMIN` or `SUPER_ADMIN` role
-- `/dashboard/*` / `/contents/*` / `/analytics/*` -> Requires valid session
-- `/login` / `/register` -> Redirects authenticated users to `/dashboard`
+---
 
-### 3) Multi-Tenancy Data Isolation
-- Enforce `businessId` constraints on all Prisma create, read, update, and delete queries.
-- Prevent IDOR (Insecure Direct Object Reference) vulnerabilities by verifying resource ownership before mutations.
+## 2. Testing Security Scenarios
 
-### 4) Webhook Security & Signature Verification
-- Stripe Webhooks: Validate signature via `stripe.webhooks.constructEvent()`.
-- Social Webhooks (Meta, TikTok, X, LinkedIn): Verify HMAC SHA-256 signature headers.
-
-### 5) Secrets & Environment Safety
-- Never check in `.env` files.
-- Store sensitive API keys (OpenAI, Anthropic, AWS, Stripe) in environment variables.
-- Mask sensitive tokens in logs using `@mastra/observability` `SensitiveDataFilter` and `SystemLogger`.
-
-## Security Checklist
-- [ ] Passwords hashed with bcrypt (salt rounds = 12)
-- [ ] `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` configured
-- [ ] Multi-tenant isolation verified on every database query
-- [ ] API routes protected against CSRF and rate-limited
-- [ ] Input validated with strict Zod schemas
-- [ ] Error messages do not leak stack traces or internal DB details to clients
+```bash
+# Run security test suite
+npm test -- lib/__tests__/security.test.ts
+npm test -- lib/__tests__/auth-security.test.ts
+```

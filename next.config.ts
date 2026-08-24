@@ -40,13 +40,47 @@ const nextConfig: NextConfig = {
       }
     ]
   },
+  // Security Headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ];
+  },
   // Tell Next.js to skip bundling these native modules
   serverExternalPackages: [
     "@duckdb/node-api",
     "@duckdb/node-bindings",
     "duckdb"
   ],
-  //logging
+  // Logging configuration
   logging: {
     fetches: {
       fullUrl: true, // Displays full fetch URLs in the terminal cache logs
