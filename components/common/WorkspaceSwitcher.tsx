@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useTransition } from 'react';
+import { useState, useRef, useTransition, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Building2, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +9,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useClickOutside } from '@/hooks/useClickOutside';
+import { useHasHydrated } from '@/hooks/use-has-hydrated';
 
 export function WorkspaceSwitcher() {
    const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +19,7 @@ export function WorkspaceSwitcher() {
    const router = useRouter();
    const pathname = usePathname();
    const queryClient = useQueryClient();
+   const hasHydrated = useHasHydrated();
 
    const { data, isLoading: isLoadingWorkspaces } = useQuery({
       queryKey: ['workspaces'],
@@ -35,7 +37,7 @@ export function WorkspaceSwitcher() {
    const activeId = data?.currentId || null;
 
    const workspaces = data?.workspaces || [];
-   const isLoading = isLoadingWorkspaces;
+   const isLoading = !hasHydrated || isLoadingWorkspaces;
 
    useClickOutside(dropdownRef, () => setIsOpen(false));
 
@@ -74,7 +76,10 @@ export function WorkspaceSwitcher() {
 
    if (isLoading) {
       return (
-         <div className="w-full h-14 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 animate-pulse flex items-center px-4 mb-4">
+         <div
+            suppressHydrationWarning
+            className="w-full h-14 rounded-2xl bg-slate-100/50 dark:bg-slate-800/50 animate-pulse flex items-center px-4 mb-4"
+         >
             <div className="h-8 w-8 rounded-lg bg-slate-200 dark:bg-slate-700 mr-3" />
             <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded-md" />
          </div>
@@ -86,7 +91,7 @@ export function WorkspaceSwitcher() {
    return (
       <>
          {/* Global Switching Overlay */}
-         {document.body && createPortal(
+         {hasHydrated && typeof document !== 'undefined' && document.body && createPortal(
             <AnimatePresence>
                {(isSwitching || isPending) && (
                   <motion.div
@@ -101,7 +106,17 @@ export function WorkspaceSwitcher() {
                            <Loader2 className="h-8 w-8 text-blue-600 dark:text-blue-400 animate-spin" />
                         </div>
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Switching Workspace</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Please wait while we load the data for your selected workspace.</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                           Preparing your dashboard environment and synchronizing resources...
+                        </p>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                           <motion.div
+                              className="bg-blue-600 h-full rounded-full"
+                              initial={{ width: "0%" }}
+                              animate={{ width: "100%" }}
+                              transition={{ duration: 1.5, ease: "easeInOut" }}
+                           />
+                        </div>
                      </div>
                   </motion.div>
                )}
@@ -109,59 +124,56 @@ export function WorkspaceSwitcher() {
             document.body
          )}
 
-         <div className="relative mb-6 z-50 px-3" ref={dropdownRef}>
+         <div className="relative w-full mb-4" ref={dropdownRef}>
             <button
                onClick={() => setIsOpen(!isOpen)}
-               disabled={isSwitching}
-               className="w-full h-14 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/50 group shadow-xs"
+               disabled={isSwitching || isPending}
+               className="w-full flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left group backdrop-blur-sm shadow-sm"
             >
                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform shrink-0">
                      <Building2 className="h-4 w-4" />
                   </div>
-                  <div className="flex flex-col items-start truncate text-left">
-                     <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Workspace</span>
-                     <span className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[120px]">
+                  <div className="truncate">
+                     <p className="text-xs text-slate-400 font-medium">Workspace</p>
+                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
                         {activeWorkspace?.name || 'Select Workspace'}
-                     </span>
+                     </p>
                   </div>
                </div>
-               {isSwitching ? (
-                  <Loader2 className="h-4 w-4 text-slate-400 animate-spin shrink-0" />
-               ) : (
-                  <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
-               )}
+               <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             <AnimatePresence>
                {isOpen && (
                   <motion.div
-                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                     transition={{ duration: 0.15 }}
-                     className="absolute top-full left-3 right-3 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden py-2"
+                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                     transition={{ duration: 0.15, ease: 'easeOut' }}
+                     className="absolute top-full left-0 right-0 mt-2 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-xl z-50 overflow-hidden"
                   >
-                     <div className="max-h-[240px] overflow-y-auto custom-scrollbar">
-                        {workspaces?.map((workspace) => (
-                           <button
-                              key={workspace.id}
-                              onClick={() => handleSwitch(workspace.id)}
-                              className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left"
-                           >
-                              <div className="flex items-center gap-3 truncate">
-                                 <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
-                                    <span className="text-xs font-bold uppercase">{workspace.name.substring(0, 2)}</span>
+                     <div className="max-h-60 overflow-y-auto space-y-1">
+                        {workspaces.map((workspace) => {
+                           const isSelected = workspace.id === activeId;
+                           return (
+                              <button
+                                 key={workspace.id}
+                                 onClick={() => handleSwitch(workspace.id)}
+                                 className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left text-sm transition-all ${
+                                    isSelected
+                                       ? 'bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold'
+                                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 font-medium'
+                                 }`}
+                              >
+                                 <div className="flex items-center gap-2.5 truncate">
+                                    <div className={`h-2 w-2 rounded-full ${isSelected ? 'bg-blue-600 dark:bg-blue-400' : 'bg-transparent'}`} />
+                                    <span className="truncate">{workspace.name}</span>
                                  </div>
-                                 <span className={`text-sm truncate max-w-[130px] ${activeId === workspace.id ? 'font-bold text-blue-600 dark:text-blue-400' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
-                                    {workspace.name}
-                                 </span>
-                              </div>
-                              {activeId === workspace.id && (
-                                 <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                              )}
-                           </button>
-                        ))}
+                                 {isSelected && <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />}
+                              </button>
+                           );
+                        })}
                      </div>
                   </motion.div>
                )}

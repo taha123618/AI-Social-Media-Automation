@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { verifyAdminToken } from "@/lib/admin-auth";
 
@@ -12,7 +11,6 @@ async function getMaintenanceStatus(origin: string, cookieHeader: string, ipHead
         cookie: cookieHeader,
         "x-forwarded-for": ipHeader,
       },
-      // Explicitly opt-out of the fetch cache so Next.js never serves a stale response
       cache: "no-store",
     });
 
@@ -50,7 +48,10 @@ export async function proxy(request: NextRequest) {
 
   if (!isBypassedPrefix) {
     const cookieHeader = request.headers.get("cookie") || "";
-    const ipHeader = request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip") || "127.0.0.1";
+    const ipHeader =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
     const status = await getMaintenanceStatus(origin, cookieHeader, ipHeader);
 
     if (status.isEnabled && !status.bypassed) {
@@ -88,18 +89,19 @@ export async function proxy(request: NextRequest) {
   // Handle /maintenance page logic separately if it's hit directly
   if (pathname === "/maintenance") {
     const cookieHeader = request.headers.get("cookie") || "";
-    const ipHeader = request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip") || "127.0.0.1";
+    const ipHeader =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
     const status = await getMaintenanceStatus(origin, cookieHeader, ipHeader);
 
     if (!status.isEnabled || status.bypassed) {
       return NextResponse.redirect(new URL("/", request.url));
     }
-    // Maintenance page itself must not be cached
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // 2. Authentication & Route Protection Checks
-  // Admin route protection
+  // 2. Admin Route Protection
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const adminToken = request.cookies.get("admin_token")?.value;
     const adminSession = adminToken ? await verifyAdminToken(adminToken) : null;
@@ -113,50 +115,87 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
 
-    // Admin routes must also never be cached so they always reflect live data
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // Protected User Routes check
+  // 3. Exempt Public Routes & Webhooks
+  const PUBLIC_PREFIXES = [
+    "/api/auth",
+    "/api/billing/webhooks",
+    "/api/system/alerts",
+    "/api/maintenance/status",
+    "/api/cron",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/terms",
+    "/privacy",
+  ];
+
+  const isPublic =
+    pathname === "/" ||
+    PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+
+  if (isPublic) {
+    return withNoCacheHeaders(NextResponse.next());
+  }
+
+  // 4. Protected User Routes check
   const PROTECTED_PREFIXES = [
-    "/dashboard/:path*",
-    "/contents/:path*",
-    "/schedule/:path*",
-    "/settings/:path*",
-    "/team/:path*",
-    "/workflow/:path*",
-    "/videos/:path*",
-    "/image/:path*",
-    "/gallery/:path*",
-    "/reviews/:path*",
-    "/analytics/:path*",
-    "/knowledge/:path*",
-    "/posts/:path*",
-    "/post-schedule/:path*",
-    "/social/:path*",
-    "/api/dashboard/:path*",
-    "/api/user/:path*",
-    "/api/contents/:path*",
-    "/api/schedule/:path*",
-    "/api/settings/:path*",
-    "/api/team/:path*",
-    "/api/workflow/:path*",
-    "/api/videos/:path*",
-    "/api/image/:path*",
-    "/api/gallery/:path*",
+    "/dashboard",
+    "/contents",
+    "/schedule",
+    "/settings",
+    "/team",
+    "/workflow",
+    "/workflows",
+    "/videos",
+    "/image",
+    "/gallery",
+    "/reviews",
+    "/analytics",
+    "/knowledge",
+    "/posts",
+    "/post-schedule",
+    "/social",
+    "/blog",
+    "/ad-campaigns",
+    "/competitors",
+    "/trends",
+    "/activity",
+    "/api/dashboard",
+    "/api/user",
+    "/api/contents",
+    "/api/schedule",
+    "/api/settings",
+    "/api/team",
+    "/api/workflow",
+    "/api/videos",
+    "/api/image",
+    "/api/gallery",
+    "/api/blog",
+    "/api/generation",
+    "/api/billing",
+    "/api/analytics",
+    "/api/social",
+    "/api/knowledge",
+    "/api/reviews",
+    "/api/competitors",
+    "/api/trends",
   ];
 
   const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 
   if (isProtected) {
     const session = await auth.api.getSession({
-      headers: await headers(),
+      headers: request.headers,
     });
 
-    if (!session) {
-      if (pathname.startsWith("/api")) {
+    if (!session?.user) {
+      if (pathname.startsWith("/api/")) {
         return NextResponse.json(
           { error: "Authentication required" },
           { status: 401 }
@@ -164,8 +203,8 @@ export async function proxy(request: NextRequest) {
       }
 
       const loginUrl = new URL("/login", request.url);
-      // Prevent open-redirect vulnerabilities by validating the redirect path
-      const safeRedirect = pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/dashboard";
+      const safeRedirect =
+        pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/dashboard";
       loginUrl.searchParams.set("redirect", safeRedirect);
       return NextResponse.redirect(loginUrl);
     }
@@ -185,6 +224,9 @@ export async function proxy(request: NextRequest) {
   return withNoCacheHeaders(NextResponse.next());
 }
 
+export const middleware = proxy;
+export default proxy;
+
 export const config = {
   matcher: [
     /*
@@ -194,6 +236,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - uploads (uploaded files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|uploads).*)',
+    "/((?!_next/static|_next/image|favicon.ico|uploads).*)",
   ],
 };

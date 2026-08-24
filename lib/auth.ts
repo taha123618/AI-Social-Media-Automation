@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 import { sendRegistrationEmail } from "./email-service";
 import { SystemLogger } from "@/features/system/services/logger.service";
@@ -14,14 +13,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
-    minPasswordLength: 8,
+    minPasswordLength: 6,
     maxPasswordLength: 128,
-    async hashPassword(password: string) {
-      return await bcrypt.hash(password, 12);
-    },
-    async verifyPassword(password: string, hash: string) {
-      return await bcrypt.compare(password, hash);
-    },
   },
   socialProviders: {
     google: {
@@ -46,14 +39,13 @@ export const auth = betterAuth({
     },
   },
   // ─────────────────────────────────────────────────────────────────────
-  // Fire welcome email for EVERY new user regardless of signup method
-  // (email/password form, Google OAuth, etc.)
+  // Fire welcome email and initialize default Free Plan on registration
   // ─────────────────────────────────────────────────────────────────────
   databaseHooks: {
     user: {
       create: {
         after: async (user) => {
-          // 1. Send the welcome email (doesn't block account creation if it fails)
+          // 1. Send the welcome email
           try {
             await sendRegistrationEmail(user.email, user.name ?? undefined);
             console.log(`📧 Welcome email queued for ${user.email}`);
@@ -66,29 +58,62 @@ export const auth = betterAuth({
             });
           }
 
-          // 2. Create a default business for the new user, so pages like /knowledge
-          //    and /analytics don't crash with "Business not found".
+          // 2. Create default Organization, Business, and activate Free Plan Subscription
           try {
-            const businessName = user.name ? `${user.name}'s Business` : 'My Business';
-            const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(2, 8);
+            const businessName = user.name ? `${user.name}'s Workspace` : 'My Workspace';
+            const slug =
+              businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-') +
+              '-' +
+              Math.random().toString(36).substring(2, 8);
+            const now = new Date();
+            const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-            await prisma.business.create({
+            await prisma.organization.create({
               data: {
                 name: businessName,
                 slug,
+                ownerId: user.id,
                 members: {
                   create: {
                     userId: user.id,
                     role: 'OWNER',
-                  }
-                }
-              }
+                  },
+                },
+                subscriptions: {
+                  create: {
+                    planId: 'free',
+                    status: 'ACTIVE',
+                    startDate: now,
+                    currentPeriodStart: now,
+                    currentPeriodEnd: periodEnd,
+                    cancelAtPeriodEnd: false,
+                    usage: {
+                      create: [
+                        { feature: 'AI_POSTS', used: 0, limit: 5, period: 'MONTHLY' },
+                        { feature: 'AI_BLOG_ARTICLES', used: 0, limit: 20, period: 'MONTHLY' },
+                      ],
+                    },
+                  },
+                },
+                businesses: {
+                  create: {
+                    name: businessName,
+                    slug,
+                    members: {
+                      create: {
+                        userId: user.id,
+                        role: 'OWNER',
+                      },
+                    },
+                  },
+                },
+              },
             });
-            console.log(`🏢 Created default business for ${user.email}`);
+            console.log(`🏢 Activated Free Plan Subscription and created default workspace for ${user.email}`);
           } catch (err) {
-            console.error(`❌ Failed to create default business for ${user.email}:`, err);
+            console.error(`❌ Failed to initialize free subscription and workspace for ${user.email}:`, err);
             await SystemLogger.logError({
-              message: "Failed to create default business",
+              message: "Failed to create default business and free subscription",
               source: "BetterAuth.UserCreate",
               context: { email: user.email, err: String(err) },
             });

@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCurrentBusiness } from '@/hooks/use-current-business';
 import { useAnalyticsOverview, useConsistencyScore, useLeadAnalytics, useAnalyticsInsights, useGrowthAnalytics } from '@/hooks/api-hooks';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FeatureGate } from '@/components/billing/FeatureGate';
 
 interface ConsistencyData {
   overall: number;
@@ -59,52 +60,16 @@ export default function AnalyticsDashboard() {
     30
   );
 
-  const { data: growthData, isLoading: growthLoading } = useGrowthAnalytics(businessId || '');
-
-  // Loading state
-  if (businessLoading || (!businessId && !businessLoading)) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <Activity className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-lg font-medium">Loading workspace...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!businessId) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <BarChart3 className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-          <p className="text-lg font-medium text-slate-600">No workspace selected</p>
-          <p className="text-sm text-slate-500">Please select a workspace to view analytics</p>
-        </div>
-      </div>
-    );
-  }
+  const { data: growthData, isLoading: growthLoading, error: growthError } = useGrowthAnalytics(
+    businessId || ''
+  );
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4 mb-8"
-      >
-        <BarChart3 className="h-10 w-10 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold">Growth Analytics</h1>
-          <p className="text-slate-500">Track your social media performance and ROI</p>
-        </div>
-      </motion.div>
-
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <Activity className="h-4 w-4 mr-2" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="growth">
@@ -116,7 +81,7 @@ export default function AnalyticsDashboard() {
             AI Insights
           </TabsTrigger>
           <TabsTrigger value="consistency">
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <Activity className="h-4 w-4 mr-2" />
             Consistency Score
           </TabsTrigger>
           <TabsTrigger value="leads">
@@ -234,7 +199,7 @@ export default function AnalyticsDashboard() {
               conversionRate={parseFloat(leadData.data.conversionRate?.conversionRate || '0')}
               totalPosts={leadData.data.conversionRate?.totalPosts || 0}
               postsWithLeads={leadData.data.conversionRate?.postsWithLeads || 0}
-                  topPerformingPosts={leadData.data.topPerformingPosts}
+              topPerformingPosts={leadData.data.topPerformingPosts}
             />
           ) : null}
         </TabsContent>
@@ -261,7 +226,9 @@ export default function AnalyticsDashboard() {
         </TabsContent>
 
         <TabsContent value="growth" className="mt-6">
-          <GrowthEngineUI data={growthData} isLoading={growthLoading} />
+          <FeatureGate feature="advanced_analytics">
+            <GrowthEngineUI data={growthData} isLoading={growthLoading} />
+          </FeatureGate>
         </TabsContent>
       </Tabs>
     </div>

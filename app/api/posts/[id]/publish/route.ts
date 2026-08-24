@@ -15,6 +15,7 @@ import {
   ApiResponse,
 } from '@/features/social/types/social-posting.types';
 import { Platform, ContentStatus } from '@/app/generated/prisma/client';
+import { EntitlementGuard } from '@/lib/guards/entitlement.guard';
 
 export async function POST(
   req: NextRequest,
@@ -24,7 +25,15 @@ export async function POST(
     const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
-        { success: false, error: { code: PostErrorCode.AUTHENTICATION_FAILED, message: 'Unauthorized' } } as ApiResponse<null>,
+        {
+          success: false,
+          error: {
+            code: PostErrorCode.AUTHENTICATION_FAILED,
+            message: 'Unauthorized',
+            timestamp: new Date(),
+          },
+          timestamp: new Date(),
+        } as ApiResponse<null>,
         { status: 401 }
       );
     }
@@ -32,13 +41,29 @@ export async function POST(
     const businessId = req.headers.get('x-business-id');
     if (!businessId) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_HEADER', message: 'Business ID required' } } as ApiResponse<null>,
+        {
+          success: false,
+          error: {
+            code: PostErrorCode.AUTHENTICATION_FAILED,
+            message: 'Business ID required',
+            timestamp: new Date(),
+          },
+          timestamp: new Date(),
+        } as ApiResponse<null>,
         { status: 400 }
       );
     }
 
     const body = (await req.json()) as PublishPostRequest;
     const { id: draftId } = await params;
+
+    // Enforce scheduling entitlement if not publishing immediately
+    if (!body.publishImmediately) {
+      const featureError = await EntitlementGuard.requireFeature(businessId, 'scheduling');
+      if (featureError) {
+        return featureError;
+      }
+    }
 
     // Get draft
     const draft = await prisma.contentDraft.findFirst({
@@ -50,7 +75,15 @@ export async function POST(
 
     if (!draft) {
       return NextResponse.json(
-        { success: false, error: { code: PostErrorCode.DRAFT_NOT_FOUND, message: 'Draft not found' } } as ApiResponse<null>,
+        {
+          success: false,
+          error: {
+            code: PostErrorCode.DRAFT_NOT_FOUND,
+            message: 'Draft not found',
+            timestamp: new Date(),
+          },
+          timestamp: new Date(),
+        } as ApiResponse<null>,
         { status: 404 }
       );
     }
@@ -67,7 +100,15 @@ export async function POST(
 
     if (socialAccounts.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: PostErrorCode.ACCOUNT_DISCONNECTED, message: 'No valid social accounts' } } as ApiResponse<null>,
+        {
+          success: false,
+          error: {
+            code: PostErrorCode.ACCOUNT_DISCONNECTED,
+            message: 'No valid social accounts',
+            timestamp: new Date(),
+          },
+          timestamp: new Date(),
+        } as ApiResponse<null>,
         { status: 400 }
       );
     }
@@ -118,35 +159,36 @@ export async function POST(
               businessId,
               creatorId: session.user.id,
               draftId: draft.id,
-              platform: account.platform,
-              externalPostId: result.postId,
               socialAccountId: account.id,
+              externalPostId: result.postId,
+              platform: account.platform,
               publishedUrl: result.url,
               postedAt: body.publishImmediately ? new Date() : undefined,
-              scheduledFor: body.scheduledFor,
+              status: body.publishImmediately ? ContentStatus.POSTED : ContentStatus.SCHEDULED,
             },
           });
 
-          // PostAnalytics are now flattened into the Post model, no separate record needed
-
           postIds.push(post.id);
-          externalPostIds[account.id] = result.postId;
+          externalPostIds[account.platform] = result.postId;
           publishedUrls.push(result.url);
 
           await SystemLogger.logActivity({
             action: 'POST_PUBLISHED',
-            entity: 'post',
+            entity: 'Post',
             entityId: post.id,
             userId: session.user.id,
-            details: { platform: account.platform, externalPostId: result.postId },
+            details: { platform: account.platform, postId: result.postId },
           });
         }
       } catch (error) {
         const errorMsg = `Failed to publish to ${account.platform}: ${error}`;
         errors.push(errorMsg);
+        console.error(errorMsg);
+
         await SystemLogger.logError({
           message: errorMsg,
           source: 'POST /api/posts/[id]/publish',
+          context: `Platform: ${account.platform}`,
         });
       }
     }
@@ -155,9 +197,14 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: { code: PostErrorCode.PLATFORM_ERROR, message: errors.join('; ') },
+          error: {
+            code: PostErrorCode.PLATFORM_ERROR,
+            message: errors.join(', ') || 'Failed to publish to any platform',
+            timestamp: new Date(),
+          },
+          timestamp: new Date(),
         } as ApiResponse<null>,
-        { status: 400 }
+        { status: 500 }
       );
     }
 
@@ -167,7 +214,6 @@ export async function POST(
       data: {
         status: body.publishImmediately ? ContentStatus.POSTED : ContentStatus.SCHEDULED,
         postedAt: body.publishImmediately ? new Date() : undefined,
-        scheduledFor: body.scheduledFor,
       },
     });
 
@@ -178,18 +224,30 @@ export async function POST(
       publishedUrls,
       status: body.publishImmediately ? 'PUBLISHED' : 'SCHEDULED',
       publishedAt: body.publishImmediately ? new Date() : undefined,
-      scheduledFor: body.scheduledFor,
     };
 
-    return NextResponse.json({ success: true, data: response, timestamp: new Date() });
+    return NextResponse.json({
+      success: true,
+      data: response,
+      timestamp: new Date(),
+    } as ApiResponse<PublishPostResponse>);
   } catch (error) {
+    console.error('Error publishing post:', error);
     await SystemLogger.logError({
       message: `Error publishing post: ${error}`,
       source: 'POST /api/posts/[id]/publish',
     });
 
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to publish post' } } as ApiResponse<null>,
+      {
+        success: false,
+        error: {
+          code: PostErrorCode.PLATFORM_ERROR,
+          message: 'Failed to publish post',
+          timestamp: new Date(),
+        },
+        timestamp: new Date(),
+      } as ApiResponse<null>,
       { status: 500 }
     );
   }

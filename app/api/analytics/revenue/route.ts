@@ -3,10 +3,11 @@ import { calculateRevenueAttribution, getChannelROI, calculateMultiTouchAttribut
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
+import { EntitlementGuard } from '@/lib/guards/entitlement.guard';
 
 /**
- * GET /api/analytics/revenue/attribution
- * Get revenue attribution data for a business
+ * GET /api/analytics/revenue
+ * Get revenue attribution data for a business (requires advanced_analytics entitlement).
  */
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify access
+    // Verify workspace access
     const businessMember = await prisma.businessMember.findFirst({
       where: {
         businessId,
@@ -42,6 +43,12 @@ export async function GET(request: NextRequest) {
         { error: 'Access denied' },
         { status: 403 }
       );
+    }
+
+    // Enforce Advanced Analytics Entitlement
+    const featureError = await EntitlementGuard.requireFeature(businessId, 'advanced_analytics');
+    if (featureError) {
+      return featureError;
     }
 
     // Calculate revenue attribution

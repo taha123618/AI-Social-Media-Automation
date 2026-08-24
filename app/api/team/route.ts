@@ -3,6 +3,7 @@ import { apiHandler, parseBody } from '@/lib/api-utils';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 import { SystemLogger } from '@/features/system/services/logger.service';
+import { EntitlementGuard } from '@/lib/guards/entitlement.guard';
 
 export const GET = apiHandler(async (req, { businessId, user }) => {
   if (!businessId) {
@@ -39,6 +40,12 @@ export const POST = apiHandler(async (req, { businessId, user }) => {
     return NextResponse.json({ error: "Business ID required" }, { status: 400 });
   }
 
+  // 1. Enforce Team Collaboration Entitlement (requires Pro or Enterprise plan)
+  const featureError = await EntitlementGuard.requireFeature(businessId, 'team_collaboration');
+  if (featureError) {
+    return featureError;
+  }
+
   const body = await parseBody(req, inviteSchema);
 
   // Check user is admin/owner
@@ -65,17 +72,12 @@ export const POST = apiHandler(async (req, { businessId, user }) => {
   }
 
   // Check if already a member
-  const existing = await prisma.businessMember.findUnique({
-    where: {
-      userId_businessId: { userId: targetUser.id, businessId },
-    },
+  const existingMember = await prisma.businessMember.findUnique({
+    where: { userId_businessId: { userId: targetUser.id, businessId } },
   });
 
-  if (existing) {
-    return NextResponse.json(
-      { error: "User is already a member" },
-      { status: 400 }
-    );
+  if (existingMember) {
+    return NextResponse.json({ error: "User is already a member of this workspace" }, { status: 409 });
   }
 
   // Add member
@@ -86,16 +88,16 @@ export const POST = apiHandler(async (req, { businessId, user }) => {
       role: body.role,
     },
     include: {
-      user: { select: { id: true, email: true, name: true } },
+      user: { select: { id: true, email: true, name: true, image: true } },
     },
   });
 
   await SystemLogger.logActivity({
-    action: "TEAM_MEMBER_ADDED",
-    entity: "BusinessMember",
+    action: 'TEAM_MEMBER_INVITED',
+    entity: 'BusinessMember',
     entityId: member.id,
     userId: user.id,
-    details: { businessId, targetUserId: targetUser.id, role: body.role }
+    details: { invitedEmail: body.email, role: body.role, businessId },
   });
 
   return NextResponse.json(member, { status: 201 });
