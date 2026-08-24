@@ -1,0 +1,45 @@
+# Security Policy
+
+## 🛡️ Supported Versions
+
+The following versions of the AI Social Media Automation platform currently receive security updates and patches:
+
+| Version | Supported          | Security Patch Cadence |
+| ------- | ------------------ | ---------------------- |
+| 0.1.x   | :white_check_mark: | Active (Immediate)     |
+| < 0.1.0 | :x:                | Deprecated             |
+
+---
+
+## 🔒 Reporting a Vulnerability
+
+We take the security of our dual-engine SaaS application, multi-tenant data stores, and user workloads extremely seriously. If you discover a security vulnerability, we appreciate your responsible disclosure.
+
+### How to Report
+
+**Please DO NOT open a public GitHub issue for security vulnerabilities.**
+
+Instead, report vulnerabilities privately by emailing:
+📧 **security@example.com**
+
+Please include in your report:
+1. **Summary**: Description of the vulnerability and its potential impact.
+2. **Steps to Reproduce**: Detailed proof of concept or reproduction steps.
+3. **Affected Components**: File paths, routes, or API endpoints.
+4. **Suggested Remediation**: (Optional) Proposed patch or configuration fix.
+
+### Response SLA & Timelines
+
+- **Initial Response & Acknowledgment**: Within **24 hours**.
+- **Triage & Severity Classification**: Within **48 hours**.
+- **Patch Release & Security Advisory**: Within **7 days** for Critical/High vulnerabilities.
+
+---
+
+## 🛡️ Core Security Architecture & Standards
+
+1. **Multi-Tenant Scoping**: All Prisma database queries must enforce `businessId` filtering to guarantee tenant isolation.
+2. **Authentication & Password Hashing**: Powered by Better-Auth with bcrypt (12 rounds) and generic error responses to prevent account enumeration.
+3. **File Upload Hardening**: S3 uploads require binary magic byte verification (`SecurityService.validateMagicBytes`) and path traversal sanitization (`SecurityService.sanitizeFilename`).
+4. **Transport & HTTP Headers**: `HSTS` (1 year), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy`.
+5. **Continuous DevSecOps**: Automated Trivy container/filesystem scanning and TruffleHog secrets detection on every pull request.
