@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "social-automation.fullname" . }}-web-pdb
+  labels:
+    {{- include "social-automation.labels" . | nindent 4 }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      {{- include "social-automation.selectorLabels" . | nindent 6 }}
+      app: app-web
