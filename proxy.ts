@@ -119,31 +119,31 @@ export async function proxy(request: NextRequest) {
 
   // Protected User Routes check
   const PROTECTED_PREFIXES = [
-    "/dashboard/:path*",
-    "/contents/:path*",
-    "/schedule/:path*",
-    "/settings/:path*",
-    "/team/:path*",
-    "/workflow/:path*",
-    "/videos/:path*",
-    "/image/:path*",
-    "/gallery/:path*",
-    "/reviews/:path*",
-    "/analytics/:path*",
-    "/knowledge/:path*",
-    "/posts/:path*",
-    "/post-schedule/:path*",
-    "/social/:path*",
-    "/api/dashboard/:path*",
-    "/api/user/:path*",
-    "/api/contents/:path*",
-    "/api/schedule/:path*",
-    "/api/settings/:path*",
-    "/api/team/:path*",
-    "/api/workflow/:path*",
-    "/api/videos/:path*",
-    "/api/image/:path*",
-    "/api/gallery/:path*",
+    "/dashboard",
+    "/contents",
+    "/schedule",
+    "/settings",
+    "/team",
+    "/workflow",
+    "/videos",
+    "/image",
+    "/gallery",
+    "/reviews",
+    "/analytics",
+    "/knowledge",
+    "/posts",
+    "/post-schedule",
+    "/social",
+    "/api/dashboard",
+    "/api/user",
+    "/api/contents",
+    "/api/schedule",
+    "/api/settings",
+    "/api/team",
+    "/api/workflow",
+    "/api/videos",
+    "/api/image",
+    "/api/gallery",
   ];
 
   const isProtected = PROTECTED_PREFIXES.some(
@@ -164,7 +164,9 @@ export async function proxy(request: NextRequest) {
       }
 
       const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
+      // Prevent open-redirect vulnerabilities by validating the redirect path
+      const safeRedirect = pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/dashboard";
+      loginUrl.searchParams.set("redirect", safeRedirect);
       return NextResponse.redirect(loginUrl);
     }
 
@@ -195,4 +197,3 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|uploads).*)',
   ],
 };
-
