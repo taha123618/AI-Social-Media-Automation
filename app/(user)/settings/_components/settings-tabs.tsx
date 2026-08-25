@@ -13,6 +13,7 @@ import { useHasHydrated } from '@/hooks/use-has-hydrated';
 import { ServicesPanel } from './services-panel';
 import { PostingSchedule } from '@/features/scheduler/components/posting-schedule';
 import { CrmIntegrationPanel } from './crm-integration-panel';
+import { FeatureGate } from '@/components/billing/FeatureGate';
 
 interface SettingsTabsProps {
   userSettings: UserSettings | null;
@@ -89,7 +90,9 @@ export function SettingsTabs({ userSettings, businessSettings, businessId }: Set
               <BusinessSettingsPanel businessSettings={businessSettings} businessId={businessId} />
             )}
             {activeTab === 'api-keys' && (
-              <ApiKeysPanel businessId={businessId} />
+              <FeatureGate feature="api_access">
+                <ApiKeysPanel businessId={businessId} />
+              </FeatureGate>
             )}
             {activeTab === 'webhooks' && (
               <WebhooksPanel businessId={businessId} />
@@ -101,7 +104,9 @@ export function SettingsTabs({ userSettings, businessSettings, businessId }: Set
               <ServicesPanel businessId={businessId} />
             )}
             {activeTab === 'posting-schedule' && businessId && (
-              <PostingSchedule businessId={businessId} />
+              <FeatureGate feature="scheduling">
+                <PostingSchedule businessId={businessId} />
+              </FeatureGate>
             )}
             {activeTab === 'crm' && (
               <CrmIntegrationPanel businessId={businessId} />

@@ -31,3 +31,12 @@ export interface EntitlementCheckResult {
   limit?: number;
   currentUsage?: number;
 }
+
+export interface InvoiceRecord {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  date: string;
+  pdfUrl: string | null;
+}

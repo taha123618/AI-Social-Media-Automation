@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { SettingsService } from '@/features/settings/services/settings.service';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { EntitlementGuard } from '@/lib/guards/entitlement.guard';
 
 const createApiKeySchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -40,6 +41,12 @@ export async function GET(req: NextRequest) {
   try {
     const { businessId } = await getAuthContext(req);
 
+    // Enforce API Access Entitlement (requires Pro or Enterprise)
+    const featureError = await EntitlementGuard.requireFeature(businessId, 'api_access');
+    if (featureError) {
+      return featureError;
+    }
+
     const apiKeys = await SettingsService.getApiKeys(businessId);
 
     return NextResponse.json(apiKeys);
@@ -63,6 +70,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { businessId } = await getAuthContext(req);
+
+    // Enforce API Access Entitlement (requires Pro or Enterprise)
+    const featureError = await EntitlementGuard.requireFeature(businessId, 'api_access');
+    if (featureError) {
+      return featureError;
+    }
 
     const body = await req.json();
     const validatedData = createApiKeySchema.parse(body);

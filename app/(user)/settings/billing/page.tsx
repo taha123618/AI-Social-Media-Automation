@@ -4,19 +4,23 @@ import React, { useState, useEffect } from 'react';
 import { BusinessSubscriptionDetails } from '@/features/billing/types';
 import { PLANS } from '@/features/billing/config/plans.config';
 import { UsageLimitIndicator } from '@/components/billing/UsageLimitIndicator';
+import { useCurrentBusiness } from '@/hooks/use-current-business';
 import Link from 'next/link';
 
 export default function BillingSettingsPage() {
+  const { businessId, isLoading: isBusinessLoading } = useCurrentBusiness();
   const [details, setDetails] = useState<BusinessSubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [actionLoading, setActionLoading] = useState(false);
 
-  // In a multi-tenant app, businessId is resolved from context/session
-  const businessId = 'default_business_id';
-
   useEffect(() => {
     async function loadSubscription() {
+      if (!businessId) {
+        if (!isBusinessLoading) setLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(`/api/billing/subscription?businessId=${businessId}`);
         if (res.ok) {
@@ -30,9 +34,10 @@ export default function BillingSettingsPage() {
       }
     }
     loadSubscription();
-  }, [businessId]);
+  }, [businessId, isBusinessLoading]);
 
   const handleUpgrade = async (planId: 'starter' | 'pro') => {
+    if (!businessId) return;
     setActionLoading(true);
     try {
       const res = await fetch('/api/billing/checkout', {
@@ -48,8 +53,9 @@ export default function BillingSettingsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.checkoutUrl) {
-          window.location.href = data.checkoutUrl;
+        const checkoutUrl = data.checkoutUrl || data.url;
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
         }
       }
     } catch (err) {
@@ -60,6 +66,7 @@ export default function BillingSettingsPage() {
   };
 
   const handleManagePortal = async () => {
+    if (!businessId) return;
     setActionLoading(true);
     try {
       const res = await fetch('/api/billing/portal', {
@@ -83,7 +90,7 @@ export default function BillingSettingsPage() {
     }
   };
 
-  if (loading) {
+  if (loading || isBusinessLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
@@ -140,97 +147,147 @@ export default function BillingSettingsPage() {
             )}
           </div>
         </div>
+
+        {details && (
+          <div className="mt-6 border-t border-neutral-100 dark:border-neutral-800 pt-4 text-xs text-neutral-500 dark:text-neutral-400">
+            Current billing period ends on{' '}
+            <span className="font-semibold text-neutral-700 dark:text-neutral-300">
+              {new Date(details.currentPeriodEnd).toLocaleDateString()}
+            </span>
+            {details.cancelAtPeriodEnd && (
+              <span className="ml-2 text-amber-600 font-semibold">
+                (Cancels at period end)
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Usage Overview */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-          Monthly Feature Usage
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {details?.usage.map((u) => (
-            <UsageLimitIndicator
-              key={u.feature}
-              feature={u.feature}
-              label={u.feature.replace(/_/g, ' ').toUpperCase()}
-              used={u.used}
-              limit={u.limit}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Available Plans Upgrade Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-            Available Plans
+      {/* Quotas & Metered Usage */}
+      {details && details.usage.length > 0 && (
+        <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+            Monthly Quota & Usage Limits
           </h3>
-          <div className="flex items-center gap-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 p-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {details.usage.map((u) => (
+              <UsageLimitIndicator
+                key={u.feature}
+                feature={u.feature}
+                label={u.feature.replace(/_/g, ' ').toUpperCase()}
+                used={u.used}
+                limit={u.limit}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Plan Tiers Switcher */}
+      <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              Available Plans
+            </h3>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              Scale your social media and blog generation workflows as your team grows.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4 md:mt-0 bg-neutral-100 dark:bg-neutral-800 p-1 rounded-lg">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
                 billingCycle === 'monthly'
-                  ? 'bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 shadow-sm'
-                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'
+                  ? 'bg-white dark:bg-neutral-900 shadow text-neutral-900 dark:text-neutral-100'
+                  : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
               Monthly
             </button>
             <button
               onClick={() => setBillingCycle('annual')}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
                 billingCycle === 'annual'
-                  ? 'bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 shadow-sm'
-                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'
+                  ? 'bg-white dark:bg-neutral-900 shadow text-neutral-900 dark:text-neutral-100'
+                  : 'text-neutral-500 dark:text-neutral-400'
               }`}
             >
-              Annual (Save 20%)
+              Annual (Save ~20%)
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(['free', 'starter', 'pro'] as const).map((pid) => {
-            const plan = PLANS[pid];
-            const isCurrent = currentPlan.id === pid;
-            const price = billingCycle === 'annual' ? plan.pricing.annual : plan.pricing.monthly;
+          {(['free', 'starter', 'pro'] as const).map((planId) => {
+            const plan = PLANS[planId];
+            const isCurrent = currentPlan.id === planId;
+            const priceInDollars =
+              billingCycle === 'annual'
+                ? Math.round(plan.pricing.annual / 100)
+                : Math.round(plan.pricing.monthly / 100);
 
             return (
               <div
-                key={pid}
-                className={`rounded-xl border p-6 shadow-sm flex flex-col justify-between ${
+                key={planId}
+                className={`rounded-xl border p-6 flex flex-col justify-between ${
                   isCurrent
-                    ? 'border-indigo-600 bg-indigo-50/10'
-                    : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'
+                    ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50/20 dark:bg-indigo-950/20'
+                    : 'border-neutral-200 dark:border-neutral-800'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+                    <h4 className="text-base font-bold text-neutral-900 dark:text-neutral-100">
                       {plan.name}
                     </h4>
                     {isCurrent && (
-                      <span className="rounded-full bg-indigo-600/10 px-2.5 py-0.5 text-xs font-semibold text-indigo-600">
+                      <span className="text-xs font-semibold bg-indigo-600 text-white px-2 py-0.5 rounded-full">
                         Current
                       </span>
                     )}
                   </div>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-neutral-900 dark:text-neutral-100">
-                      ${price > 0 ? (price / 100).toFixed(0) : '0'}
+                    <span className="text-3xl font-black text-neutral-900 dark:text-neutral-100">
+                      ${priceInDollars}
                     </span>
-                    <span className="text-sm text-neutral-500 dark:text-neutral-400">/mo</span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      /{billingCycle === 'annual' ? 'mo billed annually' : 'month'}
+                    </span>
                   </div>
-                  <ul className="mt-6 space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
-                    {plan.highlights.map((h, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <svg className="h-4 w-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>{h}</span>
-                      </li>
-                    ))}
+                  <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                    {plan.description}
+                  </p>
+
+                  <ul className="mt-6 space-y-2 text-xs text-neutral-600 dark:text-neutral-300">
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      {plan.features.ai_posts === -1
+                        ? 'Unlimited'
+                        : plan.features.ai_posts}{' '}
+                      AI social posts / mo
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      {plan.features.ai_articles === -1
+                        ? 'Unlimited'
+                        : plan.features.ai_articles}{' '}
+                      AI blog articles / mo
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      {plan.features.article_word_limit === -1
+                        ? 'No word count limits'
+                        : `${plan.features.article_word_limit.toLocaleString()} max words / article`}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      {plan.features.brand_voice_profiles === -1
+                        ? 'Unlimited'
+                        : plan.features.brand_voice_profiles}{' '}
+                      Brand Voice profiles
+                    </li>
                   </ul>
                 </div>
 
@@ -238,22 +295,22 @@ export default function BillingSettingsPage() {
                   {isCurrent ? (
                     <button
                       disabled
-                      className="w-full rounded-lg bg-neutral-100 dark:bg-neutral-800 py-2 text-sm font-medium text-neutral-400 cursor-not-allowed"
+                      className="w-full rounded-lg bg-neutral-200 dark:bg-neutral-800 py-2 text-xs font-semibold text-neutral-500 cursor-not-allowed"
                     >
                       Current Plan
                     </button>
-                  ) : pid === 'free' ? (
+                  ) : planId === 'free' ? (
                     <button
                       disabled
-                      className="w-full rounded-lg border border-neutral-200 dark:border-neutral-800 py-2 text-sm font-medium text-neutral-500"
+                      className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 py-2 text-xs font-semibold text-neutral-500"
                     >
-                      Included
+                      Default Plan
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleUpgrade(pid as 'starter' | 'pro')}
+                      onClick={() => handleUpgrade(planId as 'starter' | 'pro')}
                       disabled={actionLoading}
-                      className="w-full rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700 transition"
+                      className="w-full rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white shadow hover:bg-indigo-700 transition disabled:opacity-50"
                     >
                       Upgrade to {plan.name}
                     </button>

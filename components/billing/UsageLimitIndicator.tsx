@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { FeatureKey } from '@/features/billing/config/plans.config';
+import { ArrowUpRight } from 'lucide-react';
 
 interface UsageLimitIndicatorProps {
   feature: FeatureKey;
@@ -26,7 +28,7 @@ export function UsageLimitIndicator({
     <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-sm">
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
-        <span className="text-neutral-500 dark:text-neutral-400 font-mono">
+        <span className="text-neutral-500 dark:text-neutral-400 font-mono text-xs">
           {isUnlimited ? (
             <span className="text-emerald-500 font-semibold">Unlimited</span>
           ) : (
@@ -51,9 +53,17 @@ export function UsageLimitIndicator({
       )}
 
       {isExhausted && (
-        <p className="mt-1 text-xs text-rose-500 font-medium">
-          Quota exhausted. Upgrade plan to generate more.
-        </p>
+        <div className="mt-2 flex items-center justify-between">
+          <p className="text-xs text-rose-500 font-medium">
+            Limit reached.
+          </p>
+          <Link
+            href="/settings/billing"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+          >
+            Upgrade Plan <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
       )}
     </div>
   );
