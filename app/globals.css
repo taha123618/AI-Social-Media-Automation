@@ -38,197 +38,130 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-sm: 0rem;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
+  --radius-2xl: 0rem;
+  --radius-3xl: 0rem;
+  --radius-4xl: 0rem;
 }
 
 :root {
-  --radius: 0.75rem;
-    --background: oklch(0.98 0.005 240);
-    --foreground: oklch(0.2 0.02 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 240);
-    --primary: oklch(0.5 0.2 250);
-    --primary-foreground: oklch(1 0 0);
-    --secondary: oklch(0.95 0.01 240);
-    --secondary-foreground: oklch(0.2 0.02 240);
-    --muted: oklch(0.95 0.01 240);
-    --muted-foreground: oklch(0.5 0.02 240);
-    --accent: oklch(0.95 0.01 240);
-    --accent-foreground: oklch(0.2 0.02 240);
-    --destructive: oklch(0.6 0.2 25);
-    --border: oklch(0.9 0.01 240);
-    --input: oklch(0.9 0.01 240);
-    --ring: oklch(0.5 0.2 250 / 30%);
-    --chart-1: oklch(0.6 0.2 250);
-    --chart-2: oklch(0.7 0.15 180);
-    --chart-3: oklch(0.5 0.1 270);
-    --chart-4: oklch(0.8 0.15 80);
-    --chart-5: oklch(0.7 0.15 50);
-    --sidebar: oklch(1 0 0);
-    --sidebar-foreground: oklch(0.2 0.02 240);
-    --sidebar-primary: oklch(0.5 0.2 250);
-    --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: oklch(0.95 0.02 240);
-    --sidebar-accent-foreground: oklch(0.5 0.2 250);
-    --sidebar-border: oklch(0.9 0.01 240);
-    --sidebar-ring: oklch(0.5 0.2 250 / 30%);
+  --radius: 0rem;
+  /* Tactical Command - Light / Default Reference */
+  --background: oklch(0.98 0.002 240);
+  --foreground: oklch(0.12 0.005 240);
+  --card: oklch(0.96 0.005 240);
+  --card-foreground: oklch(0.12 0.005 240);
+  --popover: oklch(0.96 0.005 240);
+  --popover-foreground: oklch(0.12 0.005 240);
+  --primary: oklch(0.85 0.24 128); /* Radioactive Lime */
+  --primary-foreground: oklch(0.08 0.005 240); /* Void Black */
+  --secondary: oklch(0.92 0.005 240);
+  --secondary-foreground: oklch(0.12 0.005 240);
+  --muted: oklch(0.92 0.005 240);
+  --muted-foreground: oklch(0.45 0.01 240);
+  --accent: oklch(0.92 0.005 240);
+  --accent-foreground: oklch(0.12 0.005 240);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.85 0.005 240);
+  --input: oklch(0.85 0.005 240);
+  --ring: oklch(0.85 0.24 128 / 60%);
+  --chart-1: oklch(0.85 0.24 128);
+  --chart-2: oklch(0.7 0.15 180);
+  --chart-3: oklch(0.65 0.15 250);
+  --chart-4: oklch(0.8 0.15 80);
+  --chart-5: oklch(0.6 0.2 25);
+  --sidebar: oklch(0.95 0.005 240);
+  --sidebar-foreground: oklch(0.12 0.005 240);
+  --sidebar-primary: oklch(0.85 0.24 128);
+  --sidebar-primary-foreground: oklch(0.08 0.005 240);
+  --sidebar-accent: oklch(0.9 0.005 240);
+  --sidebar-accent-foreground: oklch(0.12 0.005 240);
+  --sidebar-border: oklch(0.85 0.005 240);
+  --sidebar-ring: oklch(0.85 0.24 128 / 60%);
 }
 
 .dark {
-  --background: oklch(0.12 0.02 250);
-    --foreground: oklch(0.98 0.01 250);
-    --card: oklch(0.16 0.02 250);
-    --card-foreground: oklch(0.98 0.01 250);
-    --popover: oklch(0.16 0.02 250);
-    --popover-foreground: oklch(0.98 0.01 250);
-    --primary: oklch(0.6 0.2 250);
-    --primary-foreground: oklch(0.12 0.02 250);
-    --secondary: oklch(0.2 0.02 250);
-    --secondary-foreground: oklch(0.98 0.01 250);
-    --muted: oklch(0.2 0.02 250);
-    --muted-foreground: oklch(0.6 0.02 250);
-    --accent: oklch(0.2 0.02 250);
-    --accent-foreground: oklch(0.98 0.01 250);
-    --destructive: oklch(0.5 0.2 25);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.6 0.2 250 / 40%);
-    --chart-1: oklch(0.6 0.2 250);
-    --chart-2: oklch(0.7 0.15 180);
-    --chart-3: oklch(0.5 0.1 270);
-    --chart-4: oklch(0.8 0.15 80);
-    --chart-5: oklch(0.7 0.15 50);
-    --sidebar: oklch(0.14 0.02 250);
-    --sidebar-foreground: oklch(0.98 0.01 250);
-    --sidebar-primary: oklch(0.6 0.2 250);
-    --sidebar-primary-foreground: oklch(0.14 0.02 250);
-    --sidebar-accent: oklch(0.2 0.02 250);
-    --sidebar-accent-foreground: oklch(0.98 0.01 250);
-    --sidebar-border: oklch(1 0 0 / 8%);
-    --sidebar-ring: oklch(0.6 0.2 250 / 40%);
+  --radius: 0rem;
+  /* Tactical Command - Dark Mode OS Visual Hierarchy */
+  --background: oklch(0.09 0.005 240); /* Void Black #08090B */
+  --foreground: oklch(0.96 0.005 240); /* Crisp Titanium White */
+  --card: oklch(0.13 0.01 240); /* Dark Titanium #12151B */
+  --card-foreground: oklch(0.96 0.005 240);
+  --popover: oklch(0.13 0.01 240);
+  --popover-foreground: oklch(0.96 0.005 240);
+  --primary: oklch(0.88 0.26 128); /* Radioactive Lime #CCFF00 / #DFFF00 */
+  --primary-foreground: oklch(0.08 0.005 240); /* Void Black Text */
+  --secondary: oklch(0.17 0.012 240); /* Elevated Titanium Panel */
+  --secondary-foreground: oklch(0.96 0.005 240);
+  --muted: oklch(0.16 0.01 240);
+  --muted-foreground: oklch(0.65 0.01 240);
+  --accent: oklch(0.18 0.015 240);
+  --accent-foreground: oklch(0.96 0.005 240);
+  --destructive: oklch(0.55 0.22 25); /* Tactical Red */
+  --border: oklch(0.24 0.015 240); /* Steel Divider #262B35 */
+  --input: oklch(0.22 0.015 240);
+  --ring: oklch(0.88 0.26 128 / 60%); /* Radioactive Lime Focus Ring */
+  --chart-1: oklch(0.88 0.26 128); /* Lime */
+  --chart-2: oklch(0.72 0.15 190); /* Cyan Steel */
+  --chart-3: oklch(0.78 0.16 75); /* Amber */
+  --chart-4: oklch(0.6 0.2 25); /* Red Alert */
+  --chart-5: oklch(0.65 0.1 260); /* Cobalt */
+  --sidebar: oklch(0.11 0.008 240); /* Deep Titanium Sidebar */
+  --sidebar-foreground: oklch(0.96 0.005 240);
+  --sidebar-primary: oklch(0.88 0.26 128);
+  --sidebar-primary-foreground: oklch(0.08 0.005 240);
+  --sidebar-accent: oklch(0.16 0.012 240);
+  --sidebar-accent-foreground: oklch(0.96 0.005 240);
+  --sidebar-border: oklch(0.22 0.015 240);
+  --sidebar-ring: oklch(0.88 0.26 128 / 60%);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    border-radius: 0 !important;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Quantitative Data Monospace Typography */
+  .font-mono-data,
+  [data-mono="true"],
+  .tabular-nums {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 1s ease-out;
+  /* Tactical Panel & Industrial Border Utilities */
+  .tactical-panel {
+    @apply bg-card border border-border rounded-none shadow-none;
   }
 
-    .animate-scroll-x {
-      animation: scrollX 30s linear infinite;
-    }
-
-    .animate-float {
-      animation: float 6s ease-in-out infinite;
-    }
-
-  .animate-bounce-slow {
-    animation: bounceSlow 4s ease-in-out infinite;
+  .tactical-border {
+    border-color: var(--border);
   }
 
-  .mesh-gradient {
-    background: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(147, 51, 234, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.03) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(147, 51, 234, 0.03) 0px, transparent 50%);
+  .tactical-active {
+    @apply border-primary bg-primary/10 text-primary;
   }
 
-  .dark .mesh-gradient {
-    background: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(126, 34, 206, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.04) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(126, 34, 206, 0.04) 0px, transparent 50%);
+  .tactical-badge {
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider font-bold rounded-none border border-border;
   }
 
-  .glass-card {
-    @apply bg-background/80 backdrop-blur-xl border border-border shadow-2xl shadow-primary/5;
+  .dense-row {
+    @apply py-1.5 px-3 border-b border-border;
   }
 
-  .dark .glass-card {
-    @apply bg-card/40 backdrop-blur-2xl border border-white/5 shadow-2xl shadow-black/40;
+  .ml-13 {
+    margin-left: 3.25rem;
   }
-
-  .premium-border {
-    @apply border-transparent bg-clip-padding relative;
-  }
-
-  .premium-border::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(to bottom right, var(--border), transparent);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-                .ml-13 {
-                  margin-left: 3.25rem;
-                }
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(2rem);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-    @keyframes scrollX {
-      from {
-        transform: translateX(0);
-      }
-
-        to {
-          transform: translateX(-50%);
-        }
-        }
-
-    @keyframes float {
-
-    0%,
-      100% {
-        transform: translateY(0);
-      }
-
-        50% {
-          transform: translateY(-20px);
-        }
-        }
-
-    @keyframes bounceSlow {
-
-    0%,
-      100% {
-        transform: translateY(0);
-      }
-
-        50% {
-          transform: translateY(-10px);
-        }
-        }
 }

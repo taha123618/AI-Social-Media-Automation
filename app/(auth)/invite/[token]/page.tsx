@@ -20,13 +20,13 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (!invitation || invitation.acceptedAt || invitation.expiresAt < new Date()) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-          <h1 className="mb-4 text-2xl font-bold text-white">Invalid Invitation</h1>
-          <p className="mb-6 text-gray-400">
-            This invitation link is invalid, has expired, or has already been accepted.
+        <div className="w-full max-w-md rounded-none border border-border bg-card p-8 text-center font-mono">
+          <h1 className="mb-3 text-lg font-bold uppercase text-foreground">INVALID INVITATION</h1>
+          <p className="mb-6 text-xs text-muted-foreground">
+            This invitation dispatch is invalid, has expired, or has already been claimed.
           </p>
           <Link href="/">
-            <Button className="w-full">Return Home</Button>
+            <Button className="w-full text-xs font-bold uppercase">RETURN TO HOME</Button>
           </Link>
         </div>
       </div>
@@ -38,18 +38,18 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (!session?.user?.id) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-          <h1 className="mb-4 text-2xl font-bold text-white">Sign In Required</h1>
-          <p className="mb-6 text-gray-400">
-            You have been invited to join <strong>{invitation.business.name}</strong> as a <strong>{invitation.role}</strong>.
-            Please sign in or create an account to accept.
+        <div className="w-full max-w-md rounded-none border border-border bg-card p-8 text-center font-mono">
+          <h1 className="mb-3 text-lg font-bold uppercase text-foreground">OPERATOR AUTHENTICATION REQUIRED</h1>
+          <p className="mb-6 text-xs text-muted-foreground">
+            You have been invited to join <strong className="text-foreground">{invitation.business.name}</strong> with role <strong className="text-primary">{invitation.role}</strong>.
+            Authenticate to bind membership.
           </p>
           <div className="space-y-3">
-            <Link href="/login">
-              <Button className="w-full">Sign In</Button>
+            <Link href="/login" className="block">
+              <Button className="w-full text-xs font-bold uppercase">SIGN IN</Button>
             </Link>
-            <Link href="/register">
-              <Button variant="outline" className="w-full">Create Account</Button>
+            <Link href="/register" className="block">
+              <Button variant="outline" className="w-full text-xs font-bold uppercase">CREATE ACCOUNT</Button>
             </Link>
           </div>
         </div>
@@ -57,29 +57,25 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     );
   }
 
-  // Handle form submission to server action
   async function acceptInviteAction() {
     'use server';
     const result = await acceptTeamInvitation(token);
     if (result.success) {
       redirect('/team');
     }
-    // We could handle errors here, but for simplicity, the page will just redirect
-    // or we can just redirect in the action. Let's redirect in the action directly
-    // but action is called via form.
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-        <h1 className="mb-4 text-2xl font-bold text-white">Join Workspace</h1>
-        <p className="mb-6 text-gray-400">
-          <strong>{invitation.invitedBy.name}</strong> has invited you to join <strong>{invitation.business.name}</strong> as a <strong>{invitation.role}</strong>.
+      <div className="w-full max-w-md rounded-none border border-border bg-card p-8 text-center font-mono">
+        <h1 className="mb-3 text-lg font-bold uppercase text-foreground">WORKSPACE CLEARANCE INVITATION</h1>
+        <p className="mb-6 text-xs text-muted-foreground leading-relaxed">
+          <strong className="text-foreground">{invitation.invitedBy.name}</strong> has invited you to join <strong className="text-foreground">{invitation.business.name}</strong> as <strong className="text-primary">{invitation.role}</strong>.
         </p>
 
         <form action={acceptInviteAction}>
-          <Button type="submit" className="w-full">
-            Accept Invitation
+          <Button type="submit" className="w-full text-xs font-bold uppercase">
+            ACCEPT FLEET CLEARANCE
           </Button>
         </form>
       </div>

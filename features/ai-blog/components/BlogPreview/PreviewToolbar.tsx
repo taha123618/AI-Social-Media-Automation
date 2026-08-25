@@ -53,15 +53,15 @@ export function PreviewToolbar({
   const [showAspectDropdown, setShowAspectDropdown] = useState(false);
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-card border border-border rounded-xl">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-card border border-border rounded-none">
       <div className="flex items-center gap-2">
         <ImageIcon className="h-4 w-4 text-primary" />
-        <span className="text-xs font-bold text-foreground uppercase tracking-wider">Preview</span>
+        <span className="text-xs font-mono font-bold text-foreground uppercase tracking-wider">PREVIEW CANVAS</span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto font-mono">
         {/* Device switcher */}
-        <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg">
+        <div className="flex items-center gap-1 bg-secondary p-0.5 rounded-none border border-border">
           {([
             { id: "mobile" as const, icon: Smartphone, label: "Mobile" },
             { id: "tablet" as const, icon: Tablet, label: "Tablet" },
@@ -70,15 +70,15 @@ export function PreviewToolbar({
             <button
               key={id}
               onClick={() => onDeviceChange(id)}
-              className={`flex items-center gap-1 px-2 py-1.5 rounded-md transition-all text-xs ${
+              className={`flex items-center gap-1 px-2 py-1 rounded-none transition-none text-xs ${
                 device === id
-                  ? "bg-background text-foreground shadow-sm font-semibold"
+                  ? "bg-primary text-primary-foreground font-bold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               title={label}
             >
-              <Icon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{label}</span>
+              <Icon className="h-3 w-3" />
+              <span className="hidden sm:inline uppercase text-[10px]">{label}</span>
             </button>
           ))}
         </div>
@@ -94,17 +94,17 @@ export function PreviewToolbar({
               onChange={(e) => onToggleImages(e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-8 h-4.5 rounded-full bg-muted peer-checked:bg-primary/30 transition-colors">
+            <div className="w-7 h-4 rounded-none bg-secondary border border-border peer-checked:bg-primary/20 transition-none">
               <div
-                className={`w-3.5 h-3.5 rounded-full bg-muted-foreground transition-all absolute top-0.5 ${
-                  enableImages ? "left-[18px] bg-primary" : "left-0.5"
+                className={`w-3 h-3 rounded-none bg-muted-foreground transition-none absolute top-0.5 ${
+                  enableImages ? "left-3.5 bg-primary" : "left-0.5"
                 }`}
               />
             </div>
           </div>
           <div className="flex items-center gap-1.5">
             <ImageIcon className={`h-3.5 w-3.5 ${enableImages ? "text-primary" : "text-muted-foreground"}`} />
-            <span className="text-xs font-medium text-foreground hidden sm:inline">Images</span>
+            <span className="text-xs font-mono font-medium text-foreground hidden sm:inline uppercase">IMAGES</span>
           </div>
         </label>
 
@@ -113,16 +113,16 @@ export function PreviewToolbar({
           <div className="relative">
             <button
               onClick={() => setShowAspectDropdown(!showAspectDropdown)}
-              className="flex items-center gap-1 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              className="flex items-center gap-1 px-2 py-1 rounded-none border border-border text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-secondary transition-none"
               title="Aspect ratio"
             >
               <Crop className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline text-[10px]">{aspectRatio}</span>
+              <span className="hidden sm:inline text-[10px] uppercase">{aspectRatio}</span>
             </button>
             {showAspectDropdown && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowAspectDropdown(false)} />
-                <div className="absolute right-0 top-full mt-1 z-20 bg-popover border border-border rounded-lg shadow-lg p-1 min-w-[100px]">
+                <div className="absolute right-0 top-full mt-1 z-20 bg-card border border-border rounded-none shadow-none p-1 min-w-[100px] font-mono">
                   {ASPECT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
@@ -130,10 +130,10 @@ export function PreviewToolbar({
                         onAspectRatioChange(opt.value);
                         setShowAspectDropdown(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 text-xs rounded-md transition-colors ${
+                      className={`w-full text-left px-2.5 py-1 text-xs rounded-none transition-none ${
                         aspectRatio === opt.value
-                          ? "bg-primary/10 text-primary font-semibold"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          ? "bg-primary text-primary-foreground font-bold"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
                       {opt.label}

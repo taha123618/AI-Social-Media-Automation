@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Sparkles, BookOpen, Search, Filter, Loader2, FileSpreadsheet } from "lucide-react";
+import { Plus, Sparkles, BookOpen, Search, Filter, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { BlogArticleCard } from "./BlogArticleCard";
@@ -89,51 +89,53 @@ export default function BlogDashboard() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <BookOpen className="h-7 w-7 sm:h-8 sm:w-8 text-blue-500" />
-            AI Blog Writer
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">
-            Create and manage high-ranking, SEO-optimized articles with our structured writing wizard.
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <h1 className="text-sm font-mono font-bold uppercase text-foreground">
+              AI BLOG WRITER CMS
+            </h1>
+          </div>
+          <p className="text-xs font-mono text-muted-foreground mt-1">
+            Autonomous multi-agent research, Gutenberg export, and SEO optimization.
           </p>
         </div>
 
         <Link href="/blog/new" className="w-full sm:w-auto">
-          <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10">
-            <Plus className="h-4 w-4" />
-            New Article
+          <Button size="sm" className="w-full sm:w-auto font-mono text-xs uppercase flex items-center justify-center gap-2">
+            <Plus className="h-3.5 w-3.5" />
+            SYNTHESIZE NEW ARTICLE
           </Button>
         </Link>
       </div>
 
       {/* Filter and Search Panel */}
-      <div className="flex flex-col lg:flex-row gap-4 lg:items-center justify-between bg-slate-100 dark:bg-slate-900/20 p-4 rounded-xl border border-slate-200 dark:border-slate-900">
+      <div className="flex flex-col lg:flex-row gap-3 lg:items-center justify-between bg-card p-3 rounded-none border border-border">
         <div className="relative w-full lg:max-w-xs">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search articles..."
+            placeholder="Search article vector..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 focus:border-blue-500 dark:focus:border-slate-700 focus:ring-blue-500 dark:focus:ring-slate-700"
+            className="pl-8"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0 scrollbar-hide">
-          <Filter className="h-4 w-4 text-slate-500 shrink-0" />
+        <div className="flex items-center gap-1.5 w-full lg:w-auto overflow-x-auto">
+          <Filter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           {["ALL", "DRAFT", "GENERATING", "REVIEW", "PUBLISHED"].map((status) => (
             <Button
               key={status}
               size="sm"
-              variant={filterStatus === status ? "secondary" : "ghost"}
+              variant={filterStatus === status ? "default" : "ghost"}
               onClick={() => setFilterStatus(status)}
-              className={`rounded-lg text-[10px] sm:text-xs font-semibold uppercase whitespace-nowrap ${
+              className={`rounded-none text-[10px] font-mono font-bold uppercase ${
                 filterStatus === status 
-                  ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-white shadow-sm" 
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800"
+                  ? "bg-primary text-primary-foreground" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
               }`}
             >
               {status}
@@ -144,31 +146,35 @@ export default function BlogDashboard() {
 
       {/* Content Section */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
-          <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Retrieving blog articles...</p>
+        <div className="flex flex-col items-center justify-center min-h-[250px] gap-2 border border-border bg-card">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+          <p className="text-xs font-mono text-muted-foreground">Retrieving article repository...</p>
         </div>
       ) : filteredArticles.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/10 p-8 sm:p-12 text-center max-w-xl mx-auto mt-8">
-          <Sparkles className="h-10 w-10 text-slate-400 dark:text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-300">No articles found</h3>
-          <p className="text-slate-600 dark:text-slate-500 mt-2 text-sm">
+        <div className="rounded-none border border-dashed border-border bg-card p-8 text-center max-w-lg mx-auto">
+          <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
+          <h3 className="text-xs font-mono font-bold uppercase text-foreground">NO ARTICLES LOCATED</h3>
+          <p className="text-xs font-mono text-muted-foreground mt-1">
             {search || filterStatus !== "ALL"
-              ? "Try adjusting your search query or status filter."
-              : "Generate your first SEO-optimized long-form article using our outline wizard."}
+              ? "Adjust query filter parameters."
+              : "Generate an SEO-optimized long-form article using our multi-agent wizard."}
           </p>
           {!search && filterStatus === "ALL" && (
-            <Link href="/blog/new" className="inline-block mt-6">
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white shadow-md">
-                Get Started
+            <Link href="/blog/new" className="inline-block mt-4">
+              <Button size="sm" className="font-mono text-xs uppercase">
+                INITIALIZE OUTLINE
               </Button>
             </Link>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredArticles.map((article) => (
-            <BlogArticleCard key={article.id} article={article} onDelete={handleDelete} />
+            <BlogArticleCard
+              key={article.id}
+              article={article}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       )}

@@ -25,27 +25,29 @@ export function UsageLimitIndicator({
   const isExhausted = !isUnlimited && used >= limit;
 
   return (
-    <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-sm">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
-        <span className="text-neutral-500 dark:text-neutral-400 font-mono text-xs">
+    <div className="rounded-none border border-border bg-card p-3.5 shadow-none">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-mono uppercase font-bold text-foreground tracking-wider">{label}</span>
+        <span className="font-mono text-xs font-bold">
           {isUnlimited ? (
-            <span className="text-emerald-500 font-semibold">Unlimited</span>
+            <span className="text-primary uppercase">UNLIMITED</span>
           ) : (
-            `${used} / ${limit}`
+            <span className="text-muted-foreground">
+              <strong className="text-foreground">{used}</strong> / {limit} <span className="text-[10px] text-muted-foreground">({percentage}%)</span>
+            </span>
           )}
         </span>
       </div>
 
       {!isUnlimited && (
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-none bg-secondary border border-border">
           <div
-            className={`h-full transition-all duration-300 ${
+            className={`h-full transition-none ${
               isExhausted
-                ? 'bg-rose-500'
+                ? 'bg-destructive'
                 : isNearLimit
-                ? 'bg-amber-500'
-                : 'bg-indigo-600'
+                ? 'bg-amber-400'
+                : 'bg-primary'
             }`}
             style={{ width: `${percentage}%` }}
           />
@@ -53,15 +55,15 @@ export function UsageLimitIndicator({
       )}
 
       {isExhausted && (
-        <div className="mt-2 flex items-center justify-between">
-          <p className="text-xs text-rose-500 font-medium">
-            Limit reached.
+        <div className="mt-2 flex items-center justify-between pt-1 border-t border-border">
+          <p className="text-[11px] font-mono text-destructive font-bold uppercase tracking-wider">
+            QUOTA EXHAUSTED
           </p>
           <Link
             href="/settings/billing"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-wider text-primary hover:underline"
           >
-            Upgrade Plan <ArrowUpRight className="h-3 w-3" />
+            UPGRADE TIER <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
       )}

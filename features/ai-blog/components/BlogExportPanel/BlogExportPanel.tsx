@@ -269,43 +269,42 @@ export const BlogExportPanel = forwardRef(function BlogExportPanel(
       </div>
 
       {/* Quick Copy */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600/10 to-blue-800/5 p-5 rounded-xl border border-blue-500/20">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+      <div className="relative overflow-hidden bg-card p-4 rounded-none border border-border">
         <div className="relative flex items-center gap-2 mb-3">
-          <div className="p-1.5 rounded-lg bg-blue-500/15 text-blue-400">
+          <div className="p-1 rounded-none bg-secondary text-primary">
             <ClipboardList className="h-3.5 w-3.5" />
           </div>
-          <h3 className="text-xs font-bold text-blue-300 uppercase tracking-wider">
-            Quick Copy
+          <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-wider">
+            QUICK DISPATCH COPY
           </h3>
         </div>
         <Button
           onClick={handleCopy}
           disabled={exporting === "copy"}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold text-sm h-11 shadow-lg shadow-blue-600/20 transition-all duration-200"
+          className="w-full font-mono text-xs uppercase h-10"
         >
           {exporting === "copy" ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
           ) : copied ? (
-            <Check className="h-4 w-4 mr-2" />
+            <Check className="h-3.5 w-3.5 mr-2" />
           ) : (
-            <Copy className="h-4 w-4 mr-2" />
+            <Copy className="h-3.5 w-3.5 mr-2" />
           )}
-          {copied ? "Copied!" : exporting === "copy" ? "Copying..." : "Copy with Formatting"}
+          {copied ? "COPIED TO BUFFER" : exporting === "copy" ? "SERIALIZING..." : "COPY WITH GUTENBERG FORMAT"}
         </Button>
-        <p className="text-[10px] text-blue-300/50 mt-2 text-center">
-          Preserves headings, lists, tables, code blocks, images, and typography — paste into any CMS or editor
+        <p className="text-[10px] font-mono text-muted-foreground mt-2 text-center">
+          Preserves headings, lists, tables, code blocks, images, and HTML comments for direct CMS ingestion.
         </p>
       </div>
 
       {/* Download Formats */}
-      <div className="bg-slate-900/30 p-5 rounded-xl border border-slate-800">
+      <div className="bg-card p-4 rounded-none border border-border">
         <div className="flex items-center gap-2 mb-3">
-          <div className="p-1.5 rounded-lg bg-slate-800 text-slate-400">
+          <div className="p-1 rounded-none bg-secondary text-primary">
             <FileDown className="h-3.5 w-3.5" />
           </div>
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Download File
+          <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-wider">
+            FILE EXPORT REPOSITORY
           </h3>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -313,12 +312,12 @@ export const BlogExportPanel = forwardRef(function BlogExportPanel(
             variant="outline"
             onClick={() => handleExportFile("html")}
             disabled={exporting === "html"}
-            className="border-slate-700/50 bg-slate-900/50 text-slate-300 hover:text-white hover:border-slate-600 text-xs h-10 transition-all"
+            className="border-border bg-secondary/40 text-foreground hover:bg-secondary font-mono text-xs h-9"
           >
             {exporting === "html" ? (
               <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
             ) : (
-              <FileText className="h-3.5 w-3.5 mr-1.5" />
+              <FileText className="h-3.5 w-3.5 mr-1.5 text-primary" />
             )}
             HTML
           </Button>
@@ -326,25 +325,25 @@ export const BlogExportPanel = forwardRef(function BlogExportPanel(
             variant="outline"
             onClick={() => handleExportFile("markdown")}
             disabled={exporting === "markdown"}
-            className="border-slate-700/50 bg-slate-900/50 text-slate-300 hover:text-white hover:border-slate-600 text-xs h-10 transition-all"
+            className="border-border bg-secondary/40 text-foreground hover:bg-secondary font-mono text-xs h-9"
           >
             {exporting === "markdown" ? (
               <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
             ) : (
-              <FileType className="h-3.5 w-3.5 mr-1.5" />
+              <FileType className="h-3.5 w-3.5 mr-1.5 text-primary" />
             )}
-            Markdown
+            MARKDOWN
           </Button>
           <Button
             variant="outline"
             onClick={handleExportPDF}
             disabled={exporting === "pdf"}
-            className="border-slate-700/50 bg-slate-900/50 text-slate-300 hover:text-white hover:border-slate-600 text-xs h-10 transition-all"
+            className="border-border bg-secondary/40 text-foreground hover:bg-secondary font-mono text-xs h-9"
           >
             {exporting === "pdf" ? (
               <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
             ) : (
-              <Download className="h-3.5 w-3.5 mr-1.5" />
+              <Download className="h-3.5 w-3.5 mr-1.5 text-primary" />
             )}
             PDF
           </Button>
@@ -352,26 +351,26 @@ export const BlogExportPanel = forwardRef(function BlogExportPanel(
             variant="outline"
             onClick={handleExportDOCX}
             disabled={exporting === "docx"}
-            className="border-slate-700/50 bg-slate-900/50 text-slate-300 hover:text-white hover:border-slate-600 text-xs h-10 transition-all"
+            className="border-border bg-secondary/40 text-foreground hover:bg-secondary font-mono text-xs h-9"
           >
             {exporting === "docx" ? (
               <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
             ) : (
-              <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5" />
+              <FileSpreadsheet className="h-3.5 w-3.5 mr-1.5 text-primary" />
             )}
-            Word
+            DOCX
           </Button>
         </div>
       </div>
 
       {/* Platform-specific exports */}
-      <div className="bg-slate-900/30 p-5 rounded-xl border border-slate-800">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-slate-800 text-slate-400">
+      <div className="bg-card p-4 rounded-none border border-border">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1 rounded-none bg-secondary text-primary">
             <Share2 className="h-3.5 w-3.5" />
           </div>
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Export for Platform
+          <h3 className="text-xs font-mono font-bold text-foreground uppercase tracking-wider">
+            DIRECT CMS INTEGRATION
           </h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -380,21 +379,20 @@ export const BlogExportPanel = forwardRef(function BlogExportPanel(
               key={platform.label}
               onClick={platform.onClick}
               disabled={!!exporting}
-              className="group flex items-center gap-3 p-3 rounded-lg border border-slate-800/50 bg-slate-900/20
-                hover:bg-slate-800/40 hover:border-slate-700/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-left"
+              className="group flex items-center gap-2.5 p-2.5 rounded-none border border-border bg-secondary/30
+                hover:bg-secondary hover:border-primary/50 transition-none disabled:opacity-50 disabled:cursor-not-allowed text-left font-mono"
             >
-              <div className="p-2 rounded-lg bg-slate-800/50 text-slate-400 group-hover:text-slate-300 group-hover:bg-slate-700/50 transition-colors shrink-0">
-                <platform.icon className="h-4 w-4" />
+              <div className="p-1.5 rounded-none bg-secondary text-primary shrink-0 border border-border">
+                <platform.icon className="h-3.5 w-3.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">
+                <div className="text-xs font-bold uppercase text-foreground">
                   {platform.label}
                 </div>
-                <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                <div className="text-[10px] text-muted-foreground truncate">
                   {platform.desc}
                 </div>
               </div>
-              <ArrowRight className="h-3.5 w-3.5 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0" />
             </button>
           ))}
         </div>

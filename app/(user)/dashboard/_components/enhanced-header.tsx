@@ -1,11 +1,11 @@
 'use client';
 
 import { useSession } from '@/lib/auth-client';
-import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Heart, Zap, TrendingUp, Shield, Sparkles } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/use-dashboard-stats';
 import { useCurrentBusiness } from '@/hooks/use-current-business';
+import { Badge } from '@/components/ui/badge';
 
 export function EnhancedDashboardHeader() {
    const { data: session } = useSession();
@@ -13,18 +13,16 @@ export function EnhancedDashboardHeader() {
 
    useEffect(() => {
       setCurrentDate(new Date().toLocaleDateString('en-US', {
-         weekday: 'long',
+         weekday: 'short',
          year: 'numeric',
-         month: 'long',
+         month: 'short',
          day: 'numeric'
-      }));
+      }).toUpperCase());
    }, []);
 
-   // Use React Query for dashboard stats
    const { businessId } = useCurrentBusiness();
-   const { data: dashboardData, isLoading } = useDashboardStats(businessId);
+   const { data: dashboardData } = useDashboardStats(businessId);
 
-   // Dynamic brand health data
    const brandHealth = {
       score: dashboardData?.brandHealth?.score || 0,
       engagement: dashboardData?.brandHealth?.engagement || 0,
@@ -32,151 +30,114 @@ export function EnhancedDashboardHeader() {
       reach: dashboardData?.brandHealth?.reach || 0
    };
 
-   const getHealthColor = (score: number) => {
-      if (score >= 80) return 'text-green-600 bg-green-50 dark:bg-green-900/20';
-      if (score >= 60) return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20';
-      return 'text-red-600 bg-red-50 dark:bg-red-900/20';
-   };
-
    const healthMetrics = [
-      { label: 'Engagement', value: brandHealth.engagement, icon: <Zap className="h-4 w-4" /> },
-      { label: 'Consistency', value: brandHealth.consistency, icon: <Shield className="h-4 w-4" /> },
-      { label: 'Reach', value: brandHealth.reach, icon: <TrendingUp className="h-4 w-4" /> }
+      { label: 'ENGAGEMENT', value: brandHealth.engagement, icon: <Zap className="h-3.5 w-3.5" /> },
+      { label: 'CONSISTENCY', value: brandHealth.consistency, icon: <Shield className="h-3.5 w-3.5" /> },
+      { label: 'REACH', value: brandHealth.reach, icon: <TrendingUp className="h-3.5 w-3.5" /> }
    ];
 
-   // Dynamic stats derived from React Query data
    const stats = [
       {
-         label: 'Content Generated',
+         label: 'CONTENT DRAFTS',
          value: dashboardData?.metrics?.find((m: { label: string; value: string }) => m.label === 'Content Drafts')?.value || '0',
-         change: 'Drafts',
-         icon: <Sparkles className="h-5 w-5" />,
-         color: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+         change: 'READY',
+         icon: <Sparkles className="h-4 w-4 text-primary" />,
       },
       {
-         label: 'Active Automations',
+         label: 'ACTIVE AGENTS',
          value: String(dashboardData?.workflowStats?.active || 0),
-         change: 'Running',
-         icon: <TrendingUp className="h-5 w-5" />,
-         color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+         change: 'RUNNING',
+         icon: <TrendingUp className="h-4 w-4 text-primary" />,
       },
       {
-         label: 'Automation Success',
+         label: 'AUTOMATION SUCCESS',
          value: dashboardData?.workflowStats?.successRate || '100%',
-         change: 'Last 100',
-         icon: <Zap className="h-5 w-5" />,
-         color: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
+         change: 'TELEMETRY',
+         icon: <Zap className="h-4 w-4 text-primary" />,
       },
       {
-         label: 'Engagement Rate',
+         label: 'ENGAGEMENT RATE',
          value: dashboardData?.metrics?.find((m: { label: string; value: string }) => m.label === 'Engagement Rate')?.value || '0%',
-         change: 'Weekly',
-         icon: <Heart className="h-5 w-5" />,
-         color: 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
+         change: 'WEEKLY',
+         icon: <Heart className="h-4 w-4 text-primary" />,
       }
    ];
 
    return (
-      <div className="space-y-8">
-         <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-200/60 dark:border-slate-800/60 pb-10"
-         >
-            <div className="relative">
-               {/* Abstract Decorative Element */}
-               <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1 h-16 bg-linear-to-b from-blue-600 to-purple-600 rounded-full hidden md:block" />
-
-               <div className="flex items-center gap-3 mb-3">
-                  <div className="flex -space-x-2">
-                     <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                     <div className="h-2 w-2 rounded-full bg-purple-500 animate-pulse [animation-delay:0.2s]" />
-                     <div className="h-2 w-2 rounded-full bg-pink-500 animate-pulse [animation-delay:0.4s]" />
-                  </div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-600/80 dark:text-blue-400/80">
-                     {currentDate}
+      <div className="space-y-4">
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
+            <div>
+               <div className="flex items-center gap-2 mb-1">
+                  <div className="h-1.5 w-1.5 rounded-none bg-primary" />
+                  <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">
+                     SYSTEM ONLINE // {currentDate}
                   </p>
                </div>
 
-               <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
-                  Welcome back, <br className="md:hidden" />
-                  <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 animate-gradient-x underline decoration-blue-500/20 underline-offset-8">
-                     {session?.user?.name?.split(' ')[0] || 'User'}
-                  </span>
+               <h2 className="text-xl md:text-2xl font-mono font-black uppercase tracking-tight text-foreground">
+                  OPERATOR: <span className="text-primary">{session?.user?.name || 'ADMIN'}</span>
                </h2>
 
-               <p className="mt-5 text-lg text-slate-600 dark:text-slate-400 max-w-2xl font-bold leading-relaxed">
-                  Your social presence is <span className="text-slate-900 dark:text-white border-b-2 border-yellow-400/30">extraordinary</span> today. <br className="hidden sm:block" />
-                  Ready to create something <span className="italic text-blue-600 dark:text-blue-400">legendary</span>?
+               <p className="mt-1 text-xs font-mono text-muted-foreground">
+                  Operational marketing pipelines and autonomous growth loops synchronized.
                </p>
             </div>
 
-            {/* Brand Health Score */}
-            <motion.div
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               transition={{ delay: 0.2 }}
-               className="flex items-center gap-6 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg"
-            >
+            {/* Tactical Telemetry Metric Score */}
+            <div className="flex items-center gap-4 bg-card rounded-none p-3.5 border border-border">
                <div className="flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-2xl bg-linear-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
-                     <Heart className="h-7 w-7" />
+                  <div className="h-10 w-10 rounded-none bg-secondary border border-border flex items-center justify-center text-primary font-mono font-bold text-xs">
+                     <Heart className="h-5 w-5" />
                   </div>
                   <div>
-                     <div className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Brand Health</div>
-                     <div className={`text-2xl font-black ${getHealthColor(brandHealth.score)}`}>
+                     <div className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider">HEALTH SCORE</div>
+                     <div className="text-xl font-mono font-black text-primary">
                         {brandHealth.score}%
                      </div>
                   </div>
                </div>
 
-               <div className="h-8 w-px bg-slate-200 dark:bg-slate-800" />
+               <div className="h-8 w-px bg-border" />
 
-               <div className="flex items-center gap-4">
+               <div className="flex items-center gap-3">
                   {healthMetrics.map((metric, idx) => (
-                     <div key={idx} className="text-center">
-                        <div className="flex items-center gap-1.5 mb-1">
-                           <span className={`p-1.5 rounded-lg ${getHealthColor(metric.value)}`}>
+                     <div key={idx} className="text-center font-mono">
+                        <div className="flex items-center gap-1 mb-0.5 justify-center">
+                           <span className="text-muted-foreground">
                               {metric.icon}
                            </span>
-                           <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{metric.label}</span>
+                           <span className="text-[9px] font-bold text-muted-foreground">{metric.label}</span>
                         </div>
-                        <div className={`text-sm font-black ${getHealthColor(metric.value)}`}>
+                        <div className="text-xs font-black text-foreground">
                            {metric.value}%
                         </div>
                      </div>
                   ))}
                </div>
-            </motion.div>
-         </motion.div>
+            </div>
+         </div>
 
          {/* Quick Stats Overview */}
-         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-         >
-            {stats.map((stat: { label: string; value: string; change: string; icon: React.ReactNode; color: string }, idx: number) => (
-               <div key={idx} className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                     <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${stat.color}`}>
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {stats.map((stat, idx) => (
+               <div key={idx} className="bg-card rounded-none p-3.5 border border-border transition-none">
+                  <div className="flex items-center justify-between mb-2">
+                     <div className="h-7 w-7 rounded-none bg-secondary border border-border flex items-center justify-center">
                         {stat.icon}
                      </div>
-                     <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg">
+                     <Badge variant="lime">
                         {stat.change}
-                     </span>
+                     </Badge>
                   </div>
-                  <div className="text-2xl font-black text-slate-900 dark:text-white mb-1">
+                  <div className="text-xl font-mono font-black text-foreground mb-0.5">
                      {stat.value}
                   </div>
-                  <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
                      {stat.label}
                   </div>
                </div>
             ))}
-         </motion.div>
+         </div>
       </div>
    );
 }

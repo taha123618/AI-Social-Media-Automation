@@ -17,9 +17,10 @@ import { DashboardNewContentButton, DashboardQuickActions, DashboardEmptyState, 
 import AiGenerator from './_components/ai-generator';
 import { headers } from 'next/headers';
 import { getActiveWorkspaceId } from '@/app/(user)/actions/workspace';
-import { AnimatePresence } from 'framer-motion';
 import { BillingService } from '@/features/billing/services/billing.service';
 import { UsageLimitIndicator } from '@/components/billing/UsageLimitIndicator';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface DashboardPageProps {
    searchParams: Promise<{ search?: string; businessId?: string }>;
@@ -64,35 +65,35 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
    return (
       <div className="relative min-h-screen">
-         <main className="mx-auto max-w-7xl">
+         <main className="mx-auto max-w-7xl space-y-6">
 
             <EnhancedDashboardHeader />
 
             {/* Plan & Usage Summary Bar */}
             {subscriptionDetails && (
-               <div className="mb-8 rounded-2xl border border-slate-200/80 bg-white/60 p-6 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/60 shadow-sm">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-4">
-                     <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+               <div className="rounded-none border border-border bg-card p-4 shadow-none">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-border pb-3 mb-3">
+                     <div className="flex items-center gap-2.5">
+                        <div className="h-7 w-7 rounded-none bg-primary text-primary-foreground border border-primary font-mono font-bold text-xs flex items-center justify-center">
                            {subscriptionDetails.plan.name.charAt(0)}
-                        </span>
+                        </div>
                         <div>
-                           <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                              {subscriptionDetails.plan.name} Plan Quotas
+                           <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+                              {subscriptionDetails.plan.name} QUOTAS // <span className="text-primary font-normal">TELEMETRY</span>
                            </h4>
-                           <p className="text-xs text-slate-500 dark:text-slate-400">
-                              Active billing period resets on {new Date(subscriptionDetails.currentPeriodEnd).toLocaleDateString()}
+                           <p className="text-[10px] font-mono text-muted-foreground">
+                              Period resets on {new Date(subscriptionDetails.currentPeriodEnd).toLocaleDateString()}
                            </p>
                         </div>
                      </div>
                      <Link
                         href="/settings/billing"
-                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        className="text-xs font-mono font-bold uppercase tracking-wider text-primary hover:underline"
                      >
-                        Manage Subscription →
+                        MANAGE TIER →
                      </Link>
                   </div>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                      {postsUsage && (
                         <UsageLimitIndicator
                            feature="ai_posts"
@@ -121,37 +122,34 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
                   {/* Free Plan Quota Exhaustion -> Paid Plans Upgrade Offer */}
                   {isQuotaExhausted && (
-                     <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/70 dark:border-amber-900/50 dark:bg-amber-950/20 p-5">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                           <div className="flex items-start gap-3">
-                              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                                 <Sparkles className="h-5 w-5" />
-                              </div>
+                     <div className="mt-3 rounded-none border border-primary/50 bg-primary/10 p-3.5">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                           <div className="flex items-start gap-2.5">
+                              <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                               <div>
-                                 <h5 className="text-sm font-bold text-slate-900 dark:text-white">
-                                    Free Plan Limit Reached
+                                 <h5 className="text-xs font-mono font-bold uppercase tracking-wider text-foreground">
+                                    FREE PLAN ALLOCATION EXHAUSTED
                                  </h5>
-                                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                    You have used up your free monthly generation limits. Upgrade to a paid plan to unlock 10x higher limits, scheduled auto-publishing, and AI voice cloning.
+                                 <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+                                    Monthly limit reached. Upgrade to Starter or Pro for 10x allocations, automated publishing, and voice cloning.
                                  </p>
                               </div>
                            </div>
-                           <Link
-                              href="/settings/billing"
-                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-indigo-700 transition-all whitespace-nowrap"
-                           >
-                              View Paid Plans <ArrowRight className="h-3.5 w-3.5" />
+                           <Link href="/settings/billing">
+                              <Button size="sm" className="whitespace-nowrap">
+                                 UPGRADE TIER <ArrowRight className="h-3.5 w-3.5" />
+                              </Button>
                            </Link>
                         </div>
 
                         {/* Quick Plan Highlights */}
-                        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 pt-3 border-t border-amber-200/60 dark:border-amber-900/30">
-                           <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                              <CheckCircle2 className="h-4 w-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-                              <span><strong>Starter ($29/mo)</strong>: 50 AI Posts, 100 Articles (8k words), Scheduling</span>
+                        <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2 pt-2.5 border-t border-border font-mono text-[11px]">
+                           <div className="flex items-center gap-2 text-foreground">
+                              <span className="text-primary font-bold">▪</span>
+                              <span><strong>Starter ($29/mo)</strong>: 50 AI Posts, 100 Articles, Scheduling</span>
                            </div>
-                           <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                           <div className="flex items-center gap-2 text-foreground">
+                              <span className="text-primary font-bold">▪</span>
                               <span><strong>Pro ($99/mo)</strong>: Unlimited Posts & Articles, Team Seats, Full API</span>
                            </div>
                         </div>
@@ -161,38 +159,35 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             )}
 
             {/* Search + Create Section */}
-            <div className="mb-16 flex flex-col gap-8 md:flex-row md:items-center md:justify-between pt-8">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pt-2">
                <DashboardSearch />
-
                <DashboardNewContentButton />
             </div>
 
-            {/* Main Grid */}
-            <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 items-start">
+            {/* Main Command Grid */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 items-start">
 
                {/* Recent Content */}
                <div className="lg:col-span-2 relative">
-                  <div className="mb-10 flex items-center justify-between">
+                  <div className="mb-4 flex items-center justify-between border-b border-border pb-2">
                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                           <div className="h-2 w-2 rounded-full bg-blue-600" />
-                           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Library</p>
+                        <div className="flex items-center gap-2">
+                           <div className="h-1.5 w-1.5 rounded-none bg-primary" />
+                           <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">OPERATIONAL REPO</p>
                         </div>
-                        <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
+                        <h3 className="text-base font-mono font-bold uppercase tracking-tight text-foreground">
                            Recent Drafts
                         </h3>
                      </div>
                      <Link
                         href="/contents"
-                        className="group flex items-center gap-2 text-sm font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 px-5 py-2.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 transition-all hover:scale-105 active:scale-95"
+                        className="text-xs font-mono font-bold uppercase tracking-wider text-primary hover:underline"
                      >
-                        View Library
-                        <span className="transition-transform group-hover:translate-x-1 font-bold">→</span>
+                        VIEW LIBRARY →
                      </Link>
                   </div>
 
-                  <div className="space-y-6">
-                     <AnimatePresence>
+                  <div className="space-y-3">
                      {drafts.length > 0 ? (
                         drafts.map((content: any, idx: number) => (
                            <ContentCard
@@ -206,14 +201,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                            />
                         ))
                      ) : (
-                           <DashboardEmptyState />
+                        <DashboardEmptyState />
                      )}
-                     </AnimatePresence>
                   </div>
                </div>
 
                {/* Automation Status & Analytics */}
-               <div className="space-y-12">
+               <div className="space-y-6">
                   <AiGenerator />
 
                   {/* Growth Metrics */}

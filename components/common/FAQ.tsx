@@ -1,29 +1,28 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 import React, { useState } from "react";
 
 const faqs = [
   {
-    question: "Do I need to be a prompted expert to use SocialAI?",
-    answer: "Not at all. SocialAI handles the technical prompting behind the scenes. You just describe your idea in natural language, and our engine takes care of the rest.",
+    question: "How does the autonomous multi-agent pipeline work?",
+    answer: "Mastra AI agents orchestrate specialized sub-tasks including market research, brand tone adherence, hook generation, and BullMQ worker scheduling.",
   },
   {
-    question: "Which social media platforms do you support?",
-    answer: "We currently support Instagram, Twitter (X), LinkedIn, TikTok, YouTube, Threads, and Pinterest. We're constantly adding new integrations based on user demand.",
+    question: "Which social media platforms and CMS endpoints are supported?",
+    answer: "We support LinkedIn, X (Twitter), Instagram, TikTok, YouTube Shorts, Threads, Pinterest, and direct CMS webhook publishing (WordPress, Medium, Webflow).",
   },
   {
-    question: "Is the content generated truly unique?",
-    answer: "Yes. Every post is generated from scratch based on your specific requirements and brand DNA. We don't use templates, ensuring your content stands out from the crowd.",
+    question: "How are brand safety and data privacy guaranteed?",
+    answer: "We store brand context in isolated PostgreSQL + pgvector schemas with strict multi-tenancy filters on every query. Your proprietary brand data is never shared across tenants.",
   },
   {
-    question: "Can I use SocialAI for my team or agency?",
-    answer: "Absolutely. Our Agency and Enterprise plans include dedicated features for team collaboration, client approval flows, and multi-account management.",
+    question: "Can I invite team members and assign role-based permissions?",
+    answer: "Yes. Our Pro and Enterprise tiers include role-based access control (OWNER, ADMIN, EDITOR, VIEWER) with audit trail logging for all actions.",
   },
   {
-    question: "What happens if I reach my monthly post limit?",
-    answer: "You'll receive a notification when you're close to your limit. You can easily upgrade your plan at any time or purchase additional content credits on the fly.",
+    question: "What occurs when monthly plan quotas are reached?",
+    answer: "The platform provides real-time quota telemetry and seamless 1-click upgrades or on-demand generation credits without workflow interruption.",
   },
 ];
 
@@ -31,48 +30,46 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-32 bg-slate-50 dark:bg-slate-950 relative transition-colors">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] mb-4 block">Questions</span>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white mb-6 tracking-tight">
-            Frequently asked <span className="text-[#2D46FF] dark:text-blue-500">questions.</span>
+    <section id="faq" className="py-20 bg-background border-t border-border">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center mb-12">
+          <p className="text-xs font-mono font-bold uppercase tracking-widest text-primary mb-1">
+            TECHNICAL DIRECTIVES
+          </p>
+          <h2 className="text-2xl md:text-4xl font-mono font-black uppercase text-foreground tracking-tight">
+            FREQUENTLY ASKED QUESTIONS
           </h2>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="space-y-2">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm"
+              className="rounded-none border border-border bg-card overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-8 py-6 flex items-center justify-between text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-secondary/60 transition-none"
               >
-                <span className="text-lg font-black text-slate-950 dark:text-white pr-8">{faq.question}</span>
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                <span className="text-xs md:text-sm font-mono font-bold uppercase text-foreground pr-4">
+                  {faq.question}
+                </span>
+                <div className="w-6 h-6 rounded-none bg-secondary border border-border flex items-center justify-center shrink-0 text-primary">
                   {openIndex === index ? (
-                    <Minus className="w-4 h-4 text-slate-900 dark:text-white" />
+                    <Minus className="w-3.5 h-3.5" />
                   ) : (
-                    <Plus className="w-4 h-4 text-slate-900 dark:text-white" />
+                    <Plus className="w-3.5 h-3.5" />
                   )}
                 </div>
               </button>
-              <AnimatePresence>
-                {openIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="px-8 pb-8 text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+
+              {openIndex === index && (
+                <div className="px-5 pb-4 pt-1 border-t border-border bg-secondary/20">
+                  <p className="text-xs text-muted-foreground font-mono leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>

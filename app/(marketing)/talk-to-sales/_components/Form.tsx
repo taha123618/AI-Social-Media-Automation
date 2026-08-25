@@ -42,8 +42,8 @@ import {
 import { submitDemoAction } from "../actions/form-submission.action";
 import Link from "next/link";
 
-const INPUT_BASE = "h-12 rounded-xl border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground";
-const SELECT_TRIGGER_BASE = "h-12 rounded-xl border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground";
+const INPUT_BASE = "h-10 rounded-none border-border bg-card/60 font-mono text-xs focus-visible:ring-primary focus-visible:border-primary text-foreground";
+const SELECT_TRIGGER_BASE = "h-10 rounded-none border-border bg-card/60 font-mono text-xs focus-visible:ring-primary focus-visible:border-primary text-foreground";
 const LABEL_BASE = "text-sm font-semibold text-foreground";
 const ICON_BASE = "absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none";
 const ICON_CLASS = "absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10";
@@ -177,7 +177,7 @@ function DemoFormInner({ onSuccess }: { onSuccess: () => void }) {
       exit={{ opacity: 0 }}
     >
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+        <div className="w-9 h-9 rounded-none bg-secondary border border-border flex items-center justify-center">
           <Calendar className="h-5 w-5 text-primary" />
         </div>
         <div>
@@ -191,7 +191,7 @@ function DemoFormInner({ onSuccess }: { onSuccess: () => void }) {
           ref={errorRef}
           tabIndex={-1}
           role="alert"
-          className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium"
+          className="mb-6 p-4 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-xs font-mono"
         >
           {state.message}
         </div>
@@ -459,7 +459,7 @@ function DemoFormInner({ onSuccess }: { onSuccess: () => void }) {
               name="notes"
               placeholder="Tell us about your goals, challenges, or any specific features you'd like to see..."
               value={notes}
-              className="min-h-25 rounded-xl border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground pl-11 resize-y"
+              className="min-h-25 rounded-none border-border bg-card/60 font-mono text-xs focus-visible:ring-primary text-foreground pl-11 resize-y"
               disabled={isPending}
               onChange={(e) => { setNotes(e.target.value); clearFieldError("notes"); }}
             />
@@ -477,7 +477,7 @@ function DemoFormInner({ onSuccess }: { onSuccess: () => void }) {
             type="submit"
             disabled={isPending}
             aria-busy={isPending}
-            className="w-full h-14 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-base font-bold shadow-xl shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-full h-11 rounded-none bg-primary text-primary-foreground font-mono text-xs font-bold uppercase transition-none"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
@@ -521,7 +521,7 @@ export default function DemoForm() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary backdrop-blur-sm mb-6">
+              <span className="inline-flex items-center gap-2 rounded-none border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-mono font-bold text-primary mb-6">
                 <Calendar className="h-3 w-3" />
                 Schedule a Demo
               </span>
@@ -545,7 +545,7 @@ export default function DemoForm() {
                   { icon: MessageSquare, title: "Q&A with Experts", desc: "Get answers from product specialists" },
                 ].map((item) => (
                   <div key={item.title} className="flex gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-none bg-secondary border border-border flex items-center justify-center shrink-0">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -565,7 +565,7 @@ export default function DemoForm() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <div className="rounded-xl border border-border bg-card p-6 sm:p-10 shadow-xl">
+            <div className="rounded-none border border-border bg-card p-6 sm:p-8 shadow-none">
               <AnimatePresence mode="wait">
                 {showSuccess ? (
                   <motion.div
@@ -594,7 +594,7 @@ export default function DemoForm() {
                     </p>
                     <Button
                       variant="outline"
-                      className="mt-4 rounded-xl"
+                      className="mt-4 rounded-none"
                       onClick={handleReset}
                     >
                       Book Another Demo

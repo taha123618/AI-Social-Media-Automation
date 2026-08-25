@@ -1,91 +1,75 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/lib/animations/motion";
 import { Bot, Zap, MessageSquare, BarChart3, Globe, Shield } from "lucide-react";
 import React from "react";
 
 const features = [
   {
     title: "AI Blog Writer",
-    description: "Compose SEO-optimized blog posts that rank. Our AI handles research, structure, and tone.",
-    icon: <Bot className="w-6 h-6" />,
-    color: "bg-blue-50 text-blue-600",
+    description: "Compose SEO-optimized blog posts that rank. Autonomous research, structure, and tone alignment.",
+    icon: <Bot className="w-5 h-5 text-primary" />,
   },
   {
     title: "Social Media Engine",
-    description: "Generate 30 days of social media content in minutes. Tailored for Twitter, LinkedIn, and Instagram.",
-    icon: <MessageSquare className="w-6 h-6" />,
-    color: "bg-purple-50 text-purple-600",
+    description: "Generate 30 days of high-conversion social content. Optimized for X, LinkedIn, and Instagram.",
+    icon: <MessageSquare className="w-5 h-5 text-primary" />,
   },
   {
-    title: "Ad Copy Generator",
-    description: "Create high-converting ad copy for Meta, Google, and TikTok. Built on proven marketing frameworks.",
-    icon: <Zap className="w-6 h-6" />,
-    color: "bg-orange-50 text-orange-600",
+    title: "Ad Campaign Dispatcher",
+    description: "Create high-converting ad copy for Meta, Google, and TikTok with automated conversion tracking.",
+    icon: <Zap className="w-5 h-5 text-primary" />,
   },
   {
-    title: "Neuro-Analytics",
-    description: "Analyze the psychological impact of your content before you hit publish.",
-    icon: <BarChart3 className="w-6 h-6" />,
-    color: "bg-indigo-50 text-indigo-600",
+    title: "Neuro-Analytics Telemetry",
+    description: "Real-time engagement forecasting and consistency attribution metrics across social channels.",
+    icon: <BarChart3 className="w-5 h-5 text-primary" />,
   },
   {
-    title: "Global Localization",
-    description: "Automatically adapt content for 40+ regions with cultural intelligence.",
-    icon: <Globe className="w-6 h-6" />,
-    color: "bg-green-50 text-green-600",
+    title: "Multi-Location Engine",
+    description: "Localize content and regional voice profiles across multiple global storefronts with cultural context.",
+    icon: <Globe className="w-5 h-5 text-primary" />,
   },
   {
-    title: "Brand Safety Guard",
-    description: "Real-time monitoring to ensure all AI outputs align with your brand identity.",
-    icon: <Shield className="w-6 h-6" />,
-    color: "bg-red-50 text-red-600",
+    title: "Brand Voice Guard",
+    description: "Continuous RAG embedding verification ensuring all AI outputs comply with brand safety protocols.",
+    icon: <Shield className="w-5 h-5 text-primary" />,
   },
 ];
 
 export default function Features() {
   return (
-    <section id="features" className="py-24 px-4 bg-white dark:bg-slate-950 transition-colors">
-      <div className="container mx-auto">
-        <div className="text-center mb-16">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-5xl font-extrabold text-[#020617] dark:text-white mb-6 tracking-tight"
-          >
-            One platform. <span className="text-[#2D46FF] dark:text-blue-500">Infinite growth.</span>
-          </motion.h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto font-medium">
-            Replace multiple expensive tools with one AI-powered engine designed for speed and performance.
+    <section id="features" className="py-20 px-4 bg-background border-t border-border">
+      <div className="container mx-auto max-w-6xl">
+        <div className="text-center mb-12">
+          <p className="text-xs font-mono font-bold uppercase tracking-widest text-primary mb-1">
+            CORE CAPABILITIES
+          </p>
+          <h2 className="text-2xl md:text-4xl font-mono font-black uppercase text-foreground tracking-tight">
+            ONE OPERATING SYSTEM // <span className="text-primary">INFINITE GROWTH</span>
+          </h2>
+          <p className="text-xs font-mono text-muted-foreground max-w-xl mx-auto mt-2">
+            Replace fragmented SaaS subscriptions with a single unified AI marketing automation console.
           </p>
         </div>
 
-        <motion.div
-          variants={staggerContainer}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((feature, index) => (
-            <motion.div
+            <div
               key={index}
-              variants={fadeIn}
-              whileHover={{ y: -5 }}
-              className="p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl dark:hover:shadow-none transition-all duration-300 group"
+              className="p-5 rounded-none border border-border bg-card hover:border-primary/60 transition-none"
             >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform dark:bg-slate-800 dark:text-blue-400 ${feature.color}`}>
+              <div className="w-9 h-9 rounded-none bg-secondary border border-border flex items-center justify-center mb-4">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-bold text-[#020617] dark:text-white mb-3">{feature.title}</h3>
-              <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm font-medium">
+              <h3 className="text-sm font-mono font-bold uppercase text-foreground mb-2 tracking-wider">
+                {feature.title}
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed font-mono">
                 {feature.description}
               </p>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

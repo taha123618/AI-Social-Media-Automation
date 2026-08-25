@@ -1,70 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full"
-    >
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] dark:shadow-none p-10 border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
-        <div className="mb-10 text-center relative z-10">
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl font-black text-slate-950 dark:text-white tracking-tighter mb-3"
-          >
-            Welcome back
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-slate-500 dark:text-slate-400 font-bold"
-          >
-            Sign in to manage your account.
-          </motion.p>
+    <div className="w-full">
+      <div className="bg-card rounded-none border border-border p-6 md:p-8 shadow-none relative">
+        <div className="mb-6 text-center border-b border-border pb-4">
+          <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary mb-1">
+            SECURITY GATEWAY
+          </p>
+          <h2 className="text-xl font-mono font-black uppercase tracking-tight text-foreground">
+            OPERATOR AUTHENTICATION
+          </h2>
+          <p className="text-xs font-mono text-muted-foreground mt-1">
+            Access autonomous multi-agent pipelines and telemetry.
+          </p>
         </div>
 
         <LoginForm />
 
-        <div className="mt-10 text-center relative z-10">
-          <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
-            Don't have an account yet?{" "}
+        <div className="mt-6 text-center border-t border-border pt-4">
+          <p className="text-xs font-mono text-muted-foreground">
+            No operator account yet?{" "}
             <Link
               href="/register"
-              className="text-[#2D46FF] dark:text-blue-500 hover:text-blue-600 transition-colors"
+              className="text-primary font-bold uppercase hover:underline"
             >
-              Create New Account
+              CREATE NEW ACCOUNT
             </Link>
           </p>
         </div>
-
-        {/* Subtle Gradient Accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
-
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500 px-6 leading-relaxed"
-      >
-        By continuing, you agree to our{" "}
-        <Link href="/terms" className="text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-colors underline decoration-slate-200 dark:decoration-slate-800 underline-offset-4">
-          Terms of Service
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-colors underline decoration-slate-200 dark:decoration-slate-800 underline-offset-4">
-          Privacy Policy
-        </Link>
-      </motion.p>
-    </motion.div>
+    </div>
   );
 }
