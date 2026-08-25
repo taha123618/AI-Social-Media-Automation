@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Brain, FileText, Sparkles, BookOpen } from 'lucide-react';
+import { Brain, Sparkles, BookOpen } from 'lucide-react';
 import { KnowledgeProfile } from './knowledge-profile';
 import { KnowledgeSummary } from './knowledge-summary';
 import { KnowledgeDocuments } from './knowledge-documents';
 import type { BusinessProfileInput } from '@/features/knowledge/types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface KnowledgeLayoutProps {
   profile: BusinessProfileInput;
@@ -22,9 +23,9 @@ export function KnowledgeLayout({ profile, documents }: KnowledgeLayoutProps) {
   ] as const;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Premium Tabs navigation bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -32,21 +33,25 @@ export function KnowledgeLayout({ profile, documents }: KnowledgeLayoutProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`p-5 rounded-3xl text-left border-2 transition-all ${isActive
-                  ? 'border-blue-500 bg-blue-50/40 dark:bg-blue-900/10 shadow-sm'
-                  : 'border-slate-200 hover:border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/40'
-                }`}
+              className={`p-4 rounded-xl text-left border transition-all ${
+                isActive
+                  ? 'border-primary bg-primary/5 ring-1 ring-primary/30 shadow-xs'
+                  : 'border-border/80 hover:border-primary/40 bg-card'
+              }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-2xl ${isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                  }`}>
-                  <Icon className="h-5 w-5" />
+                <div
+                  className={`p-2 rounded-lg ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-xs'
+                      : 'bg-secondary text-muted-foreground'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
                 </div>
                 <div>
-                  <div className="font-black text-sm text-slate-900 dark:text-white">{tab.label}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{tab.desc}</div>
+                  <div className="font-bold text-xs text-foreground">{tab.label}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{tab.desc}</div>
                 </div>
               </div>
             </button>
@@ -54,38 +59,34 @@ export function KnowledgeLayout({ profile, documents }: KnowledgeLayoutProps) {
         })}
       </div>
 
-      {/* Tab Contents */}
-      <div className="transition-all duration-300">
-        {activeTab === 'profile' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-blue-500" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Brand DNA Profile Settings</h2>
+      {/* Tab Contents with AnimatePresence */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          {activeTab === 'profile' && (
+            <div className="space-y-6">
+              <KnowledgeProfile initialData={profile} />
             </div>
-            <KnowledgeProfile initialData={profile} />
-          </div>
-        )}
+          )}
 
-        {activeTab === 'dna' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-500" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Brand DNA Canvas & Elevator Pitches</h2>
+          {activeTab === 'dna' && (
+            <div className="space-y-6">
+              <KnowledgeSummary />
             </div>
-            <KnowledgeSummary />
-          </div>
-        )}
+          )}
 
-        {activeTab === 'docs' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-500" />
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">RAG Context Document Library</h2>
+          {activeTab === 'docs' && (
+            <div className="space-y-6">
+              <KnowledgeDocuments initialDocuments={documents} />
             </div>
-            <KnowledgeDocuments initialDocuments={documents} />
-          </div>
-        )}
-      </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,53 +1,61 @@
 import * as motion from "framer-motion/client";
 import { fadeIn, staggerContainer } from "@/lib/animations/motion";
 import { PricingContent } from "./PricingContent";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 export default function PricingHeader() {
-   return (
-      <section className="py-24 px-4 text-center relative z-10">
-         <div className="container mx-auto">
-            <motion.div
-               variants={staggerContainer}
-               initial="initial"
-               animate="animate"
-               className="max-w-4xl mx-auto"
+  return (
+    <section className="py-20 px-4 text-center relative z-10">
+      <div className="container mx-auto">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="max-w-3xl mx-auto"
+        >
+          <motion.div
+            variants={fadeIn}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4"
+          >
+            PLANS & SCALING TIERS
+          </motion.div>
+          <motion.h1
+            variants={fadeIn}
+            className="text-4xl md:text-6xl font-extrabold text-foreground mb-4 tracking-tight leading-tight"
+          >
+            Predictable Plans for <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Autonomous Growth Fleets
+            </span>
+          </motion.h1>
+          <motion.p
+            variants={fadeIn}
+            className="text-base md:text-lg text-muted-foreground font-normal mb-12 max-w-xl mx-auto leading-relaxed"
+          >
+            Transparent pricing with instant API access. Every paid tier includes a 14-day risk-free trial.
+          </motion.p>
+
+          {/* Interactive Pricing Toggle + Cards */}
+          <div className="pb-12">
+            <PricingContent />
+          </div>
+
+          {/* Enterprise CTA */}
+          <motion.div variants={fadeIn} className="mt-8 text-center border-t border-border/60 pt-8">
+            <p className="text-muted-foreground text-xs md:text-sm font-medium mb-3">
+              Need custom seat configurations, dedicated VPC instance, or tailored SLA?
+            </p>
+            <Link
+              href="/talk-to-sales"
+              className="inline-flex items-center gap-1 text-xs md:text-sm font-semibold text-primary hover:underline underline-offset-4 transition-all"
             >
-               <motion.span
-                  variants={fadeIn}
-                  className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.3em] text-[10px] mb-6 block"
-               >
-                  Plans &amp; Pricing
-               </motion.span>
-               <motion.h1
-                  variants={fadeIn}
-                  className="text-5xl md:text-7xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter"
-               >
-                  Ready to grow your <br /> <span className="text-[#2D46FF] dark:text-blue-500">social organic?</span>
-               </motion.h1>
-               <motion.p
-                  variants={fadeIn}
-                  className="text-xl text-slate-500 dark:text-slate-400 font-bold mb-16 max-w-2xl mx-auto leading-relaxed"
-               >
-                  Simple prices. No hidden fees. Cancel at any time.<br className="hidden md:block" />
-                  Start with a 14-day free trial on any paid plan.
-               </motion.p>
-
-               {/* Interactive Pricing Toggle + Cards */}
-               <div className="pb-32">
-                  <PricingContent />
-               </div>
-
-               {/* Enterprise CTA */}
-               <motion.div variants={fadeIn} className="mt-12 text-center">
-                  <p className="text-slate-500 dark:text-slate-400 font-bold mb-6 italic opacity-50">
-                     Need a custom plan for your enterprise?
-                  </p>
-                  <button className="text-[#2D46FF] dark:text-blue-400 font-black text-sm uppercase tracking-widest hover:scale-105 transition-transform">
-                     Talk to our experts →
-                  </button>
-               </motion.div>
-            </motion.div>
-         </div>
-      </section>
-   );
+              <span>Talk to Enterprise Architecture Team</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
 }

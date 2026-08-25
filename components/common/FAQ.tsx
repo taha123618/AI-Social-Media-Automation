@@ -6,24 +6,24 @@ import React, { useState } from "react";
 
 const faqs = [
   {
-    question: "Do I need to be a prompted expert to use SocialAI?",
-    answer: "Not at all. SocialAI handles the technical prompting behind the scenes. You just describe your idea in natural language, and our engine takes care of the rest.",
+    question: "How do Mastra autonomous AI agents operate across channels?",
+    answer: "Our engine orchestrates 13 specialized Mastra agents. One agent conducts topical research, another formats the article with Gutenberg HTML serialization, while social agents schedule optimized variants across LinkedIn, X, and Instagram.",
   },
   {
-    question: "Which social media platforms do you support?",
-    answer: "We currently support Instagram, Twitter (X), LinkedIn, TikTok, YouTube, Threads, and Pinterest. We're constantly adding new integrations based on user demand.",
+    question: "Which social networks and CMS platforms are supported natively?",
+    answer: "We support direct 1-click publishing and scheduling for LinkedIn, X (Twitter), Instagram, TikTok, YouTube, Threads, as well as WordPress, Ghost, Webflow, and Shopify.",
   },
   {
-    question: "Is the content generated truly unique?",
-    answer: "Yes. Every post is generated from scratch based on your specific requirements and brand DNA. We don't use templates, ensuring your content stands out from the crowd.",
+    question: "How does Brand Voice isolation prevent hallucinations?",
+    answer: "We use pgvector embeddings with multi-tenant workspace scoping. Your brand tone, style guidelines, and approved reference materials are retrieved dynamically via RAG before any generation pass.",
   },
   {
-    question: "Can I use SocialAI for my team or agency?",
-    answer: "Absolutely. Our Agency and Enterprise plans include dedicated features for team collaboration, client approval flows, and multi-account management.",
+    question: "Can I manage multiple client workspaces with team roles?",
+    answer: "Yes. Our platform provides multi-tenant role-based access control (Admin, Editor, Viewer), client approval queues, and separated billing per organization.",
   },
   {
-    question: "What happens if I reach my monthly post limit?",
-    answer: "You'll receive a notification when you're close to your limit. You can easily upgrade your plan at any time or purchase additional content credits on the fly.",
+    question: "What happens when monthly quota generation limits are reached?",
+    answer: "You receive proactive in-app quota alerts. You can upgrade with 1 click to the next tier or purchase add-on consumption packs without interrupting active schedules.",
   },
 ];
 
@@ -31,31 +31,36 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-32 bg-slate-50 dark:bg-slate-950 relative transition-colors">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] mb-4 block">Questions</span>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white mb-6 tracking-tight">
-            Frequently asked <span className="text-[#2D46FF] dark:text-blue-500">questions.</span>
+    <section id="faq" className="py-24 bg-muted/20">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            KNOWLEDGE BASE
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+            Frequently Asked <span className="text-primary">Questions</span>
           </h2>
+          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+            Everything you need to know about autonomous social automation and multi-agent workflows.
+          </p>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="space-y-3.5">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm"
+              className="rounded-xl border border-border/80 bg-card overflow-hidden transition-all duration-200"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-8 py-6 flex items-center justify-between text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                className="w-full px-6 py-4 flex items-center justify-between text-left transition-colors hover:bg-muted/40"
               >
-                <span className="text-lg font-black text-slate-950 dark:text-white pr-8">{faq.question}</span>
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                <span className="text-sm md:text-base font-semibold text-foreground pr-4">{faq.question}</span>
+                <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0">
                   {openIndex === index ? (
-                    <Minus className="w-4 h-4 text-slate-900 dark:text-white" />
+                    <Minus className="w-3.5 h-3.5 text-primary" />
                   ) : (
-                    <Plus className="w-4 h-4 text-slate-900 dark:text-white" />
+                    <Plus className="w-3.5 h-3.5 text-muted-foreground" />
                   )}
                 </div>
               </button>
@@ -65,9 +70,9 @@ export default function FAQ() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <div className="px-8 pb-8 text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                    <div className="px-6 pb-5 pt-1 text-xs md:text-sm text-muted-foreground leading-relaxed border-t border-border/40">
                       {faq.answer}
                     </div>
                   </motion.div>

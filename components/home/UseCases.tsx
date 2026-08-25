@@ -1,95 +1,102 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/lib/animations/motion";
-import { User, Users, Building2, Rocket, TrendingUp, ShieldCheck } from "lucide-react";
+import { staggerContainer } from "@/lib/animations/motion";
+import { User, Users, Building2, CheckCircle2 } from "lucide-react";
 import React from "react";
 
 const personas = [
   {
-    title: "Solo Creators",
-    description: "Build a global personal brand without hiring a social media manager. SocialAI acts as your ghostwriter and strategist.",
-    icon: <User className="w-6 h-6" />,
-    stats: "+240% reach",
-    benefits: ["Viral Hook Generation", "Multi-platform distribution", "Personal Voice Tuning"],
-    color: "bg-blue-50 text-blue-600",
+    title: "Solo Founders & Creators",
+    description: "Build an authoritative personal brand without hiring an agency. SocialAI functions as your dedicated ghostwriter, trend scout, and distributor.",
+    icon: <User className="w-5 h-5 text-primary" />,
+    stats: "+240% Reach Velocity",
+    benefits: ["Deterministic Voice Fine-Tuning", "Autonomous Cross-Network Scheduling", "Visual Post Previews"],
   },
   {
-    title: "Marketing Agencies",
-    description: "Manage 50+ clients with the same team size. Automate content production and focus on high-level strategy.",
-    icon: <Users className="w-6 h-6" />,
-    stats: "5x productivity",
-    benefits: ["Client Approval Flows", "Bulk Content Scheduling", "White-label Reporting"],
-    color: "bg-indigo-50 text-indigo-600",
+    title: "Agencies & Growth Fleets",
+    description: "Operate 50+ client workspaces with unified billing and zero context mixing. Let autonomous agents produce initial drafts while your team directs strategy.",
+    icon: <Users className="w-5 h-5 text-accent" />,
+    stats: "5x Content Throughput",
+    benefits: ["Client Review & Approval Gates", "Bulk Editorial Scheduling", "Custom Webhook Dispatch"],
   },
   {
-    title: "Enterprise Brands",
-    description: "Scale high-quality, brand-safe content across hundreds of local and global social profiles autonomously.",
-    icon: <Building2 className="w-6 h-6" />,
-    stats: "99% consistency",
-    benefits: ["Brand Safety Guard", "Localized Content", "SSO & Role Access"],
-    color: "bg-slate-900 text-white",
+    title: "Enterprise SaaS Brands",
+    description: "Scale localized, brand-safe blog articles and product announcements across global regions with automated RAG grounding.",
+    icon: <Building2 className="w-5 h-5 text-purple-400" />,
+    stats: "99.9% Tone Adherence",
+    benefits: ["Gutenberg HTML CMS Export", "pgvector Tone Grounding", "Role-Based Access Control"],
   },
 ];
 
 export default function UseCases() {
   return (
-    <section id="solutions" className="py-32 bg-slate-50 dark:bg-slate-950 relative overflow-hidden transition-colors">
-      {/* Decorative Blur */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-100/30 dark:bg-blue-900/10 blur-[150px] rounded-full -z-10" />
-
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-20">
-          <span className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] mb-4 block">Use Cases</span>
-          <h2 className="text-4xl md:text-6xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter">
-            Solutions for <span className="text-[#2D46FF] dark:text-blue-500">every scale</span>
+    <section id="solutions" className="py-24 bg-muted/20 relative">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="max-w-2xl mx-auto text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            TARGET USE CASES
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+            Architected for <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Every Scale of Operation
+            </span>
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">
-            Whether you're building a personal brand or managing a global conglomerate,
-            SocialAI scales with your ambitions.
+          <p className="text-muted-foreground text-sm md:text-base">
+            Whether launching a bootstrapped product or scaling enterprise organic search, our multi-agent fleet adapts to your exact operational requirements.
           </p>
-        </div>
+        </motion.div>
 
         <motion.div
           variants={staggerContainer}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-10"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {personas.map((persona, index) => (
+          {personas.map((persona, idx) => (
             <motion.div
-              key={index}
-              variants={fadeIn}
-              whileHover={{ y: -10 }}
-              className={`p-10 rounded-[3rem] border border-slate-200 dark:border-slate-800 transition-all duration-300 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col ${persona.color.includes("bg-slate-900") ? "bg-slate-950 dark:bg-slate-900 text-white border-transparent" : "bg-white dark:bg-slate-900/50"
-                }`}
+              key={persona.title}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -3 }}
+              transition={{ duration: 0.3, delay: idx * 0.08 }}
+              className="p-6 rounded-xl border border-border/80 bg-card hover:border-primary/40 transition-all duration-200 flex flex-col justify-between shadow-xs"
             >
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 ${persona.color.includes("bg-slate-900") ? "bg-white/10 text-white" : persona.color.replace("bg-", "dark:bg-").replace("text-", "dark:text-")
-                }`}>
-                {persona.icon}
-              </div>
-              <div className="mb-4 flex items-center gap-2">
-                <h3 className="text-2xl font-black tracking-tight">{persona.title}</h3>
-                <span className={`text-[10px] font-black px-2 py-1 rounded-full ${persona.color.includes("bg-slate-900") ? "bg-blue-500 text-white" : "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                  }`}>
-                  {persona.stats}
-                </span>
-              </div>
-              <p className={`text-sm leading-relaxed mb-8 flex-grow font-medium ${persona.color.includes("bg-slate-900") ? "text-slate-400" : "text-slate-500 dark:text-slate-400"
-                }`}>
-                {persona.description}
-              </p>
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    {persona.icon}
+                  </div>
+                  <span className="text-[11px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                    {persona.stats}
+                  </span>
+                </div>
 
-              <ul className="space-y-4 mb-4">
+                <h3 className="text-base font-bold text-foreground mb-2">
+                  {persona.title}
+                </h3>
+                <p className="text-xs text-muted-foreground leading-relaxed mb-6">
+                  {persona.description}
+                </p>
+              </div>
+
+              <div className="space-y-2 border-t border-border/60 pt-4">
                 {persona.benefits.map((benefit, i) => (
-                  <li key={i} className="flex items-center gap-3 text-xs font-bold">
-                    <div className={`w-1.5 h-1.5 rounded-full ${persona.color.includes("bg-slate-900") ? "bg-blue-400" : "bg-[#2D46FF] dark:bg-blue-400"
-                      }`} />
-                    {benefit}
-                  </li>
+                  <div key={i} className="flex items-center gap-2 text-xs text-foreground/90">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span>{benefit}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </motion.div>
           ))}
         </motion.div>

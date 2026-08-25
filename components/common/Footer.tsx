@@ -1,72 +1,70 @@
 import Link from "next/link";
+import AppLogo from "./AppLogo";
 
 export default function Footer() {
-   return (
-      <footer className="py-20 bg-slate-50 dark:bg-[#020617] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-white/5 transition-colors">
-         <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
-               <div className="col-span-2">
-                  <Link href="/" className="flex items-center gap-2 mb-8 group">
-                     {/* Logo container has its own bg brand color */}
-                     <div className="w-10 h-10 rounded-xl bg-[#2D46FF] flex items-center justify-center font-black text-white text-xl">
-                        S
-                     </div>
-                     <span className="text-xl font-black text-slate-950 dark:text-white tracking-tighter">SocialAI</span>
-                  </Link>
-                  <p className="max-w-xs mb-8 text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
-                     The world's most advanced AI engine for social exponential growth.
-                     Join 25k+ creators scaling with automation.
-                  </p>
-                  <div className="flex gap-4">
-                     {/* Social placeholders */}
-                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#2D46FF] hover:text-white transition-colors cursor-pointer">𝕏</div>
-                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#2D46FF] hover:text-white transition-colors cursor-pointer">in</div>
-                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#2D46FF] hover:text-white transition-colors cursor-pointer">gh</div>
-                  </div>
-               </div>
-
-               <div>
-                  <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs mb-8">Product</h4>
-                  <ul className="space-y-4 font-bold text-sm">
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">AI Blog Writer</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Social Engine</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Ad Copy Gen</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Pricing</Link></li>
-                  </ul>
-               </div>
-
-               <div>
-                  <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs mb-8">Company</h4>
-                  <ul className="space-y-4 font-bold text-sm">
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">About Us</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Careers</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Privacy Policy</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Terms</Link></li>
-                  </ul>
-               </div>
-
-               <div>
-                  <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs mb-8">Support</h4>
-                  <ul className="space-y-4 font-bold text-sm">
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Help Center</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">API Docs</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Contact Sales</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Status</Link></li>
-                  </ul>
-               </div>
+  return (
+    <footer className="py-16 bg-card border-t border-border/70 text-muted-foreground transition-colors">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+          <div className="col-span-2">
+            <div className="mb-4">
+              <AppLogo />
             </div>
-
-            <div className="pt-12 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-               <p className="text-xs font-bold text-slate-500">
-                  © 2026 SocialAI Technologies Inc. All rights reserved.
-               </p>
-               <div className="flex gap-8">
-                  <Link href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors">Instagram</Link>
-                  <Link href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors">Discord</Link>
-                  <Link href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors">YouTube</Link>
-               </div>
+            <p className="max-w-xs mb-6 text-sm text-muted-foreground leading-relaxed">
+              Enterprise multi-agent social media automation, SEO-optimized blog writing, and predictive analytics engine.
+            </p>
+            <div className="flex gap-3">
+              {["X", "IN", "GH", "YT"].map((item) => (
+                <div
+                  key={item}
+                  className="w-8 h-8 rounded-lg bg-secondary border border-border/70 flex items-center justify-center text-xs font-mono font-bold text-foreground hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+                >
+                  {item}
+                </div>
+              ))}
             </div>
-         </div>
-      </footer>
-   );
+          </div>
+
+          <div>
+            <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">Product</h4>
+            <ul className="space-y-2.5 text-xs">
+              <li><Link href="/ai-blog-writer" className="hover:text-primary transition-colors">AI Blog Writer</Link></li>
+              <li><Link href="/social-media-management-tool" className="hover:text-primary transition-colors">Social Scheduler</Link></li>
+              <li><Link href="/pricing" className="hover:text-primary transition-colors">Pricing & Plans</Link></li>
+              <li><Link href="/talk-to-sales" className="hover:text-primary transition-colors">Talk to Sales</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">Platform</h4>
+            <ul className="space-y-2.5 text-xs">
+              <li><Link href="/#features" className="hover:text-primary transition-colors">Agent Framework</Link></li>
+              <li><Link href="/#tools" className="hover:text-primary transition-colors">Tool Ecosystem</Link></li>
+              <li><Link href="/#faq" className="hover:text-primary transition-colors">Documentation</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">Account</h4>
+            <ul className="space-y-2.5 text-xs">
+              <li><Link href="/login" className="hover:text-primary transition-colors">Sign In</Link></li>
+              <li><Link href="/register" className="hover:text-primary transition-colors">Create Workspace</Link></li>
+              <li><Link href="/settings/billing" className="hover:text-primary transition-colors">Billing & Seats</Link></li>
+              <li><Link href="/dashboard" className="hover:text-primary transition-colors">Operator Console</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+          <p>© {new Date().getFullYear()} SocialAI Platform. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/security" className="hover:text-primary transition-colors">Security Guardrails</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

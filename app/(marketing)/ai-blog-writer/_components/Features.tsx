@@ -1,150 +1,92 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import {
-  Brain, Search, FileText, Shield, Zap, Globe, BarChart3, Mic2, RefreshCw,
+  Brain, Search, FileText, Shield, Zap, Globe, BarChart3, ArrowRight
 } from "lucide-react";
 
 const FEATURES = [
   {
     icon: Brain,
-    color: "text-blue-400",
-    bg: "bg-blue-500/10 border-blue-500/20",
-    title: "Semantic Intelligence",
-    description: "Goes beyond keywords — understands topical depth and search intent to craft content that dominates SERPs.",
+    title: "Semantic Swarm Research",
+    description: "Multi-agent research parses topical depth and search intent to formulate exhaustive outline hierarchies.",
   },
   {
     icon: Search,
-    color: "text-violet-400",
-    bg: "bg-violet-500/10 border-violet-500/20",
-    title: "Real-Time SEO Scoring",
-    description: "Live 100-point SEO analysis as you generate. Checks keyword density, headings, meta, readability, and more.",
+    title: "Real-Time 100-Point SEO Scorer",
+    description: "Live heuristics evaluate heading balance, keyword density, meta descriptions, and readability indices.",
   },
   {
     icon: FileText,
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10 border-emerald-500/20",
-    title: "Long-Form Engine",
-    description: "Generate 2,500–8,000+ word pillar articles, listicles, how-tos with proper heading structure and internal links.",
+    title: "Gutenberg HTML Serialization",
+    description: "Generates clean semantic WordPress Gutenberg block comments, callout panels, and code fences ready for copy-paste.",
   },
   {
     icon: Shield,
-    color: "text-rose-400",
-    bg: "bg-rose-500/10 border-rose-500/20",
-    title: "AI Detection Bypass",
-    description: "Proprietary humanization layer produces writing that passes Originality.ai, GPTZero, and Turnitin.",
+    title: "pgvector Tone Grounding",
+    description: "Embeddings ensure strict brand guidelines, preventing ungrounded claims and repetitive AI phrasing.",
   },
   {
     icon: Zap,
-    color: "text-yellow-400",
-    bg: "bg-yellow-500/10 border-yellow-500/20",
-    title: "One-Click Publishing",
-    description: "Publish directly to WordPress, Webflow, Shopify, or Ghost. Schema markup auto-generated on export.",
+    title: "1-Click Direct CMS Export",
+    description: "Sync articles directly to WordPress REST endpoints, Ghost, Webflow, Shopify, or Notion databases.",
   },
   {
     icon: Globe,
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10 border-cyan-500/20",
-    title: "40+ Language Support",
-    description: "Localize articles for any market with cultural intelligence. Tone automatically adapted per locale.",
+    title: "40+ Locale Adaptation",
+    description: "Translate and localize long-form articles with culturally nuanced search terms and regional SEO tags.",
   },
   {
     icon: BarChart3,
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10 border-indigo-500/20",
-    title: "Performance Analytics",
-    description: "Track ranking progress, organic traffic, and conversion rates in a unified dashboard.",
-  },
-  {
-    icon: Mic2,
-    color: "text-pink-400",
-    bg: "bg-pink-500/10 border-pink-500/20",
-    title: "Brand Voice Training",
-    description: "Upload existing content and our AI learns your unique tone, vocabulary, and writing style.",
-  },
-  {
-    icon: RefreshCw,
-    color: "text-orange-400",
-    bg: "bg-orange-500/10 border-orange-500/20",
-    title: "Auto-Repurposing",
-    description: "Turn one blog post into 10 social media posts, an email newsletter, a LinkedIn article, and more.",
+    title: "Attribution & Ranking Tracking",
+    description: "Monitor indexation velocity, organic keyword ranks, and pipeline revenue attribution in real time.",
   },
 ];
 
 export default function Features() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const cards = sectionRef.current?.querySelectorAll(".feature-card");
-    if (!cards) return;
-
-    cards.forEach((card, i) => {
-      gsap.from(card, {
-        opacity: 0,
-        y: 60,
-        scale: 0.95,
-        duration: 0.8,
-        delay: i * 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: card,
-          start: "top 85%",
-          end: "top 60%",
-          toggleActions: "play none none none",
-        },
-      });
-    });
-  }, []);
-
   return (
-    <section ref={sectionRef} className="relative py-32 bg-background overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 relative">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="max-w-3xl mx-auto text-center mb-20"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-semibold text-violet-400 mb-6">
-            <Zap className="h-4 w-4" />
-            Packed with Power
+    <section id="features" className="py-24 bg-background">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            TECHNICAL ARCHITECTURE
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tighter text-foreground mb-6 leading-[1.05]">
-            Everything great content{" "}
-            <span className="bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
-              needs to succeed
+          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+            Built for Content Velocity & <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Organic Search Dominance
             </span>
           </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Our AI Blog Writer combines GPT-5-class language models with real-time SEO data,
-            competitor analysis, and brand intelligence.
+          <p className="text-muted-foreground text-sm md:text-base">
+            Every feature is engineered for high-intent topical authority and deterministic CMS integration.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((feature, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {FEATURES.map((feature, idx) => {
             const Icon = feature.icon;
             return (
-              <div
+              <motion.div
                 key={feature.title}
-                className="feature-card group relative p-8 rounded-3xl border border-border bg-card/50 hover:bg-card/80 transition-all duration-500 overflow-hidden"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="p-5 rounded-xl border border-border/80 bg-card hover:border-primary/40 hover:shadow-xs transition-all duration-200 flex flex-col justify-between"
               >
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-card/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10">
-                  <div className={`inline-flex p-3.5 rounded-2xl border mb-6 ${feature.bg}`}>
-                    <Icon className={`h-6 w-6 ${feature.color}`} />
+                <div>
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-3">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
+                  <h3 className="text-sm font-bold text-foreground mb-1.5">
+                    {feature.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                {/* Hover glow effect */}
-                <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl pointer-events-none" />
-              </div>
+              </motion.div>
             );
           })}
         </div>

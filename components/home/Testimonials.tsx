@@ -1,83 +1,95 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { fadeIn, staggerContainer } from "@/lib/animations/motion";
 import { Star } from "lucide-react";
 import React from "react";
 
 const reviews = [
   {
     name: "Alex Rivera",
-    role: "Founder, Bloom Digital",
-    content: "SocialAI reduced our content production time by 80%. We're managing 2x more clients without hiring.",
+    role: "Founder, Bloom Digital Fleet",
+    content: "SocialAI reduced our organic production time by 80%. We manage 2x client rosters with deterministic tone safety.",
     avatar: "AR",
   },
   {
     name: "Sarah Chen",
-    role: "E-comm Creator",
-    content: "The viral hook engine is scary good. My last TikTok got 1.2M views using a SocialAI script.",
+    role: "E-comm Growth Operator",
+    content: "The multi-agent workflow is astonishing. Our topical authority rankings rose significantly in under 3 weeks.",
     avatar: "SC",
   },
   {
     name: "Marcus Thorne",
-    role: "VP Marketing, TechFlow",
-    content: "Brand safety was our biggest concern with AI. SocialAI's guardrails are the best in the market.",
+    role: "VP Marketing, TechFlow Cloud",
+    content: "Brand safety was our biggest concern with AI generation. SocialAI's pgvector guardrails are unmatched in precision.",
     avatar: "MT",
   },
   {
     name: "Elena Rodriguez",
-    role: "Social Media Lead",
-    content: "Finally, an AI that actually sounds like my brand. The voice training is a game changer.",
+    role: "Head of Content Ops",
+    content: "Finally, an autonomous engine that genuinely replicates our brand voice without generic LLM platitudes.",
     avatar: "ER",
   },
   {
     name: "David Park",
-    role: "Growth Hacker",
-    content: "The analytics breakdown is deep. I finally understand WHY my posts are performing well.",
+    role: "Principal Growth Engineer",
+    content: "The analytics attribution breakdowns are comprehensive. We can pinpoint conversion ROI for every article vector.",
     avatar: "DP",
-  },
-  {
-    name: "Julia Smith",
-    role: "Lifestyle Influencer",
-    content: "It's like having a 24/7 creative assistant. I never run out of ideas anymore.",
-    avatar: "JS",
   },
 ];
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="py-24 bg-white dark:bg-slate-950 relative overflow-hidden transition-colors">
-      <div className="container mx-auto px-4 text-center mb-16">
-        <span className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] mb-4 block">Wall of Love</span>
-        <h2 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white mb-6 tracking-tight">
-          Trusted by <span className="text-[#2D46FF] dark:text-blue-500">thousands</span> of creators
-        </h2>
+    <section id="testimonials" className="py-24 bg-background relative overflow-hidden">
+      <div className="container mx-auto px-4 text-center mb-16 max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            VERIFIED SOCIAL PROOF
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+            Trusted by Growth Operators & <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Modern Marketing Fleets
+            </span>
+          </h2>
+        </motion.div>
       </div>
 
-      <div className="flex gap-8 whitespace-nowrap animate-scroll-x hover:[animation-play-state:paused] transition-all">
-        {[...reviews, ...reviews].map((review, index) => (
-          <div
+      <div className="flex gap-4 overflow-x-auto pb-6 px-4 no-scrollbar max-w-6xl mx-auto">
+        {reviews.map((review, index) => (
+          <motion.div
             key={index}
-            className="w-[400px] shrink-0 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 shadow-sm dark:shadow-none flex flex-col gap-6"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            whileHover={{ y: -3 }}
+            transition={{ duration: 0.3, delay: index * 0.06 }}
+            className="w-[300px] shrink-0 p-5 rounded-xl border border-border/80 bg-card hover:border-primary/40 transition-all duration-200 flex flex-col justify-between shadow-xs"
           >
-            <div className="flex gap-1 text-yellow-400 dark:text-yellow-500">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className="w-4 h-4 fill-current" />
-              ))}
+            <div>
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed italic mb-4">
+                &ldquo;{review.content}&rdquo;
+              </p>
             </div>
-            <p className="text-slate-600 dark:text-slate-400 font-bold text-sm leading-relaxed whitespace-normal italic">
-              "{review.content}"
-            </p>
-            <div className="flex items-center gap-4 mt-auto">
-              <div className="w-10 h-10 rounded-full bg-[#2D46FF] dark:bg-blue-600 flex items-center justify-center text-white text-xs font-black">
+            <div className="flex items-center gap-3 border-t border-border/60 pt-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-mono font-bold text-primary">
                 {review.avatar}
               </div>
               <div className="text-left">
-                <div className="text-sm font-black text-slate-950 dark:text-white">{review.name}</div>
-                <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{review.role}</div>
+                <div className="text-xs font-bold text-foreground">{review.name}</div>
+                <div className="text-[10px] text-muted-foreground">{review.role}</div>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>

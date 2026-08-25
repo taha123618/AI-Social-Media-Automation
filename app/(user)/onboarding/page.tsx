@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BusinessTypeSelector } from './_components/business-type-selector';
 import { WebsiteScanner, type ScrapedData } from './_components/website-scanner';
+import { Check, ArrowRight, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Step = 'business-type' | 'website-scan' | 'complete';
 
@@ -20,7 +22,6 @@ export default function OnboardingPage() {
   };
 
   const handleScanComplete = (data: ScrapedData) => {
-    // Business profile has been updated by the API
     console.log('Scan complete:', data);
   };
 
@@ -29,7 +30,6 @@ export default function OnboardingPage() {
       setCurrentStep('website-scan');
     } else if (currentStep === 'website-scan') {
       setCurrentStep('complete');
-      // Redirect to dashboard after 2 seconds
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
@@ -37,108 +37,122 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto w-full">
         {/* Progress Indicator */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between max-w-2xl mx-auto">
-            {['business-type', 'website-scan', 'complete'].map((step, idx) => (
-              <div key={step} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${currentStep === step
-                      ? 'bg-blue-600 text-white'
-                      : ['business-type', 'website-scan'].indexOf(currentStep) > idx
-                        ? 'bg-green-600 text-white'
-                        : 'bg-slate-200 text-slate-500'
-                    }`}
-                >
-                  {['business-type', 'website-scan'].indexOf(currentStep) > idx ? '✓' : idx + 1}
-                </div>
-                {idx < 2 && (
+        <div className="mb-10">
+          <div className="flex items-center justify-between max-w-md mx-auto">
+            {['business-type', 'website-scan', 'complete'].map((step, idx) => {
+              const isPast = ['business-type', 'website-scan', 'complete'].indexOf(currentStep) > idx;
+              const isCurrent = currentStep === step;
+
+              return (
+                <div key={step} className="flex items-center">
                   <div
-                    className={`w-32 h-1 mx-4 ${['business-type', 'website-scan'].indexOf(currentStep) > idx
-                        ? 'bg-green-600'
-                        : 'bg-slate-200'
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-all ${
+                      isCurrent
+                        ? 'bg-primary text-primary-foreground ring-4 ring-primary/20 shadow-xs'
+                        : isPast
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-secondary text-muted-foreground border border-border/80'
+                    }`}
+                  >
+                    {isPast ? <Check className="w-4 h-4" /> : idx + 1}
+                  </div>
+                  {idx < 2 && (
+                    <div
+                      className={`w-20 sm:w-28 h-0.5 mx-2 transition-all ${
+                        isPast ? 'bg-primary' : 'bg-border'
                       }`}
-                  />
-                )}
-              </div>
-            ))}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Main Content */}
-        <AnimatePresence mode="wait">
-          {currentStep === 'business-type' && (
-            <motion.div
-              key="business-type"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <BusinessTypeSelector
-                onSelect={handleBusinessTypeSelect}
-                selectedType={selectedBusinessType}
-              />
-              <div className="mt-8 text-center">
-                <button
-                  onClick={handleNext}
-                  disabled={!selectedBusinessType}
-                  className="px-12 py-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  Continue
-                </button>
-              </div>
-            </motion.div>
-          )}
+        {/* Step Container */}
+        <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-10 shadow-lg">
+          <AnimatePresence mode="wait">
+            {currentStep === 'business-type' && (
+              <motion.div
+                key="step-1"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="space-y-8"
+              >
+                <BusinessTypeSelector
+                  onSelect={handleBusinessTypeSelect}
+                  selectedType={selectedBusinessType}
+                />
 
-          {currentStep === 'website-scan' && (
-            <motion.div
-              key="website-scan"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <WebsiteScanner
-                onScanComplete={handleScanComplete}
-                businessId={businessId}
-              />
-              <div className="mt-8 text-center flex gap-4 justify-center">
-                <button
-                  onClick={() => setCurrentStep('business-type')}
-                  className="px-8 py-4 border border-slate-300 dark:border-slate-700 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                >
-                  Back
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="px-12 py-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all"
-                >
-                  {websiteUrl ? 'Skip & Continue' : 'Continue'}
-                </button>
-              </div>
-            </motion.div>
-          )}
+                <div className="flex justify-end pt-4 border-t border-border/60">
+                  <Button
+                    onClick={handleNext}
+                    disabled={!selectedBusinessType}
+                    className="text-xs font-semibold rounded-lg gap-2"
+                  >
+                    <span>Continue to Website Grounding</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
 
-          {currentStep === 'complete' && (
-            <motion.div
-              key="complete"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="text-center py-20"
-            >
-              <div className="text-6xl mb-6">🎉</div>
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
-                You&apos;re All Set!
-              </h1>
-              <p className="text-xl text-slate-600 dark:text-slate-400 mb-8">
-                Your AI Growth Assistant is ready to help you attract more customers
-              </p>
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {currentStep === 'website-scan' && (
+              <motion.div
+                key="step-2"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="space-y-8"
+              >
+                <WebsiteScanner
+                  onScanComplete={handleScanComplete}
+                  businessId={businessId}
+                />
+
+                <div className="flex justify-between items-center pt-4 border-t border-border/60">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep('business-type')}
+                    className="text-xs font-medium rounded-lg"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    className="text-xs font-semibold rounded-lg gap-2"
+                  >
+                    <span>Finalize Workspace Setup</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 'complete' && (
+              <motion.div
+                key="step-3"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12 space-y-4"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
+                  <Sparkles className="w-8 h-8" />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                  Workspace Initialization Complete
+                </h2>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Your autonomous agents and brand voice vectors are active. Redirecting to operator dashboard...
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

@@ -42,8 +42,8 @@ import {
 import { submitDemoAction } from "../actions/form-submission.action";
 import Link from "next/link";
 
-const INPUT_BASE = "h-12 rounded-xl border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground";
-const SELECT_TRIGGER_BASE = "h-12 rounded-xl border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground";
+const INPUT_BASE = "h-11 rounded-lg border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground";
+const SELECT_TRIGGER_BASE = "h-11 rounded-lg border-border bg-background font-medium focus-visible:ring-primary/30 text-foreground";
 const LABEL_BASE = "text-sm font-semibold text-foreground";
 const ICON_BASE = "absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none";
 const ICON_CLASS = "absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10";
