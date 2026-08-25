@@ -8,7 +8,7 @@ import { BillingService } from '@/features/billing/services/billing.service';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const businessId = searchParams.get('businessId');
+    const businessId = searchParams.get('businessId') || request.headers.get('x-business-id') || '';
 
     if (!businessId) {
       return NextResponse.json({ error: 'businessId is required' }, { status: 400 });

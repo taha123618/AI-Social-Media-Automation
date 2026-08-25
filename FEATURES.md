@@ -8,6 +8,8 @@ This document provides a comprehensive overview of all features and modules impl
 
 | Domain Module | Primary Location | Status | Key Technologies & Capabilities |
 | :--- | :--- | :--- | :--- |
+| **Subscription & Billing Engine** | `features/billing/`, `app/api/billing/` | ✅ Production-Ready | Stripe Checkout & Customer Portal, Centralized Plan Entitlements (`free`, `starter`, `pro`, `enterprise`), Transactional Metering, Idempotent Webhooks, Auto-Activation on Registration, Quota Exhaustion Offer Banners |
+| **Route Protection & Security Middleware** | `proxy.ts`, `lib/security.ts` | ✅ Production-Ready | Multi-Path Protection, Session Extraction, Safe Open-Redirect Defense, Magic Byte File Upload Validation, HSTS & Security Headers |
 | **AI Blog Writer** | `features/ai-blog/` | ✅ Implemented | TipTap Rich Text Editor, Real-time SEO Scoring, Unsplash Image Injection, Multi-Platform Serializers (WordPress, Webflow, Medium, Shopify, Notion), PDF & DOCX Export, Version History |
 | **Social Media Scheduler** | `features/scheduler/`, `features/social/` | ✅ Implemented | BullMQ Queues, Cron Job Recurrence, Multi-Account Timezone Slots, Multi-Platform Publishing (Meta, LinkedIn, X, TikTok, YouTube) |
 | **Post Composer** | `features/post-creation/` | ✅ Implemented | Multi-Platform Character Limit Checks, Platform Preview, AI Caption Synthesis, Hashtag Optimization, Media Attachments |
@@ -23,16 +25,43 @@ This document provides a comprehensive overview of all features and modules impl
 | **Workflow Automation** | `features/workflow/`, `mastra/workflows/` | ✅ Implemented | Multi-Step Trigger-Action Pipelines, Weather-Driven Posting, Competitor Tracking, Scheduled Workflows |
 | **Mastra Multi-Agent Engine** | `mastra/` | ✅ Implemented | 13 Specialized Autonomous Agents, LibSQL + DuckDB Observability Store, Weather/YouTube/Competitor Tools |
 | **Organization & Team RBAC** | `features/organization/` | ✅ Implemented | Multi-Tenancy (`businessId`), Team Member Roles (`OWNER`, `ADMIN`, `EDITOR`, `VIEWER`), Invitation Flow |
-| **Billing & Subscriptions** | `features/billing/` | ✅ Implemented | Stripe Checkout & Customer Portal, Tier Limits, Usage Quotas, Webhook Lifecycle Sync |
 | **System Operations & Logs** | `features/system/` | ✅ Implemented | Activity Logs, BullMQ Job Logs, Error Tracking, System Metrics, Maintenance Mode Toggle |
-| **Marketing Landing Suite** | `app/(marketing)/` | ✅ Implemented | 10 Animated Sections (GSAP + Framer Motion + Lenis), Interactive Comparison, Pricing Calculator, FAQ Accordion |
+| **Marketing Landing Suite** | `app/(marketing)/` | ✅ Implemented | 10 Animated Sections (GSAP + Framer Motion + Lenis), Interactive Comparison, Pricing Calculator with 1-Click Checkout, FAQ Accordion |
 | **Admin Operations Panel** | `app/(admin)/` | ✅ Implemented | System Resource Dashboard, AI Blog Template Manager, Global User Directory, Error Monitoring |
 
 ---
 
 ## Detailed Module Breakdown
 
-### 1. AI Blog Writer (`features/ai-blog/`)
+### 1. Subscription, Plan Entitlements & Billing System (`features/billing/`)
+- **Centralized Plan Hierarchy (`features/billing/config/plans.config.ts`)**:
+  - `Free` ($0): 5 AI social posts/mo, 20 blog articles/mo, 3,000 max words/article, 1 Brand Voice profile, manual CMS export.
+  - `Starter` ($29/mo or $24/mo annual): 50 AI social posts/mo, 100 blog articles/mo, 8,000 max words/article, 5 Brand Voices, automated post & article scheduling, topical cluster mapping, AI detection bypass.
+  - `Pro` ($99/mo or $79/mo annual): Unlimited posts & articles, no word limits, unlimited Brand Voices, team seats, developer API access, priority support.
+  - `Enterprise` ($299/mo): Full white-label reports, dedicated instances, SLA.
+- **Entitlement Service (`EntitlementService`)**: Cached, high-throughput capability verification (`canAccess`, `getFeatureLimit`, `resolvePlanForBusiness`).
+- **Usage Metering (`UsageService`)**: PostgreSQL atomic consumption (`consume`) and quota checking (`canConsume`). Prevents unauthorized resource consumption with `QuotaExceededError`.
+- **Stripe Lifecycle Integration**:
+  - `POST /api/billing/checkout`: Initiates Stripe Checkout sessions for upgrades and annual/monthly billing cycles.
+  - `POST /api/billing/portal`: Generates customer billing portal sessions.
+  - `POST /api/billing/webhooks`: Idempotent event processing (`checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_succeeded`).
+  - `GET /api/cron/billing-reconciliation`: Periodic reconciliation and monthly quota reset worker.
+- **Auto-Activation on Registration**: Seeding of Organization, default workspace, active Free subscription, and initial usage limits on user signup.
+- **Interactive Marketing Checkout (`components/home/PricingCard.tsx`)**: 1-click checkout for logged-in workspaces and registration pre-fill for new visitors.
+- **Dashboard Quota Banners (`app/(user)/dashboard/page.tsx`)**: Prominent upgrade triggers when free quotas are exhausted.
+- **Billing Settings Dashboard (`app/(user)/settings/billing/page.tsx`)**: Real-time quota breakdown, subscription status, invoice PDF download links, and plan tier switcher.
+
+---
+
+### 2. Route Protection & Security Architecture (`proxy.ts`, `lib/security.ts`)
+- **Middleware Proxy (`proxy.ts`)**: Base path prefix route protection for user dashboards, APIs, content libraries, schedules, settings, and workflows with automatic redirect to `/login?redirect=...`.
+- **Direct Header Session Verification**: `auth.api.getSession({ headers: request.headers })` ensuring session tokens are accurately parsed on every request.
+- **Public Route & Webhook Whitelisting**: Clean bypass for auth endpoints, Stripe webhooks, Prometheus metrics, and public marketing pages.
+- **Security Defenses (`lib/security.ts`)**: Magic byte binary header validation for media uploads, HTML sanitization, HSTS, and XSS filtering.
+
+---
+
+### 3. AI Blog Writer (`features/ai-blog/`)
 - **Interactive Rich Text Editor**: Powered by TipTap (`@tiptap/react`) with live formatting, undo/redo, heading hierarchy enforcement, and blockquotes.
 - **Real-Time Preview Synchronization**: Immediate bidirectional reflection between editor updates and preview renderers.
 - **Context-Aware Visuals**: `BlogImageService` analyzes headings and category keywords to automatically inject contextual Unsplash images.
@@ -44,33 +73,38 @@ This document provides a comprehensive overview of all features and modules impl
   - **Notion**: Formatted block-compatible HTML.
 - **Multi-Format Downloads**: PDF (via `jsPDF` + `html2canvas`), Word `.docx` (HTML Blob), Markdown, and Rich HTML clipboard.
 
-### 2. Social Media Scheduler & Publisher (`features/scheduler/`, `features/social/`)
+---
+
+### 4. Social Media Scheduler & Publisher (`features/scheduler/`, `features/social/`)
 - **Queue Architecture**: Powered by BullMQ on Redis (`social-posting-queue`).
 - **Recurrence Engine**: Supports daily, weekly, and custom cron-based posting schedules with automated time slot optimization.
-- **Platform Adapters**:
-  - Meta (Facebook Pages & Instagram Business)
-  - LinkedIn (Personal Profiles & Company Pages)
-  - X (Twitter API v2)
-  - TikTok for Business
-  - YouTube Community & Shorts
+- **Platform Adapters**: Meta (Facebook & Instagram), LinkedIn, X (Twitter API v2), TikTok for Business, YouTube Community & Shorts.
 - **Failover & Retries**: Automated retry logic with exponential backoff for network or rate-limit issues.
 
-### 3. Business Knowledge Base & RAG Pipeline (`features/knowledge/`)
+---
+
+### 5. Business Knowledge Base & RAG Pipeline (`features/knowledge/`)
 - **Vector Storage**: Integrated PostgreSQL `pgvector` (`vector` extension).
 - **Document Ingestion**: Supports PDF and plain-text file uploads.
 - **Chunking & Embeddings**: Automated document parsing, semantic chunking, and embedding generation via OpenAI `text-embedding-3-small`.
 - **RAG Querying**: Cosine distance similarity search (`<=>`) dynamically injects brand knowledge, mission statements, and tone preferences into generation prompts.
 
-### 4. Ad Campaign Engine (`features/ad-campaigns/`)
+---
+
+### 6. Ad Campaign Engine (`features/ad-campaigns/`)
 - **Ad Creative Synthesis**: Generates high-converting headlines, primary texts, descriptions, and CTAs tailored to Meta and Google Ads specifications.
 - **A/B Variant Testing**: Generates and tracks multiple ad copy and visual variations simultaneously.
 - **Launch Queue & Performance Sync**: Asynchronous campaign deployment and scheduled metrics synchronization from ad accounts.
 
-### 5. Video & Image Generation Pipelines (`features/video_generation/`, `features/image_generation/`)
+---
+
+### 7. Video & Image Generation Pipelines (`features/video_generation/`, `features/image_generation/`)
 - **Video Generation**: Script-to-video processing via HeyGen and Replicate integrations with background status polling workers.
 - **Image Generation**: Generates high-resolution social imagery via Flux and Stable Diffusion models, automatically persisted to AWS S3 / Cloudflare R2 with database tracking.
 
-### 6. Mastra Multi-Agent Engine (`mastra/`)
+---
+
+### 8. Mastra Multi-Agent Engine (`mastra/`)
 - **13 Autonomous Agents**:
   - `weatherAgent`: Triggers localized posts based on weather forecasts.
   - `youtubeAgent`: Ingests YouTube URLs, extracts transcripts, and drafts derivative social posts.
@@ -78,12 +112,5 @@ This document provides a comprehensive overview of all features and modules impl
   - `trendEventAgent`: Detects viral topics and holiday hooks.
   - `reviewBoosterAgent`: Orchestrates feedback gathering and positive review generation.
   - `multiLocationAgent`: Coordinates franchise locations and localizes messaging.
-  - `analyticsAgent`, `engagementAgent`, `templateAgent`, `postCreationAgent`, `postPublisherAgent`, `blogWriterAgent`, `blogSeoAgent`.
-- **Storage & Observability**: Relational state backed by LibSQL (`mastra.db`) and span traces stored in DuckDB (`mastra.duckdb`).
-
----
-
-## Status Classification
-- ✅ **Implemented**: Fully built, tested, and operational in the codebase.
-- 🟡 **Partially Implemented / In Progress**: Functional core present, pending additional platform integrations or UI enhancements.
-- 🔵 **Roadmap / Planned**: Architectural foundations established, planned for future releases.
+  - `blogWriterAgent`: Orchestrates deep-dive long-form article synthesis.
+  - `socialMediaAgent`, `adCopyAgent`, `analyticsAgent`, `complianceAgent`, `audioVideoAgent`, `schedulingAgent`.
