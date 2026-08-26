@@ -12,11 +12,12 @@ interface BlogArticleCardProps {
     title: string | null;
     slug: string | null;
     status: string;
-    wordCount: number;
-    readingTime: number;
-    seoScore: number | null;
-    tone: string;
+    wordCount?: number | null;
+    readingTime?: number | null;
+    seoScore?: number | null;
+    tone?: string | null;
     updatedAt: string | Date;
+    [key: string]: any;
   };
   onDelete: (id: string) => void;
   isDeleting?: boolean;
@@ -36,7 +37,7 @@ export function BlogArticleCard({ article, onDelete, isDeleting }: BlogArticleCa
     }
   };
 
-  const getSeoScoreColor = (score: number | null) => {
+  const getSeoScoreColor = (score: number | null | undefined) => {
     if (!score) return "text-muted-foreground";
     if (score >= 80) return "text-primary font-bold";
     if (score >= 50) return "text-amber-500";
@@ -89,11 +90,11 @@ export function BlogArticleCard({ article, onDelete, isDeleting }: BlogArticleCa
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1 font-mono text-foreground">
             <FileText className="h-3 w-3 text-primary" />
-            {article.wordCount} words
+            {article.wordCount ?? 0} words
           </span>
           <span className="flex items-center gap-1">
             <FileClock className="h-3 w-3" />
-            {article.readingTime} min
+            {article.readingTime ?? 1} min
           </span>
         </div>
 

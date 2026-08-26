@@ -13,53 +13,30 @@ import { BlogArticleCard } from "./BlogArticleCard";
 import { toast as sonnerToast } from "sonner";
 import { getBlogDashboardAnalytics } from "../actions/blog-generation.actions";
 
+import { useBlogArticles, useDeleteBlogArticle } from "../hooks/use-blog-article";
+
 export default function BlogDashboardEnhanced() {
-  const [articles, setArticles] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
-  const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
 
-  const toast = ({ title, description, variant }: { title?: string; description?: string; variant?: string }) => {
-    if (variant === "destructive") {
-      sonnerToast.error(title || "Error", { description });
-    } else {
-      sonnerToast.success(title || "Success", { description });
-    }
-  };
-
-  const fetchArticles = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/blog/articles");
-      const json = await res.json();
-      if (json.success) {
-        setArticles(json.data || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query Axios hooks
+  const { data: articles = [], isLoading: loading } = useBlogArticles();
+  const deleteArticleMutation = useDeleteBlogArticle();
 
   useEffect(() => {
-    fetchArticles();
     getBlogDashboardAnalytics(30).then(setAnalyticsData).catch(console.error);
   }, []);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/blog/articles/${id}`, { method: "DELETE" });
-      const json = await res.json();
-      if (json.success) {
-        setArticles((prev) => prev.filter((a) => a.id !== id));
-        sonnerToast.success("Article deleted");
-      }
-    } catch (err) {
+      await deleteArticleMutation.mutateAsync(id);
+      sonnerToast.success("Article deleted");
+    } catch (err: any) {
       console.error(err);
+      sonnerToast.error("Failed to delete article", { description: err.message });
     } finally {
       setDeletingId(null);
     }

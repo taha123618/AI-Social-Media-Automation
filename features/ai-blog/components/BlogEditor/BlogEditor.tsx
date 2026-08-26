@@ -38,6 +38,13 @@ import { ContentStats } from "./ContentStats";
 import { SERPPreview } from "./SERPPreview";
 import { SEOScorePanel } from "./SEOScorePanel";
 import { AIAssistantPanel } from "./AIAssistantPanel";
+import {
+  useBlogArticle,
+  useBlogArticleVersions,
+  useUpdateBlogArticle,
+  useAnalyzeArticleSEO,
+  useRestoreBlogVersion,
+} from "../../hooks/use-blog-article";
 import { BlogPreview } from "../BlogPreview/BlogPreview";
 import { PreviewToolbar, type PreviewDevice } from "../BlogPreview/PreviewToolbar";
 import { BlogExportPanel, type BlogExportPanelHandle } from "../BlogExportPanel/BlogExportPanel";
@@ -49,8 +56,18 @@ interface BlogEditorProps {
 }
 
 export default function BlogEditor({ articleId }: BlogEditorProps) {
+  const router = useRouter();
+
+  // React Query Hooks (Axios-powered)
+  const { data: fetchedArticle, isLoading: articleLoading, error: articleError } = useBlogArticle(articleId);
+  const { data: fetchedVersions = [], isLoading: versionsLoading } = useBlogArticleVersions(articleId, {
+    enabled: true,
+  });
+  const updateArticleMutation = useUpdateBlogArticle(articleId);
+  const analyzeSEOMutation = useAnalyzeArticleSEO(articleId);
+  const restoreVersionMutation = useRestoreBlogVersion(articleId);
+
   const [article, setArticle] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"seo" | "ai" | "settings" | "versions" | "preview" | "export">("seo");
   const [selectedText, setSelectedText] = useState("");
@@ -61,10 +78,6 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
   const [metaDescription, setMetaDescription] = useState("");
   const [seoScore, setSeoScore] = useState<number | null>(null);
   const [seoReport, setSeoReport] = useState<SEOReport | null>(null);
-
-  // Versions state
-  const [versions, setVersions] = useState<any[]>([]);
-  const [loadingVersions, setLoadingVersions] = useState(false);
 
   // SEO regenerate state
   const [isRegeneratingSEO, setIsRegeneratingSEO] = useState(false);
@@ -86,8 +99,6 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
   const [imageAspectRatio, setImageAspectRatio] = useState<ImageAspectRatio>("16:9");
   const [enableImageOverlay, setEnableImageOverlay] = useState(false);
   const [availableImgProviders] = useState(() => getAvailableProviders());
-
-  const router = useRouter();
   
   const toast = ({ title, description, variant }: { title?: string; description?: string; variant?: string }) => {
     if (variant === "destructive") {
@@ -122,73 +133,37 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
     },
   });
 
-  const fetchArticle = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/blog/articles/${articleId}`);
-      const json = await res.json();
-      if (json.success) {
-        setArticle(json.data);
-        setTitle(json.data.title || "");
-        setSlug(json.data.slug || "");
-        setMetaDescription(json.data.metaDescription || "");
-        setSeoScore(json.data.seoScore);
+  // Populate state once article is loaded via React Query
+  useEffect(() => {
+    if (fetchedArticle) {
+      setArticle(fetchedArticle);
+      setTitle(fetchedArticle.title || "");
+      setSlug(fetchedArticle.slug || "");
+      setMetaDescription(fetchedArticle.metaDescription || "");
+      setSeoScore(fetchedArticle.seoScore ?? null);
 
-        if (editor && json.data.content) {
-          editor.commands.setContent(json.data.content);
-          setEditorContent(json.data.content);
-        }
-
-        // Fetch SEO Report if available
-        if (json.data.seoReports?.[0]) {
-          setSeoReport(json.data.seoReports[0]);
-        }
-      } else {
-        toast({
-          title: "Error fetching article",
-          description: json.error || "Article not found",
-          variant: "destructive",
-        });
-        router.push("/blog");
+      if (editor && fetchedArticle.content && !editor.getText().trim()) {
+        editor.commands.setContent(fetchedArticle.content);
+        setEditorContent(fetchedArticle.content);
       }
-    } catch (err) {
-      console.error(err);
+
+      if (fetchedArticle.seoReports?.[0]) {
+        setSeoReport(fetchedArticle.seoReports[0]);
+      }
+    }
+  }, [fetchedArticle, editor]);
+
+  // Handle article fetch errors
+  useEffect(() => {
+    if (articleError) {
       toast({
-        title: "Connection error",
-        description: "Failed to retrieve article details.",
+        title: "Error fetching article",
+        description: (articleError as Error).message || "Article not found",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      router.push("/blog");
     }
-  };
-
-  const fetchVersions = async () => {
-    try {
-      setLoadingVersions(true);
-      const res = await fetch(`/api/blog/articles/${articleId}/versions`);
-      const json = await res.json();
-      if (json.success) {
-        setVersions(json.data || []);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingVersions(false);
-    }
-  };
-
-  useEffect(() => {
-    if (editor) {
-      fetchArticle();
-    }
-  }, [articleId, editor]);
-
-  useEffect(() => {
-    if (activeTab === "versions") {
-      fetchVersions();
-    }
-  }, [activeTab]);
+  }, [articleError, router]);
 
   // Auto-trigger AI image generation when content changes (debounced) or images enabled
   useEffect(() => {
@@ -220,48 +195,38 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
         ? BlogImageService.injectImagesIntoContent(htmlContent, Object.values(sectionImages), article?.title || title)
         : htmlContent;
 
-      const res = await fetch(`/api/blog/articles/${articleId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          slug,
-          metaDescription,
-          content: contentWithImages,
-          status: article.status === "GENERATING" ? "REVIEW" : article.status,
-        }),
+      const updated = await updateArticleMutation.mutateAsync({
+        title,
+        slug,
+        metaDescription,
+        content: contentWithImages,
+        status: article?.status === "GENERATING" ? "REVIEW" : article?.status,
       });
 
-      const json = await res.json();
-      if (json.success) {
-        setArticle(json.data);
-        setSeoScore(json.data.seoScore);
+      setArticle(updated);
+      setSeoScore(updated.seoScore ?? null);
 
-        // Fetch updated SEO report
-        const seoRes = await fetch(`/api/blog/articles/${articleId}/seo`, { method: "POST" });
-        const seoJson = await seoRes.json();
-        if (seoJson.success) {
-          setSeoReport(seoJson.data);
+      // Trigger updated SEO analysis via React Query Axios mutation
+      try {
+        const seoData = await analyzeSEOMutation.mutateAsync();
+        if (seoData) {
+          setSeoReport(seoData);
         }
+      } catch {
+        // Non-critical background SEO failure handled gracefully
+      }
 
-        if (showNotification) {
-          toast({
-            title: "Article saved",
-            description: "All content, SEO metrics, and metadata updated.",
-          });
-        }
-      } else {
+      if (showNotification) {
         toast({
-          title: "Save failed",
-          description: json.error || "An error occurred",
-          variant: "destructive",
+          title: "Article saved",
+          description: "All content, SEO metrics, and metadata updated.",
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       toast({
-        title: "Connection issue",
-        description: "Failed to sync updates to the server.",
+        title: "Save failed",
+        description: err.message || "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -274,48 +239,26 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
 
     try {
       setSaving(true);
-      const res = await fetch(`/api/blog/articles/${articleId}/versions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ versionId }),
-      });
+      const restored = await restoreVersionMutation.mutateAsync(versionId);
 
-      const body = await res.text();
-      let json: any;
-      try {
-        json = JSON.parse(body);
-      } catch {
-        toast({
-          title: "Version restore failed",
-          description: `Server returned ${res.status}: ${body || "empty response"}`,
-          variant: "destructive",
-        });
-        return;
+      if (restored?.content) {
+        editor?.commands.setContent(restored.content);
+        setEditorContent(restored.content);
       }
+      if (restored?.title) setTitle(restored.title);
+      if (restored?.metaDescription) setMetaDescription(restored.metaDescription);
 
-      if (!res.ok || !json.success) {
-        toast({
-          title: "Restore failed",
-          description: json?.error || `Server error (${res.status})`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      editor?.commands.setContent(json.data.content);
-      setTitle(json.data.title || "");
-      setMetaDescription(json.data.metaDescription || "");
       toast({
         title: "Version restored",
         description: "Article content reverted back successfully.",
       });
       setActiveTab("seo");
       setTimeout(() => handleSave(false), 500);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       toast({
         title: "Restore failed",
-        description: "An unexpected error occurred",
+        description: err.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
@@ -451,21 +394,19 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
   const handlePublish = async () => {
     try {
       setSaving(true);
-      const res = await fetch(`/api/blog/articles/${articleId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "PUBLISHED" }),
+      const updated = await updateArticleMutation.mutateAsync({ status: "PUBLISHED" });
+      setArticle(updated);
+      toast({
+        title: "Article published",
+        description: "The article status is now set to published.",
       });
-      const json = await res.json();
-      if (json.success) {
-        setArticle(json.data);
-        toast({
-          title: "Article published",
-          description: "The article status is now set to published.",
-        });
-      }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      toast({
+        title: "Publish failed",
+        description: err.message || "Failed to publish article",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -490,11 +431,11 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
     editor.chain().focus().insertContent(text).run();
   };
 
-  if (loading) {
+  if (articleLoading || !article) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-        <p className="text-slate-400 text-sm">Loading article workspace...</p>
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        <p className="text-muted-foreground text-sm">Loading article workspace...</p>
       </div>
     );
   }
@@ -790,34 +731,34 @@ export default function BlogEditor({ articleId }: BlogEditorProps) {
                 </div>
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Previous Saved Revisions</h3>
               </div>
-              {loadingVersions ? (
-                <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 text-blue-500 animate-spin" /></div>
-              ) : versions.length === 0 ? (
-                <div className="bg-slate-900/30 border border-slate-800 rounded-xl p-8 text-center">
-                  <History className="h-8 w-8 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-500 text-xs">No previous versions exist yet.</p>
-                  <p className="text-slate-600 text-[10px] mt-1">Versions are auto-saved each time content changes.</p>
+              {versionsLoading ? (
+                <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 text-primary animate-spin" /></div>
+              ) : fetchedVersions.length === 0 ? (
+                <div className="bg-card border border-border/80 rounded-xl p-8 text-center">
+                  <History className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground text-xs">No previous versions exist yet.</p>
+                  <p className="text-muted-foreground/70 text-[10px] mt-1">Versions are auto-saved each time content changes.</p>
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
-                  {versions.map((ver, i) => (
+                  {fetchedVersions.map((ver, i) => (
                     <div
                       key={ver.id}
-                      className="group bg-slate-900/30 border border-slate-800 rounded-lg p-3 flex flex-col gap-2 hover:bg-slate-900/50 hover:border-slate-700 transition-all duration-200"
+                      className="group bg-card border border-border/70 rounded-lg p-3 flex flex-col gap-2 hover:bg-secondary/40 hover:border-border transition-all duration-200"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-[9px] font-bold text-slate-400 border border-slate-700">
-                            #{versions.length - i}
+                          <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center text-[9px] font-bold text-foreground border border-border/70">
+                            #{fetchedVersions.length - i}
                           </div>
-                          <span className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors line-clamp-1">
+                          <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
                             {ver.title}
                           </span>
                         </div>
-                        <span className="text-[9px] text-slate-600 whitespace-nowrap ml-2">{new Date(ver.createdAt).toLocaleString()}</span>
+                        <span className="text-[9px] text-muted-foreground whitespace-nowrap ml-2">{new Date(ver.createdAt).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-end">
-                        <Button size="sm" variant="ghost" className="h-7 text-[10px] text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700/50" onClick={() => handleRestoreVersion(ver.id)}>
+                        <Button size="sm" variant="ghost" className="h-7 text-[10px] text-muted-foreground hover:text-foreground bg-secondary/50 hover:bg-secondary" onClick={() => handleRestoreVersion(ver.id)}>
                           <History className="h-3 w-3 mr-1" />
                           Restore
                         </Button>
