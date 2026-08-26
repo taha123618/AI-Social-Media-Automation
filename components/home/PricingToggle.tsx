@@ -9,12 +9,23 @@ interface PricingToggleProps {
 
 export const PricingToggle = ({ billingCycle, onChange }: PricingToggleProps) => {
   return (
-    <div className="flex items-center justify-center gap-3 bg-secondary/80 p-1.5 rounded-xl border border-border/80 shadow-xs">
+    <div className="inline-flex items-center bg-secondary/80 p-1.5 rounded-xl border border-border/70 shadow-xs relative">
+      {/* Sliding active indicator */}
+      <motion.div
+        layoutId="pricing-toggle-indicator"
+        className="absolute top-1.5 bottom-1.5 rounded-lg bg-card shadow-sm border border-border/60"
+        style={{
+          left: billingCycle === "month" ? "6px" : "50%",
+          width: "calc(50% - 6px)",
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      />
+
       <button
         onClick={() => onChange("month")}
-        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+        className={`relative z-10 px-5 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-150 flex-1 ${
           billingCycle === "month"
-            ? "bg-card text-foreground shadow-xs"
+            ? "text-foreground"
             : "text-muted-foreground hover:text-foreground"
         }`}
       >
@@ -23,14 +34,14 @@ export const PricingToggle = ({ billingCycle, onChange }: PricingToggleProps) =>
 
       <button
         onClick={() => onChange("year")}
-        className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+        className={`relative z-10 flex items-center justify-center gap-1.5 px-5 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-150 flex-1 ${
           billingCycle === "year"
-            ? "bg-card text-foreground shadow-xs"
+            ? "text-foreground"
             : "text-muted-foreground hover:text-foreground"
         }`}
       >
         <span>Annual</span>
-        <span className="bg-primary/10 border border-primary/20 text-primary text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full">
+        <span className="bg-primary/10 border border-primary/25 text-primary text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full">
           -20%
         </span>
       </button>

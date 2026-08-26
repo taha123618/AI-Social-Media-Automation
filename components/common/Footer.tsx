@@ -1,11 +1,41 @@
 import Link from "next/link";
 import AppLogo from "./AppLogo";
+import { FaXTwitter, FaLinkedin, FaGithub, FaYoutube } from "react-icons/fa6";
+
+const socialLinks = [
+  { icon: FaXTwitter, href: "https://x.com", label: "X / Twitter" },
+  { icon: FaLinkedin, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: FaGithub, href: "https://github.com", label: "GitHub" },
+  { icon: FaYoutube, href: "https://youtube.com", label: "YouTube" },
+];
+
+const footerLinks = {
+  Product: [
+    { label: "AI Blog Writer", href: "/ai-blog-writer" },
+    { label: "Social Scheduler", href: "/social-media-management-tool" },
+    { label: "Pricing & Plans", href: "/pricing" },
+    { label: "Talk to Sales", href: "/talk-to-sales" },
+  ],
+  Platform: [
+    { label: "Agent Framework", href: "/#features" },
+    { label: "Tool Ecosystem", href: "/#tools" },
+    { label: "Documentation", href: "/#faq" },
+    { label: "Privacy Policy", href: "/privacy" },
+  ],
+  Account: [
+    { label: "Sign In", href: "/login" },
+    { label: "Create Workspace", href: "/register" },
+    { label: "Billing & Seats", href: "/settings/billing" },
+    { label: "Operator Console", href: "/dashboard" },
+  ],
+};
 
 export default function Footer() {
   return (
-    <footer className="py-16 bg-card border-t border-border/70 text-muted-foreground transition-colors">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <footer className="bg-card border-t border-border/70 text-muted-foreground transition-colors">
+      <div className="container mx-auto px-4 max-w-6xl py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+          {/* Brand column */}
           <div className="col-span-2">
             <div className="mb-4">
               <AppLogo />
@@ -13,47 +43,37 @@ export default function Footer() {
             <p className="max-w-xs mb-6 text-sm text-muted-foreground leading-relaxed">
               Enterprise multi-agent social media automation, SEO-optimized blog writing, and predictive analytics engine.
             </p>
-            <div className="flex gap-3">
-              {["X", "IN", "GH", "YT"].map((item) => (
-                <div
-                  key={item}
-                  className="w-8 h-8 rounded-lg bg-secondary border border-border/70 flex items-center justify-center text-xs font-mono font-bold text-foreground hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+            <div className="flex gap-2">
+              {socialLinks.map(({ icon: Icon, href, label }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-lg bg-secondary border border-border/70 flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-150"
                 >
-                  {item}
-                </div>
+                  <Icon className="w-3.5 h-3.5" />
+                </Link>
               ))}
             </div>
           </div>
 
-          <div>
-            <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">Product</h4>
-            <ul className="space-y-2.5 text-xs">
-              <li><Link href="/ai-blog-writer" className="hover:text-primary transition-colors">AI Blog Writer</Link></li>
-              <li><Link href="/social-media-management-tool" className="hover:text-primary transition-colors">Social Scheduler</Link></li>
-              <li><Link href="/pricing" className="hover:text-primary transition-colors">Pricing & Plans</Link></li>
-              <li><Link href="/talk-to-sales" className="hover:text-primary transition-colors">Talk to Sales</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">Platform</h4>
-            <ul className="space-y-2.5 text-xs">
-              <li><Link href="/#features" className="hover:text-primary transition-colors">Agent Framework</Link></li>
-              <li><Link href="/#tools" className="hover:text-primary transition-colors">Tool Ecosystem</Link></li>
-              <li><Link href="/#faq" className="hover:text-primary transition-colors">Documentation</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">Account</h4>
-            <ul className="space-y-2.5 text-xs">
-              <li><Link href="/login" className="hover:text-primary transition-colors">Sign In</Link></li>
-              <li><Link href="/register" className="hover:text-primary transition-colors">Create Workspace</Link></li>
-              <li><Link href="/settings/billing" className="hover:text-primary transition-colors">Billing & Seats</Link></li>
-              <li><Link href="/dashboard" className="hover:text-primary transition-colors">Operator Console</Link></li>
-            </ul>
-          </div>
+          {/* Link columns */}
+          {Object.entries(footerLinks).map(([group, links]) => (
+            <div key={group}>
+              <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">{group}</h4>
+              <ul className="space-y-2.5 text-xs">
+                {links.map(({ label, href }) => (
+                  <li key={label}>
+                    <Link href={href} className="hover:text-primary transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
