@@ -1,55 +1,49 @@
 "use client";
-import { Headphones, CreditCard, BookOpen, Smile } from "lucide-react";
+
+import { Headphones, CreditCard, BookOpen, Sparkles } from "lucide-react";
 
 const trustFeatures = [
   {
-    title: "Always Available Support",
-    description: "Get help anytime with our 24/7 support team. We're here to provide ongoing, top-notch assistance to ensure you're completely happy.",
-    icon: <Headphones className="w-5 h-5 text-blue-600" />,
-    color: "bg-blue-50"
+    title: "Dedicated Operational Support",
+    description: "Get prompt assistance from our platform engineering team. Priority and enterprise tiers include dedicated CSM support and Slack connect channels.",
+    icon: <Headphones className="w-5 h-5 text-primary" />,
   },
   {
-    title: "Flexible Subscriptions",
-    description: "Choose a plan that works for you. You can upgrade or cancel your subscription at any time without any constraints. Pay only for what you need.",
-    icon: <CreditCard className="w-5 h-5 text-indigo-600" />,
-    color: "bg-indigo-50"
+    title: "Flexible Quota Scaling",
+    description: "Upgrade or scale your dispatch volume on demand. Pay only for the active workspace seats and generation units your fleet utilizes.",
+    icon: <CreditCard className="w-5 h-5 text-accent" />,
   },
   {
-    title: "Guides and Community",
-    description: "Access a wide range of guides and tutorials for all your content generation needs. Become part of a supportive community here.",
-    icon: <BookOpen className="w-5 h-5 text-blue-500" />,
-    color: "bg-blue-50"
+    title: "Developer API & Webhooks",
+    description: "Integrate programmatic generation endpoints directly into your proprietary CMS, marketing automation, or CRM stack.",
+    icon: <BookOpen className="w-5 h-5 text-purple-400" />,
   },
   {
-    title: "Not sure?",
-    description: "Use our plus plan to easily automate your content creation process and see the magic happen instantly.",
-    icon: <Smile className="w-5 h-5 text-blue-400" />,
-    color: "bg-blue-50"
+    title: "Deterministic Brand Guardrails",
+    description: "Eliminate hallucinations using multi-tenant pgvector RAG embeddings that enforce your tone of voice across every generated article.",
+    icon: <Sparkles className="w-5 h-5 text-primary" />,
   }
 ];
 
 export const TrustFeatures = () => {
   return (
-    <div className="py-24 bg-white dark:bg-slate-950 transition-colors">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {trustFeatures?.map((feature, index) => (
+    <div className="py-20 bg-muted/20">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {trustFeatures.map((feature, index) => (
             <div
               key={index}
-              className="p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30 flex gap-6 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-slate-100/50 dark:hover:shadow-none transition-all duration-500 group"
+              className="p-6 rounded-xl border border-border/80 bg-card flex gap-4 hover:border-primary/40 transition-all duration-200"
             >
-              <div className={`w-12 h-12 rounded-xl ${feature.color} dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-500`}>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                 {feature.icon}
               </div>
               <div>
-                <h4 className="text-lg font-black text-slate-950 dark:text-white mb-3 tracking-tight">
+                <h4 className="text-sm font-bold text-foreground mb-1.5">
                   {feature.title}
                 </h4>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   {feature.description}
-                  {feature.title === "Guides and Community" && (
-                    <span className="text-[#2D46FF] dark:text-blue-400 cursor-pointer hover:underline ml-1">supportive community here.</span>
-                  )}
                 </p>
               </div>
             </div>

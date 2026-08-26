@@ -42,7 +42,7 @@ bun run build           # Build production bundle with 8GB heap memory allocatio
 | `package.json` | Project metadata, scripts, and dependencies. |
 | `tsconfig.json` | Path aliases (`@/*`), compiler options, and build outputs. |
 | `prisma/schema.prisma` | Datasource, pgvector extension, and client generator config. |
-| `prisma/models/*.prisma` | Modular domain schema models (Ad, Auth, Blog, Business, CRM, Knowledge, Social, System, Video, Workflow). |
+| `prisma/models/*.prisma` | Modular domain schema models (Ad, Auth, Billing, Blog, Business, CRM, Knowledge, Social, System, Video, Workflow). |
 
 ## Boundaries
 

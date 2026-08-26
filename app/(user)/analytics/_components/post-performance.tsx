@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
 import { FaXTwitter } from 'react-icons/fa6';
 import { FaLinkedin, FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
@@ -15,78 +14,80 @@ const icons: Record<string, any> = {
 
 export function PostPerformance({ posts }: { posts: any[] }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white overflow-hidden dark:border-slate-800 dark:bg-slate-900/50 shadow-sm">
-      <div className="p-8 border-b border-slate-100 dark:border-slate-800">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Content Performance</h3>
-        <p className="text-sm text-slate-500">Deep dive into individual post metrics</p>
+    <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
+      <div className="p-5 border-b border-border/70 flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-bold text-foreground">Content Performance</h3>
+          <p className="text-xs text-muted-foreground">Detailed engagement and conversion telemetry per post</p>
+        </div>
+        <span className="text-xs font-mono font-medium text-muted-foreground">
+          {posts.length} Posts Analyzed
+        </span>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
+        <table className="w-full text-left text-sm">
           <thead>
-            <tr className="bg-slate-50/50 dark:bg-slate-800/50">
-              <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Content</th>
-              <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Platform</th>
-              <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Impressions</th>
-              <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Engagement</th>
-              <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Clicks</th>
-              <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Posted</th>
+            <tr className="bg-muted/30 border-b border-border/70 text-xs font-semibold text-muted-foreground uppercase">
+              <th className="px-5 py-3">Content Vector</th>
+              <th className="px-5 py-3">Channel</th>
+              <th className="px-5 py-3 text-center">Impressions</th>
+              <th className="px-5 py-3 text-center">Engagement</th>
+              <th className="px-5 py-3 text-center">Clicks</th>
+              <th className="px-5 py-3">Published Date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {posts.map((post, idx) => {
+          <tbody className="divide-y divide-border/60">
+            {posts.map((post) => {
               const Icon = icons[post.platform] || ExternalLink;
               return (
-                <motion.tr
+                <tr
                   key={post.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
+                  className="hover:bg-muted/30 transition-colors"
                 >
-                  <td className="px-8 py-4">
+                  <td className="px-5 py-3">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{post.title || 'Untitled Content'}</span>
-                      <span className="text-[10px] font-medium text-slate-400 mt-0.5">{post.intent}</span>
+                      <span className="font-semibold text-foreground line-clamp-1">{post.title || 'Untitled Campaign Vector'}</span>
+                      <span className="text-[11px] text-muted-foreground mt-0.5">{post.intent || 'GENERAL'}</span>
                     </div>
                   </td>
-                  <td className="px-8 py-4">
+                  <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded flex items-center justify-center bg-slate-50 dark:bg-slate-800">
-                        <Icon className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
+                      <div className="h-6 w-6 rounded-md flex items-center justify-center bg-secondary">
+                        <Icon className="h-3.5 w-3.5 text-primary" />
                       </div>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{post.platform}</span>
+                      <span className="text-xs font-medium text-foreground uppercase">{post.platform}</span>
                     </div>
                   </td>
-                  <td className="px-8 py-4 text-center">
-                    <span suppressHydrationWarning className="text-sm font-bold text-slate-900 dark:text-white">{post.metrics.impressions.toLocaleString()}</span>
+                  <td className="px-5 py-3 text-center font-mono">
+                    <span suppressHydrationWarning className="font-semibold text-foreground">{post.metrics.impressions.toLocaleString()}</span>
                   </td>
-                  <td className="px-8 py-4 text-center">
-                    <span suppressHydrationWarning className="text-sm font-bold text-emerald-600">{(post.metrics.likes + post.metrics.comments).toLocaleString()}</span>
+                  <td className="px-5 py-3 text-center font-mono">
+                    <span suppressHydrationWarning className="font-semibold text-primary">{(post.metrics.likes + post.metrics.comments).toLocaleString()}</span>
                   </td>
-                  <td className="px-8 py-4 text-center">
-                    <span suppressHydrationWarning className="text-sm font-bold text-blue-600">{post.metrics.clicks.toLocaleString()}</span>
+                  <td className="px-5 py-3 text-center font-mono">
+                    <span suppressHydrationWarning className="font-semibold text-accent">{post.metrics.clicks.toLocaleString()}</span>
                   </td>
-                  <td className="px-8 py-4">
-                    <div className="flex items-center justify-between">
-                      <span suppressHydrationWarning className="text-xs font-medium text-slate-500">
-                        {new Date(post.postedAt).toLocaleDateString()}
+                  <td className="px-5 py-3">
+                    <div className="flex items-center justify-between font-mono text-xs text-muted-foreground">
+                      <span suppressHydrationWarning>
+                        {new Date(post.postedAt).toISOString().split('T')[0]}
                       </span>
                       {post.url && (
-                        <a href={post.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
+                        <a href={post.url} target="_blank" rel="noopener noreferrer" className="p-1 rounded-md hover:bg-muted text-primary transition-colors">
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
                       )}
                     </div>
                   </td>
-                </motion.tr>
+                </tr>
               );
             })}
 
             {posts.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-8 py-12 text-center text-slate-400 text-sm">
-                  No posts analyzed yet.
+                <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground text-xs">
+                  No post telemetry data recorded yet.
                 </td>
               </tr>
             )}

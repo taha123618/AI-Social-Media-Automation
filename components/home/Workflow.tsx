@@ -1,34 +1,41 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/animations/motion";
-import { Rocket, Sparkles, Send, TrendingUp } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
+import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
+import { Rocket, Sparkles, Send, TrendingUp, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const steps = [
   {
-    title: "Define Your Goal",
-    description: "Tell SocialAI what you want to achieve—brand awareness, lead gen, or viral growth.",
-    icon: <Rocket className="w-6 h-6" />,
+    number: "01",
+    title: "Brand DNA & Topical Mapping",
+    description: "Ingest your knowledge base, brand voice guidelines, and target persona definitions into pgvector RAG.",
+    icon: <Rocket className="w-5 h-5 text-primary" />,
+    badge: "CONTEXT LAYER",
   },
   {
-    title: "AI Analysis",
-    description: "Our engine analyzes your brand DNA and historical performance to generate the perfect strategy.",
-    icon: <Sparkles className="w-6 h-6" />,
+    number: "02",
+    title: "Autonomous Swarm Research",
+    description: "Mastra analytical agents monitor trends, keyword difficulty, and audience sentiment in real time.",
+    icon: <Sparkles className="w-5 h-5 text-accent" />,
+    badge: "INTEL LOOP",
   },
   {
-    title: "Auto-Generation",
-    description: "Get 30 days of high-converting social posts across all platforms in seconds.",
-    icon: <Send className="w-6 h-6" />,
+    number: "03",
+    title: "Multi-Channel Synthesis",
+    description: "Generate SEO-optimized long-form articles, Gutenberg blocks, and synchronized social carousels.",
+    icon: <Send className="w-5 h-5 text-purple-400" />,
+    badge: "GENERATION",
   },
   {
-    title: "Scale Experimentally",
-    description: "Publish, analyze, and let our AI optimize your content for exponential reach.",
-    icon: <TrendingUp className="w-6 h-6" />,
+    number: "04",
+    title: "Deterministic Dispatch & Attribution",
+    description: "Schedule across platforms with peak-cadence timing and track compounding revenue ROI metrics.",
+    icon: <TrendingUp className="w-5 h-5 text-primary" />,
+    badge: "ATTRIBUTION",
   },
 ];
 
@@ -38,7 +45,7 @@ export default function Workflow() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Progress Bar Animation
+      // Scroll-scrubbed vertical progress line
       gsap.fromTo(
         progressRef.current,
         { scaleY: 0 },
@@ -54,20 +61,21 @@ export default function Workflow() {
         }
       );
 
-      // Stagger Steps Animation
-      const stepsElements = gsap.utils.toArray<HTMLElement>(".workflow-step");
-      stepsElements.forEach((step, i) => {
+      // Alternate x-entrance per step
+      const stepsEls = gsap.utils.toArray<HTMLElement>(".workflow-step");
+      stepsEls.forEach((step, i) => {
         gsap.fromTo(
           step,
-          { opacity: 0, x: i % 2 === 0 ? -50 : 50 },
+          { opacity: 0, x: i % 2 === 0 ? -24 : 24 },
           {
             opacity: 1,
             x: 0,
-            duration: 1,
+            duration: 0.7,
+            ease: "power3.out",
             scrollTrigger: {
               trigger: step,
-              start: "top 80%",
-              end: "top 50%",
+              start: "top 85%",
+              end: "top 55%",
               scrub: 1,
             },
           }
@@ -82,66 +90,88 @@ export default function Workflow() {
     <section
       id="workflow"
       ref={sectionRef}
-      className="py-32 px-4 bg-slate-950 dark:bg-stone-100 relative overflow-hidden rounded-[4rem] mx-4 my-8 transition-colors"
+      className="py-24 px-4 bg-muted/20 relative overflow-hidden"
     >
-      {/* Background Accent */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[150px] rounded-full -z-10" />
+      {/* Ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/4 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="container mx-auto">
-        <div className="max-w-3xl mx-auto text-center mb-24">
-          <motion.span
-            variants={fadeIn}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="text-blue-400 font-black uppercase tracking-[0.3em] text-[10px] mb-4 block"
-          >
-            The Social Engine
-          </motion.span>
+      <div className="container mx-auto max-w-5xl relative z-10">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            PIPELINE ARCHITECTURE
+          </div>
           <motion.h2
             variants={fadeIn}
             initial="initial"
             whileInView="animate"
             viewport={{ once: true }}
-            className="text-4xl md:text-6xl font-black text-white dark:text-slate-950 mb-8 tracking-tighter"
+            className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight"
           >
-            From idea to <span className="text-blue-400">viral</span> <br /> in four simple steps
+            How the Autonomous Swarm <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Executes Your Strategy
+            </span>
           </motion.h2>
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
+            From raw concept to scheduled multi-channel distribution in 4 deterministic steps.
+          </p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto">
-          {/* Central Progress Line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-white/5 -translate-x-1/2 hidden md:block">
+        <div className="relative max-w-3xl mx-auto">
+          {/* Central vertical progress track — desktop only */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border/70 -translate-x-1/2 hidden md:block">
             <div
               ref={progressRef}
-              className="w-full bg-[#2D46FF] shadow-[0_0_20px_rgba(45,70,255,0.5)] origin-top"
-              style={{ height: '100%' }}
+              className="w-full bg-gradient-to-b from-primary to-accent origin-top"
+              style={{ height: "100%" }}
             />
           </div>
 
-          <div className="space-y-24 relative">
+          {/* Mobile left-border timeline */}
+          <div className="absolute left-4 top-0 bottom-0 w-px bg-border/50 md:hidden" />
+
+          <div className="space-y-10 relative">
             {steps.map((step, index) => (
               <div
                 key={index}
-                className={`flex flex-col md:flex-row items-center gap-12 workflow-step ${index % 2 !== 0 ? "md:flex-row-reverse" : ""
-                  }`}
+                className={`flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 pl-10 md:pl-0 relative workflow-step ${
+                  index % 2 !== 0 ? "md:flex-row-reverse" : ""
+                }`}
               >
-                <div className="flex-1 text-center md:text-left">
-                  <div className={`flex flex-col ${index % 2 !== 0 ? "md:items-end md:text-right" : "md:items-start"}`}>
-                    <div className="w-16 h-16 rounded-[1.5rem] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform">
-                      {step.icon}
+                {/* Mobile: left dot node */}
+                <div className="absolute left-0 top-5 md:hidden z-10">
+                  <div className="w-8 h-8 rounded-full bg-card border-2 border-primary flex items-center justify-center shadow-sm shadow-primary/20">
+                    <span className="text-[10px] font-mono font-bold text-primary">{step.number}</span>
+                  </div>
+                </div>
+                {/* Card */}
+                <div className="flex-1">
+                  <div
+                    className={`group p-6 rounded-xl border border-border/80 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 ${
+                      index % 2 !== 0 ? "md:text-right" : ""
+                    }`}
+                  >
+                    <div className={`flex items-center gap-3 mb-4 ${index % 2 !== 0 ? "md:flex-row-reverse" : ""}`}>
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                        {step.icon}
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+                        {step.badge}
+                      </span>
                     </div>
-                    <h3 className="text-2xl font-black text-white dark:text-slate-950 mb-4 tracking-tight">{step.title}</h3>
-                    <p className="text-slate-400 dark:text-slate-600 leading-relaxed font-medium">
+                    <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       {step.description}
                     </p>
                   </div>
                 </div>
 
-                {/* Counter Circle */}
-                <div className="relative z-10 hidden md:block">
-                  <div className="w-14 h-14 rounded-full bg-white dark:bg-slate-900 border-4 border-[#020617] dark:border-slate-950 flex items-center justify-center text-slate-950 dark:text-white font-black text-xl shadow-2xl">
-                    {index + 1}
+                {/* Node */}
+                <div className="relative z-10 hidden md:flex flex-col items-center gap-1">
+                  <div className="w-10 h-10 rounded-full bg-card border-2 border-primary flex items-center justify-center shadow-md shadow-primary/20">
+                    <span className="text-xs font-mono font-bold text-primary">{step.number}</span>
                   </div>
                 </div>
 
@@ -150,6 +180,22 @@ export default function Workflow() {
             ))}
           </div>
         </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mt-16 text-center"
+        >
+          <Link href="/register">
+            <Button size="lg" className="h-11 px-8 rounded-lg font-semibold shadow-md shadow-primary/20">
+              Deploy Your Fleet
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

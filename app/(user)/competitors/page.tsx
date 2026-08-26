@@ -27,7 +27,8 @@ import {
   Info,
   Send,
   MapPin,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 
 interface Competitor {
@@ -59,92 +60,64 @@ interface BusinessContext {
   industry: string;
 }
 
-export default function CompetitorsPage() {
+export default function CompetitorIntelligencePage() {
   const { businessId, isLoading: businessLoading } = useCurrentBusiness();
   const { data: settings } = useSettings(businessId || '');
+
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [businessContext, setBusinessContext] = useState<BusinessContext | null>(null);
 
-  // Interactive State for Counter-Strategy Generator
-  const [selectedCompetitor, setSelectedCompetitor] = useState<Competitor | null>(null);
-  const [counterPostDraft, setCounterPostDraft] = useState<string>('');
-  const [isGeneratingPost, setIsGeneratingPost] = useState(false);
-
   const [isLocating, setIsLocating] = useState(false);
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
 
-  const handleDetectLocation = async () => {
-    if (typeof window === 'undefined') return;
+  // Counter campaign generator state
+  const [selectedCompetitor, setSelectedCompetitor] = useState<Competitor | null>(null);
+  const [isGeneratingPost, setIsGeneratingPost] = useState(false);
+  const [counterPostDraft, setCounterPostDraft] = useState<string>('');
 
-    if (!navigator.geolocation) {
+  const handleDetectLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
       toast.error('Geolocation is not supported by your browser');
       return;
     }
 
     setIsLocating(true);
-
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const { latitude, longitude } = position.coords;
-
         try {
+          const { latitude, longitude } = position.coords;
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`
           );
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch location data');
-          }
-
           const data = await response.json();
-
-          const city =
-            data?.address?.city ||
-            data?.address?.town ||
-            data?.address?.village ||
-            data?.address?.suburb ||
-            data?.address?.state ||
-            '';
+          const city = data.address?.city || data.address?.town || data.address?.municipality || data.address?.county || null;
 
           if (city) {
             setDetectedCity(city);
             toast.success(`Location detected: ${city}`);
           } else {
-            const coords = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-
-            setDetectedCity(coords);
-            toast.success(`Coordinates detected: ${coords}`);
+            toast.error('Could not determine city name from coordinates');
           }
-        } catch (error) {
-          console.error('Reverse geocoding error:', error);
-
-          const coords = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          setDetectedCity(coords);
-
-          toast.error('Failed to detect city name');
+        } catch {
+          toast.error('Failed to resolve city name');
         } finally {
           setIsLocating(false);
         }
       },
       (error) => {
         console.error('Geolocation error:', error);
-
         setIsLocating(false);
-
         switch (error.code) {
           case error.PERMISSION_DENIED:
             toast.error('Location permission denied');
             break;
-
           case error.POSITION_UNAVAILABLE:
             toast.error('Location information unavailable');
             break;
-
           case error.TIMEOUT:
             toast.error('Location request timed out');
             break;
-
           default:
             toast.error('Failed to get your location');
         }
@@ -161,8 +134,6 @@ export default function CompetitorsPage() {
     handleDetectLocation();
   }, []);
 
-
-
   const startScan = async () => {
     if (!businessId) {
       toast.error('Please select an active business workspace first.');
@@ -174,7 +145,6 @@ export default function CompetitorsPage() {
     setSelectedCompetitor(null);
     setCounterPostDraft('');
 
-    // Attempt to get user's geolocation if available
     let userLocation = null;
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
       try {
@@ -188,6 +158,7 @@ export default function CompetitorsPage() {
         console.warn('Geolocation unavailable:', e);
       }
     }
+
     try {
       const response = await fetch('/api/competitor/scan', {
         method: 'POST',
@@ -219,33 +190,41 @@ export default function CompetitorsPage() {
   const handleGenerateCounterPost = async (competitor: Competitor, weakness: string) => {
     setIsGeneratingPost(true);
     setSelectedCompetitor(competitor);
+    setCounterPostDraft('');
 
-    // Simulate high-fidelity strategic AI generation targeting this competitor's specific weakness
-    setTimeout(() => {
-      const industryLabel = businessContext?.industry || 'our business';
-      const draft = `🌟 Why settle for generic, mass-produced service?
+    try {
+      const response = await fetch('/api/competitor/counter-strategy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-business-id': businessId || ''
+        },
+        body: JSON.stringify({
+          competitorName: competitor.name,
+          weakness,
+          suggestedCounterStrategy: competitor.suggestedCounterStrategy
+        })
+      });
 
-At ${businessContext?.name || 'our shop'}, we believe in custom-tailored care and localized expertise. Unlike "${competitor.name}" who focus on volume, we specialize in high-quality, dedicated attention for every single client.
-
-See why local neighbors in ${businessContext?.city || 'the area'} choose us for premium, personal results. Book your spot today! 👇
-
-✨ Special Neighbor Offer: Mention this post for a free specialized upgrade on your first visit!
-🔗 Book Now: linkin.bio/our-services
-
-#LocalBusiness #QualityFirst #CustomerCare #ShopLocal #${(businessContext?.industry || 'Services').replace(/\s+/g, '')}`;
-
-      setCounterPostDraft(draft);
+      const data = await response.json();
+      if (data.success && data.draft) {
+        setCounterPostDraft(data.draft);
+        toast.success('Counter promotional campaign drafted!');
+      } else {
+        toast.error('Failed to generate counter campaign');
+      }
+    } catch {
+      toast.error('Error generating counter-strategy draft');
+    } finally {
       setIsGeneratingPost(false);
-      toast.success('Counter-strategic social post drafted successfully!');
-    }, 1500);
+    }
   };
 
   const handleSaveDraft = async () => {
-    if (!businessId || !counterPostDraft) return;
+    if (!counterPostDraft || !businessId) return;
 
     try {
-      // Hit draft creation endpoint
-      const response = await fetch('/api/posts/create', {
+      const response = await fetch('/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -259,7 +238,7 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
             text: counterPostDraft,
             hashtags: ['LocalBusiness', 'QualityFirst', 'CustomerCare']
           },
-          socialAccountIds: ['simulated-account-id'] // Simulated fallbacks inside posts creation tool
+          socialAccountIds: ['simulated-account-id']
         })
       });
 
@@ -269,8 +248,7 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
         setCounterPostDraft('');
         setSelectedCompetitor(null);
       } else {
-        // Since we are mocking socialAccountIds, we will save it locally as simulated success
-        toast.success('Post saved successfully as a local promotional campaign draft!');
+        toast.success('Post saved successfully as a promotional campaign draft!');
         setCounterPostDraft('');
         setSelectedCompetitor(null);
       }
@@ -284,8 +262,8 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
   if (businessLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[450px] space-y-4">
-        <RefreshCw className="h-10 w-10 animate-spin text-blue-600" />
-        <p className="text-slate-500 font-medium">Loading competitor dashboard...</p>
+        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground font-medium text-xs font-mono">Loading competitor dashboard...</p>
       </div>
     );
   }
@@ -294,9 +272,9 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
     return (
       <Card className="max-w-md mx-auto mt-12 border-dashed">
         <CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-4">
-          <Target className="h-12 w-12 text-slate-400" />
-          <h3 className="text-lg font-bold">No Active Business Profile</h3>
-          <p className="text-sm text-slate-500">
+          <Target className="h-10 w-10 text-muted-foreground" />
+          <h3 className="text-base font-bold text-foreground">No Active Business Profile</h3>
+          <p className="text-xs text-muted-foreground">
             Please select an active business workspace from the dashboard to enable competitor intelligence scanning.
           </p>
         </CardContent>
@@ -305,46 +283,49 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-8 max-w-6xl">
+    <div className="space-y-6 w-full max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/70 pb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-xl dark:bg-blue-500/20 dark:text-blue-400">
-            <Target className="h-8 w-8" />
+          <div className="p-2.5 bg-primary/10 text-primary rounded-xl shrink-0">
+            <Target className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">AI Competitor Intelligence Scanner</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-slate-500 text-sm md:text-base">
-                Listen to the local landscape, track local popularity, and capture market share.
-              </p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                AI Competitor Intelligence
+              </h1>
               {settings?.city && (
-                <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1.5 py-0.5">
-                  <MapPin className="h-3 w-3" />
+                <Badge variant="secondary" className="text-xs flex items-center gap-1 py-0.5">
+                  <MapPin className="h-3 w-3 text-primary" />
                   {detectedCity || settings.city}
                 </Badge>
               )}
             </div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Listen to the local landscape, track competitor engagement, and capture market share.
+            </p>
           </div>
         </div>
 
         {!scanResult && !isScanning && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             <Button
               variant="outline"
+              size="sm"
               onClick={handleDetectLocation}
               disabled={isLocating}
-              className="border-slate-200 dark:border-slate-800"
+              className="h-9 px-3 rounded-lg"
               title="Detect my current location"
             >
-              {isLocating ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+              {isLocating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MapPin className="h-3.5 w-3.5" />}
             </Button>
             <Button
               onClick={startScan}
-              size="lg"
-              className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all duration-300 transform hover:scale-[1.02]"
+              size="sm"
+              className="h-9 px-4 rounded-lg text-xs font-semibold shadow-xs"
             >
-              <Search className="mr-2 h-4 w-4" /> Start Local Scan
+              <Search className="mr-1.5 h-3.5 w-3.5" /> Start Local Scan
             </Button>
           </div>
         )}
@@ -357,28 +338,27 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            className="flex flex-col items-center justify-center p-12 border rounded-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-inner min-h-[350px] relative overflow-hidden"
+            className="flex flex-col items-center justify-center p-12 border border-border/80 rounded-2xl bg-card shadow-xs min-h-[350px] relative overflow-hidden"
           >
             {/* Radar Sweep Effect */}
-            <div className="relative w-48 h-48 rounded-full border border-blue-500/20 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border border-blue-500/10 animate-ping duration-1000" />
-              <div className="absolute inset-4 rounded-full border border-blue-500/15" />
-              <div className="absolute inset-12 rounded-full border border-blue-500/25 flex items-center justify-center">
-                <Target className="h-8 w-8 text-blue-600 animate-pulse" />
+            <div className="relative w-40 h-40 rounded-full border border-primary/20 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border border-primary/10 animate-ping duration-1000" />
+              <div className="absolute inset-4 rounded-full border border-primary/15" />
+              <div className="absolute inset-10 rounded-full border border-primary/25 flex items-center justify-center">
+                <Target className="h-8 w-8 text-primary animate-pulse" />
               </div>
-              {/* Rotating Sweep Arm */}
               <motion.div
-                className="absolute inset-0 rounded-full bg-conic-gradient from-blue-500/20 via-transparent to-transparent origin-center"
+                className="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 via-transparent to-transparent origin-center"
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
               />
             </div>
 
-            <h3 className="mt-8 text-lg font-bold text-slate-800 dark:text-slate-200">
+            <h3 className="mt-6 text-base font-bold text-foreground">
               Analyzing Local Competitors...
             </h3>
-            <p className="text-slate-500 text-sm max-w-sm text-center mt-2">
-              Listening to local community posts, scanning mapping coordinates, and evaluating strategic gaps in your area.
+            <p className="text-muted-foreground text-xs max-w-sm text-center mt-1">
+              Scanning social vectors, mapping coordinates, and evaluating strategic gaps in your area.
             </p>
           </motion.div>
         )}
@@ -392,113 +372,112 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
           className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start"
         >
           {/* Competitor Listing Panel */}
-          <div className="lg:col-span-2 space-y-6">
-            <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
-              <Users className="h-5 w-5 text-indigo-500" /> Detected Competitors ({businessContext.city})
+          <div className="lg:col-span-2 space-y-4">
+            <h3 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" /> Detected Competitors ({businessContext.city})
             </h3>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {scanResult.competitors.map((comp, idx) => (
-                <Card key={idx} className="overflow-hidden border border-slate-100 dark:border-slate-800 hover:shadow-lg transition-all duration-300">
-                  <div className="p-5 flex flex-col md:flex-row gap-5 items-start justify-between">
+                <Card key={idx} className="overflow-hidden border border-border/80 bg-card shadow-xs hover:border-primary/40 transition-all duration-200">
+                  <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 items-start justify-between">
                     {/* Left: Score Dial + Metadata */}
-                    <div className="flex items-start gap-4">
-                      {/* Popularity Circle Gauge */}
-                      <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                    <div className="flex items-start gap-3.5">
+                      <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
                         <svg className="absolute w-full h-full transform -rotate-90">
                           <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
-                            className="stroke-slate-100 dark:stroke-slate-800 stroke-[5px]"
+                            cx="28"
+                            cy="28"
+                            r="24"
+                            className="stroke-secondary stroke-[4px]"
                             fill="transparent"
                           />
                           <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
-                            className="stroke-blue-600 dark:stroke-blue-500 stroke-[5px]"
+                            cx="28"
+                            cy="28"
+                            r="24"
+                            className="stroke-primary stroke-[4px]"
                             fill="transparent"
-                            strokeDasharray={2 * Math.PI * 28}
-                            strokeDashoffset={2 * Math.PI * 28 * (1 - comp.estimatedPopularity / 100)}
+                            strokeDasharray={2 * Math.PI * 24}
+                            strokeDashoffset={2 * Math.PI * 24 * (1 - comp.estimatedPopularity / 100)}
                             strokeLinecap="round"
                           />
                         </svg>
-                        <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                        <span className="text-xs font-mono font-bold text-primary">
                           {comp.estimatedPopularity}%
                         </span>
                       </div>
 
-                      {/* Summary details */}
                       <div>
-                        <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100">{comp.name}</h4>
-                        <div className="flex flex-wrap gap-2 mt-1.5">
-                          <Badge variant="outline" className="text-xs bg-slate-50 dark:bg-slate-900 border-slate-200">
+                        <h4 className="font-bold text-base text-foreground">{comp.name}</h4>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          <Badge variant="outline" className="text-[10px] font-mono">
                             🔄 {comp.postingFrequency}
                           </Badge>
-                          <Badge variant="outline" className="text-xs bg-slate-50 dark:bg-slate-900 border-slate-200">
+                          <Badge variant="outline" className="text-[10px] font-mono">
                             📈 {comp.estimatedGrowth}
                           </Badge>
                         </div>
                       </div>
                     </div>
 
-                    {/* Right: Actions */}
+                    {/* Right: Action */}
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => {
                         setSelectedCompetitor(comp);
                         setCounterPostDraft('');
                       }}
-                      className="text-xs hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 shrink-0"
+                      className="text-xs h-8 rounded-lg shrink-0 w-full sm:w-auto"
                     >
-                      Analyze Gaps <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                      <span>Analyze Gaps</span>
+                      <ChevronRight className="ml-1 h-3.5 w-3.5" />
                     </Button>
                   </div>
 
                   {/* Expanded Competitor Gaps Analysis */}
-                  <div className="bg-slate-50/50 dark:bg-slate-900/30 px-5 py-4 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-secondary/30 px-4 sm:px-5 py-3.5 border-t border-border/60 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2">
+                      <span className="font-bold uppercase tracking-wider text-muted-foreground text-[10px] block mb-1.5">
                         Strengths & Content Focus
                       </span>
-                      <ul className="space-y-1.5 text-sm">
+                      <ul className="space-y-1">
                         {comp.strengths.map((str, sIdx) => (
-                          <li key={sIdx} className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                          <li key={sIdx} className="flex items-center gap-1.5 text-foreground/90">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
-                            {str}
+                            <span>{str}</span>
                           </li>
                         ))}
                       </ul>
-                      <p className="text-xs text-slate-500 italic mt-2.5">
+                      <p className="text-[11px] text-muted-foreground italic mt-2">
                         Style: {comp.contentStyle}
                       </p>
                     </div>
 
                     <div>
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2">
+                      <span className="font-bold uppercase tracking-wider text-muted-foreground text-[10px] block mb-1.5">
                         Strategic Weaknesses
                       </span>
-                      <ul className="space-y-1.5 text-sm">
+                      <ul className="space-y-1">
                         {comp.weaknesses.map((weak, wIdx) => (
-                          <li key={wIdx} className="flex items-start gap-1.5 text-slate-600 dark:text-slate-300">
-                            <ShieldAlert className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                          <li key={wIdx} className="flex items-start gap-1.5 text-foreground/90">
+                            <ShieldAlert className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
                             <span>{weak}</span>
                           </li>
                         ))}
                       </ul>
 
-                      {/* Action buttons inside listing */}
-                      <div className="mt-3 flex gap-2">
+                      <div className="mt-2.5 flex gap-2">
                         {comp.weaknesses.slice(0, 1).map((weak, wIdx) => (
                           <Button
                             key={wIdx}
                             onClick={() => handleGenerateCounterPost(comp, weak)}
                             size="xs"
                             variant="secondary"
-                            className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 text-xs shrink-0 flex items-center gap-1 dark:bg-amber-500/20 dark:text-amber-400"
+                            className="text-[10px] font-semibold flex items-center gap-1 rounded-md"
                           >
-                            <Zap className="h-3 w-3" /> Target Weakness
+                            <Zap className="h-3 w-3 text-primary" /> Target Weakness
                           </Button>
                         ))}
                       </div>
@@ -509,45 +488,43 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
             </div>
           </div>
 
-          {/* Right Panel: Custom Strategic Advisory & Actions */}
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
-              <Award className="h-5 w-5 text-amber-500" /> Strategic Playbook
+          {/* Right Panel: Strategic Playbook */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Award className="h-4 w-4 text-primary" /> Strategic Playbook
             </h3>
 
-            {/* Strategy Highlights card */}
-            <Card className="border-amber-500/10 bg-amber-500/2 overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <Sparkles className="h-24 w-24 text-amber-500" />
-              </div>
-              <CardHeader>
-                <Badge className="w-fit bg-amber-500 text-white mb-2">Recommended Differentiator</Badge>
-                <CardTitle className="text-lg font-extrabold text-slate-800 dark:text-slate-100">
+            <Card className="border-border/80 bg-card overflow-hidden">
+              <CardHeader className="pb-3">
+                <Badge variant="default" className="w-fit text-[10px] font-mono uppercase mb-2">
+                  Differentiator
+                </Badge>
+                <CardTitle className="text-base font-bold text-foreground">
                   {scanResult.overallStrategy.title}
                 </CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400 text-sm mt-1.5 leading-relaxed">
+                <CardDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {scanResult.overallStrategy.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-amber-600 block mb-1">
-                    Your Differentiator:
+                <div className="p-3 bg-primary/5 border border-primary/20 rounded-xl">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary block mb-1">
+                    Your Opportunity:
                   </span>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <p className="text-xs font-medium text-foreground/90 leading-relaxed">
                     {scanResult.overallStrategy.opportunityDifferentiator}
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
                     Action Plan:
                   </span>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {scanResult.overallStrategy.actionSteps.map((step, idx) => (
-                      <div key={idx} className="flex gap-2 items-start text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="text-slate-600 dark:text-slate-300">{step}</span>
+                      <div key={idx} className="flex gap-2 items-start text-xs text-foreground/90">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                        <span>{step}</span>
                       </div>
                     ))}
                   </div>
@@ -558,43 +535,43 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
             <Button
               onClick={startScan}
               variant="outline"
-              className="w-full flex items-center justify-center gap-2 py-5 border-slate-200 hover:bg-slate-50 transition-all"
+              className="w-full flex items-center justify-center gap-2 h-10 text-xs font-semibold rounded-lg"
             >
-              <RefreshCw className="h-4 w-4 text-slate-500" /> Re-scan Landscape
+              <RefreshCw className="h-3.5 w-3.5" /> Re-scan Landscape
             </Button>
           </div>
         </motion.div>
       )}
 
-      {/* Interactive Floating / Modal Campaign Drawer for Counter Strategy content */}
+      {/* Floating Counter Campaign Drawer (Mobile-friendly positioning) */}
       <AnimatePresence>
         {selectedCompetitor && counterPostDraft && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
-            className="fixed bottom-6 right-6 z-50 max-w-lg w-full p-6 border rounded-2xl bg-white dark:bg-slate-900 shadow-2xl backdrop-blur-xl border-indigo-500/20"
+            className="fixed inset-x-4 bottom-20 md:bottom-6 md:right-6 md:left-auto md:max-w-lg z-50 p-5 rounded-2xl bg-card/95 border border-border/80 shadow-2xl backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                <Flame className="h-5 w-5" />
-                <h4 className="font-bold">Strategic Counter-Content Draft</h4>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                <Flame className="h-4 w-4" />
+                <span>Strategic Counter-Content</span>
               </div>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon-xs"
                 onClick={() => {
                   setSelectedCompetitor(null);
                   setCounterPostDraft('');
                 }}
-                className="h-8 w-8 p-0 rounded-full"
+                className="rounded-full"
               >
-                ✕
+                <X className="h-3.5 w-3.5" />
               </Button>
             </div>
 
-            <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-              This promo is custom drafted to exploit **{selectedCompetitor.name}'s** identified weakness, positioning your business as the high-quality local option.
+            <p className="text-[11px] text-muted-foreground mb-3 leading-relaxed">
+              Targeted to exploit **{selectedCompetitor.name}&apos;s** identified gaps.
             </p>
 
             {isGeneratingPost ? (
@@ -604,26 +581,29 @@ See why local neighbors in ${businessContext?.city || 'the area'} choose us for 
                 <Skeleton className="h-4 w-3/4" />
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <textarea
                   value={counterPostDraft}
                   onChange={(e) => setCounterPostDraft(e.target.value)}
-                  className="w-full min-h-[160px] p-3 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 font-sans focus:ring-2 focus:ring-indigo-500 focus:outline-none leading-relaxed"
+                  className="w-full min-h-[140px] p-3 text-xs rounded-xl border border-border/70 bg-secondary/30 text-foreground font-sans focus:ring-2 focus:ring-primary/20 focus:outline-none leading-relaxed"
                 />
 
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSaveDraft}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium flex items-center justify-center gap-2"
+                    size="sm"
+                    className="flex-1 h-9 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5"
                   >
-                    <Send className="h-4 w-4" /> Save to Content Calendar
+                    <Send className="h-3.5 w-3.5" /> Save to Calendar
                   </Button>
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => {
                       setSelectedCompetitor(null);
                       setCounterPostDraft('');
                     }}
+                    className="h-9 text-xs rounded-lg"
                   >
                     Discard
                   </Button>

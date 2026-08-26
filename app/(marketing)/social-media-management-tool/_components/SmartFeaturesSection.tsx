@@ -6,103 +6,79 @@ import { Globe, Bot, LayoutDashboard, Image, Layers } from "lucide-react";
 const smartFeatures = [
   {
     icon: Globe,
-    title: "Multi-Platform Publishing",
-    desc: "Manage posts for Facebook, Instagram, LinkedIn, YouTube, Pinterest & X — from one powerful dashboard. Save hours by publishing across platforms in one click.",
-    color: "#2D46FF",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
+    title: "Multi-Platform Dispatch",
+    desc: "Coordinate posts for LinkedIn, X, Instagram, YouTube, and Facebook from one autonomous dashboard. Synchronize campaigns with optimal per-channel timing.",
   },
   {
     icon: Bot,
-    title: "AI-Powered Content Creation",
-    desc: "Generate engaging content in seconds. Select tone. Retry or refine with smart controls. Always sound on-brand. No writer's block ever again.",
-    color: "#7C3AED",
-    bg: "bg-violet-50 dark:bg-violet-900/20",
+    title: "Mastra Swarm Generation",
+    desc: "Generate high-resonance copy variants grounded in pgvector brand vectors. Select tones, inject hashtags, and calibrate engagement hooks.",
   },
   {
     icon: LayoutDashboard,
-    title: "Centralized Post Management",
-    desc: "Get a complete overview of published, scheduled, failed, and drafted posts — all in one place. Track every post's journey at a glance.",
-    color: "#0EA5E9",
-    bg: "bg-cyan-50 dark:bg-cyan-900/20",
+    title: "Centralized Queue Telemetry",
+    desc: "Complete real-time overview of published, scheduled, failed, and drafted posts. Track delivery velocity and channel reach.",
   },
   {
     icon: Image,
-    title: "Media Library & Stock Access",
-    desc: "Reuse previously uploaded visuals or explore stock images & gifs. Organize, find, and insert assets easily. Keep your brand assets ready at your fingertips.",
-    color: "#10B981",
-    bg: "bg-green-50 dark:bg-green-900/20",
+    title: "RAG Media Vector Library",
+    desc: "Reuse verified brand assets, generate AI imagery, and organize high-resolution assets with automatic aspect-ratio formatting.",
   },
   {
     icon: Layers,
-    title: "Reusable Templates & Smart Scheduling",
-    desc: "Save your high-performing content + media as templates. Use them anytime with one click. Configure posting times and click 'Add to Queue' to auto-publish.",
-    color: "#F59E0B",
-    bg: "bg-amber-50 dark:bg-amber-900/20",
+    title: "Reusable Blueprint Templates",
+    desc: "Turn high-performing posts into reusable frameworks. Auto-fill recurring themes with updated seasonal trends and AI copy.",
   },
 ];
 
 export default function SmartFeaturesSection() {
   return (
-    <section className="py-24 px-4 bg-slate-50 dark:bg-slate-900/50 transition-colors">
-      <div className="container mx-auto max-w-6xl">
+    <section className="py-24 px-4 bg-background">
+      <div className="container mx-auto max-w-5xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-20"
+          transition={{ duration: 0.4 }}
+          className="text-center mb-16"
         >
-          <span className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.3em] text-[10px] mb-4 block">Features</span>
-          <h2 className="text-4xl md:text-6xl font-black text-slate-950 dark:text-white mb-6 tracking-tighter">
-            Smart Features Built<br />
-            <span className="text-[#2D46FF] dark:text-blue-500">for Social Success</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            AUTONOMOUS SOCIAL FLEET
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+            Engineered for <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Compounding Audience Reach
+            </span>
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-lg font-bold max-w-2xl mx-auto">
-            Every feature is thoughtfully crafted to simplify your workflow and elevate your brand presence.
+          <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto">
+            Scale your social growth without increasing manual operator headcount.
           </p>
         </motion.div>
 
-        <div className="grid gap-8">
-          {/* Top two large cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {smartFeatures.slice(0, 2).map((feat, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {smartFeatures.map((feat, i) => {
+            const Icon = feat.icon;
+            return (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-10 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-xl hover:shadow-slate-100/50 dark:hover:shadow-none transition-all group overflow-hidden"
+                whileHover={{ y: -3 }}
+                transition={{ duration: 0.3, delay: i * 0.06 }}
+                className="p-6 rounded-xl bg-card border border-border/80 hover:border-primary/40 transition-all duration-200 text-left flex flex-col justify-between shadow-xs"
               >
-                <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity" style={{ backgroundColor: feat.color }} />
-                <div className={`inline-flex w-14 h-14 rounded-2xl ${feat.bg} items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <feat.icon className="w-7 h-7" style={{ color: feat.color }} />
+                <div>
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-sm font-bold text-foreground mb-2">{feat.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{feat.desc}</p>
                 </div>
-                <h3 className="text-2xl font-black text-slate-950 dark:text-white mb-4 leading-tight">{feat.title}</h3>
-                <p className="text-slate-400 dark:text-slate-500 font-medium leading-relaxed">{feat.desc}</p>
               </motion.div>
-            ))}
-          </div>
-
-          {/* Bottom three smaller cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {smartFeatures.slice(2).map((feat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-900 hover:shadow-xl hover:shadow-slate-100/50 dark:hover:shadow-none transition-all group overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-2xl opacity-5 group-hover:opacity-10 transition-opacity" style={{ backgroundColor: feat.color }} />
-                <div className={`inline-flex w-12 h-12 rounded-xl ${feat.bg} items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
-                  <feat.icon className="w-6 h-6" style={{ color: feat.color }} />
-                </div>
-                <h3 className="text-lg font-black text-slate-950 dark:text-white mb-3 leading-tight">{feat.title}</h3>
-                <p className="text-slate-400 dark:text-slate-500 font-medium text-sm leading-relaxed">{feat.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>

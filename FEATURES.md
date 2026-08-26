@@ -8,11 +8,11 @@ This document provides a comprehensive overview of all features and modules impl
 
 | Domain Module | Primary Location | Status | Key Technologies & Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Subscription & Billing Engine** | `features/billing/`, `app/api/billing/` | ✅ Production-Ready | Stripe Checkout & Customer Portal, Centralized Plan Entitlements (`free`, `starter`, `pro`, `enterprise`), Transactional Metering, Idempotent Webhooks, Auto-Activation on Registration, Quota Exhaustion Offer Banners |
+| **Subscription & Billing Engine** | `features/billing/`, `app/api/billing/`, `app/(admin)/admin/(dashboard)/billing/` | ✅ Production-Ready | Stripe Checkout & Customer Portal, Centralized Plan Entitlements (`free`, `starter`, `pro`, `enterprise`), Transactional Metering, Idempotent Webhooks, Admin Billing Command Center, Manual Plan Overrides with Audit Logging, Dynamic Client & Server Feature Gating |
 | **Route Protection & Security Middleware** | `proxy.ts`, `lib/security.ts` | ✅ Production-Ready | Multi-Path Protection, Session Extraction, Safe Open-Redirect Defense, Magic Byte File Upload Validation, HSTS & Security Headers |
 | **AI Blog Writer** | `features/ai-blog/` | ✅ Implemented | TipTap Rich Text Editor, Real-time SEO Scoring, Unsplash Image Injection, Multi-Platform Serializers (WordPress, Webflow, Medium, Shopify, Notion), PDF & DOCX Export, Version History |
 | **Social Media Scheduler** | `features/scheduler/`, `features/social/` | ✅ Implemented | BullMQ Queues, Cron Job Recurrence, Multi-Account Timezone Slots, Multi-Platform Publishing (Meta, LinkedIn, X, TikTok, YouTube) |
-| **Post Composer** | `features/post-creation/` | ✅ Implemented | Multi-Platform Character Limit Checks, Platform Preview, AI Caption Synthesis, Hashtag Optimization, Media Attachments |
+| **Post Composer** | `features/post-creation/` | ✅ Implemented | Multi-Platform Character Limit Checks, Platform Preview, AI Caption Synthesis, Hashtag Optimization, Media Attachments, Safe Date Scheduling Popover |
 | **Business Knowledge Base (RAG)** | `features/knowledge/` | ✅ Implemented | PostgreSQL + `pgvector` Embeddings, Document Ingestion (PDF/TXT), Semantic Similarity Search, Context Injection into Prompts |
 | **Ad Campaign Manager** | `features/ad-campaigns/` | ✅ Implemented | Meta & Google Ad Creative Generation, Variant Testing, Campaign Launch Queue, Performance Metrics Sync Worker |
 | **Video Generation** | `features/video_generation/` | ✅ Implemented | HeyGen & Replicate Integration, Script-to-Video Generation, Async Status Polling Worker, Video Analytics Dashboard |
@@ -20,14 +20,17 @@ This document provides a comprehensive overview of all features and modules impl
 | **Review Booster** | `features/crm/`, `mastra/agents/review-booster-agent.ts` | ✅ Implemented | Review Request Automation (SMS/Email), Sentiment Analysis, Customer Feedback Pipeline, Multi-Channel Review Aggregation |
 | **CRM & Lead Management** | `features/crm/` | ✅ Implemented | Lead Capture, Demo Bookings, Pipeline Stages, Contact Interaction History, Lead Scoring |
 | **Multi-Location Management** | `features/multi-location/` | ✅ Implemented | Multi-Branch Franchise Management, Location-Specific Tone and Schedules, Centralized vs Local Content Overrides |
-| **Social & Business Analytics** | `features/analytics/` | ✅ Implemented | Cross-Platform Aggregation, Recharts Visualizations, Trend Detection, AI Growth Recommendations |
+| **Social & Business Analytics** | `features/analytics/` | ✅ Implemented | Cross-Platform Aggregation, Recharts Visualizations, Trend Detection, AI Growth Recommendations (Gated Growth Engine) |
 | **Compliance & Safety** | `features/compliance/` | ✅ Implemented | Forbidden Keyword Detection, Brand Safety Audits, Automated Draft Rejection/Flagging |
 | **Workflow Automation** | `features/workflow/`, `mastra/workflows/` | ✅ Implemented | Multi-Step Trigger-Action Pipelines, Weather-Driven Posting, Competitor Tracking, Scheduled Workflows |
 | **Mastra Multi-Agent Engine** | `mastra/` | ✅ Implemented | 13 Specialized Autonomous Agents, LibSQL + DuckDB Observability Store, Weather/YouTube/Competitor Tools |
-| **Organization & Team RBAC** | `features/organization/` | ✅ Implemented | Multi-Tenancy (`businessId`), Team Member Roles (`OWNER`, `ADMIN`, `EDITOR`, `VIEWER`), Invitation Flow |
+| **Organization & Team RBAC** | `features/organization/` | ✅ Implemented | Multi-Tenancy (`businessId`), Team Member Roles (`OWNER`, `ADMIN`, `EDITOR`, `VIEWER`), Invitation Flow, Pro Tier Gating |
 | **System Operations & Logs** | `features/system/` | ✅ Implemented | Activity Logs, BullMQ Job Logs, Error Tracking, System Metrics, Maintenance Mode Toggle |
+| **AI Creative Studio** | `app/(user)/studio/`, `features/image_generation/`, `features/video_generation/` | ✅ Production-Ready | Multimodal Creative Workspace, Tabbed UI (Flux Pro Images, Runway/Luma AI Videos, Media Gallery), URL Query State Persistence (`?tab=...`), `AnimatePresence` Transitions |
+| **Workspace & Multi-Tenancy Hub** | `components/common/WorkspaceSwitcher.tsx`, `components/user/layout/` | ✅ Production-Ready | Instant Tenant Switching, Query Invalidation, Fullscreen Sync Overlay, Dynamic User & Admin Layout Shell (`w-64`, `h-16`, `p-6 bg-muted/40`) |
+| **Resource Quota Telemetry** | `components/billing/UsageLimitIndicator.tsx`, `app/(user)/dashboard/` | ✅ Production-Ready | Visual Progress Gauges (`ai_posts`, `ai_articles`, `brand_voice_profiles`), Dynamic Warning Thresholds (80% Amber, 100% Destructive), 1-Click Upgrade Links |
 | **Marketing Landing Suite** | `app/(marketing)/` | ✅ Implemented | 10 Animated Sections (GSAP + Framer Motion + Lenis), Interactive Comparison, Pricing Calculator with 1-Click Checkout, FAQ Accordion |
-| **Admin Operations Panel** | `app/(admin)/` | ✅ Implemented | System Resource Dashboard, AI Blog Template Manager, Global User Directory, Error Monitoring |
+| **Admin Operations Panel** | `app/(admin)/` | ✅ Production-Ready | Dedicated Billing Command Center (`/admin/billing`), User Directory with Plan Overrides, System Resource Dashboard, Error Logs, Stripe Webhook Monitor |
 
 ---
 
@@ -46,6 +49,13 @@ This document provides a comprehensive overview of all features and modules impl
   - `POST /api/billing/portal`: Generates customer billing portal sessions.
   - `POST /api/billing/webhooks`: Idempotent event processing (`checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_succeeded`).
   - `GET /api/cron/billing-reconciliation`: Periodic reconciliation and monthly quota reset worker.
+- **Admin Operations & Manual Subscription Override**:
+  - **Command Center (`/admin/billing`)**: Executive MRR/ARR KPI metrics, full subscription directory with search & plan/status filters, granular usage meter inspectors, Stripe webhook log viewer, and manual plan override modal with audit note logging.
+  - **User Plan Override (`/admin/users/edit/[id]`)**: Real-time plan switcher (`FREE`, `STARTER`, `PRO`, `ENTERPRISE`) and status control (`ACTIVE`, `TRIALING`, `PAST_DUE`, `CANCELED`) with period extension, usage limit reset, and audit trail record creation.
+- **Dynamic Feature Gating & Quotas (`<FeatureGate />`, `useEntitlements()`)**:
+  - **Dynamic Client Resolution**: `useEntitlements(feature)` automatically fetches the active workspace's live subscription and overrides.
+  - **Feature Access**: Unlocks the Growth Engine tab (`/analytics`), Omni-Scheduler (`/schedule`), Team collaboration (`/team`), and Developer API keys (`/settings`).
+  - **Quota Telemetry**: Displays visual progress indicators for `ai_posts`, `ai_articles`, and `brand_voice_profiles` with warning states and 1-click upgrade modals.
 - **Auto-Activation on Registration**: Seeding of Organization, default workspace, active Free subscription, and initial usage limits on user signup.
 - **Interactive Marketing Checkout (`components/home/PricingCard.tsx`)**: 1-click checkout for logged-in workspaces and registration pre-fill for new visitors.
 - **Dashboard Quota Banners (`app/(user)/dashboard/page.tsx`)**: Prominent upgrade triggers when free quotas are exhausted.
@@ -114,3 +124,17 @@ This document provides a comprehensive overview of all features and modules impl
   - `multiLocationAgent`: Coordinates franchise locations and localizes messaging.
   - `blogWriterAgent`: Orchestrates deep-dive long-form article synthesis.
   - `socialMediaAgent`, `adCopyAgent`, `analyticsAgent`, `complianceAgent`, `audioVideoAgent`, `schedulingAgent`.
+
+---
+
+### 9. Modernized UI Suite & Theme Transition Engine (`components/`, `app/(user)/`)
+- **Animated Theme Switcher (`components/common/ThemeToggleAnimated.tsx`)**: View Transitions API radial circle-blur expanding toggle synchronized with `next-themes` and `localStorage`.
+- **Central Global Modals (`components/common/GlobalModals.tsx`)**: Unified dialog orchestrator mounted in `app/(user)/layout.tsx` managing content creation, workflow builder, member invitations, and content scheduling.
+- **Contents Library (`app/(user)/contents/`)**: Multi-platform asset management with floating batch selection toolbar and instant media inspector.
+- **Post Management (`app/(user)/posts/`)**: Tabbed status filtering (`All`, `Draft`, `Scheduled`, `Published`, `Trash`) with real-time sync telemetry.
+- **Workflow Engine (`app/(user)/workflows/`)**: Node step pipeline badges, execution status toggles, and drag-and-drop media ingestion dropzone.
+- **Omni Schedule (`app/(user)/schedule/`)**: Interactive calendar with AI peak times drawer and hourly intensity heatmap.
+- **Posting Schedule (`app/(user)/post-schedule/`)**: Queue timeline cards with BullMQ and Cron engine status pills.
+- **Multi-Location Hub (`app/(user)/multi-location/`)**: AI Regional Strategist dialog, GPS branch geocoding, and 1-click regional copy adaptation.
+- **Social Engagement Unified Inbox (`app/(user)/engagement/`)**: 2-pane direct message stream with unified channel filter buttons (Instagram, Facebook, LinkedIn, X, YouTube) and instant reply dispatcher.
+- **Review & Reputation Manager (`app/(user)/reviews/`)**: Autopilot requests switch, 4 stat cards with monospace telemetry, sentiment indicators, and AI auto-response generation.

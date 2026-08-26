@@ -17,27 +17,24 @@ export function TeamHeaderButtons({ userRole }: { userRole: string }) {
   }
 
   return (
-    <div className="flex gap-3">
+    <div className="flex items-center gap-2.5">
       <Button
+        variant="outline"
+        size="sm"
         onClick={handleBulkInvite}
-        className="group relative h-14 px-6 rounded-2xl bg-purple-600 font-black text-white hover:bg-purple-700 transition-all active:scale-95 shadow-xl shadow-purple-500/25 overflow-hidden border-none"
+        className="text-xs font-semibold rounded-lg gap-1.5"
       >
-        <div className="absolute inset-0 bg-linear-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="relative flex items-center gap-3">
-          <Users className="h-5 w-5 transition-transform group-hover:scale-110" />
-          <span className="hidden sm:inline">Bulk Invite</span>
-          <span className="sm:hidden">Bulk</span>
-        </div>
+        <Users className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Bulk Invite</span>
+        <span className="sm:hidden">Bulk</span>
       </Button>
       <Button
+        size="sm"
         onClick={handleSingleInvite}
-        className="group relative h-14 px-8 rounded-2xl bg-blue-600 font-black text-white hover:bg-blue-700 transition-all active:scale-95 shadow-xl shadow-blue-500/25 overflow-hidden border-none"
+        className="text-xs font-semibold rounded-lg gap-1.5"
       >
-        <div className="absolute inset-0 bg-linear-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="relative flex items-center gap-3">
-          <UserPlus className="h-5 w-5 transition-transform group-hover:scale-110 group-hover:rotate-12" />
-          <span>Invite</span>
-        </div>
+        <UserPlus className="h-3.5 w-3.5" />
+        <span>Invite Member</span>
       </Button>
     </div>
   );

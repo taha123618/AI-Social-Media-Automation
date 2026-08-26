@@ -9,32 +9,42 @@ interface PricingToggleProps {
 
 export const PricingToggle = ({ billingCycle, onChange }: PricingToggleProps) => {
   return (
-    <div className="flex items-center justify-center gap-4 mb-16">
-      <span className={`text-sm font-black uppercase tracking-widest transition-colors ${billingCycle === "month" ? "text-slate-950 dark:text-white" : "text-slate-400 dark:text-slate-600"
-        }`}>
-        Monthly
-      </span>
+    <div className="inline-flex items-center bg-secondary/80 p-1.5 rounded-xl border border-border/70 shadow-xs relative">
+      {/* Sliding active indicator */}
+      <motion.div
+        layoutId="pricing-toggle-indicator"
+        className="absolute top-1.5 bottom-1.5 rounded-lg bg-card shadow-sm border border-border/60"
+        style={{
+          left: billingCycle === "month" ? "6px" : "50%",
+          width: "calc(50% - 6px)",
+        }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      />
 
       <button
-        onClick={() => onChange(billingCycle === "month" ? "year" : "month")}
-        className="cursor-pointer w-16 h-8 rounded-full bg-slate-100 dark:bg-slate-800 relative p-1 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+        onClick={() => onChange("month")}
+        className={`relative z-10 px-5 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-150 flex-1 ${
+          billingCycle === "month"
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
       >
-        <motion.div
-          animate={{ x: billingCycle === "month" ? 0 : 32 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="w-6 h-6 rounded-full bg-[#2D46FF] shadow-lg shadow-blue-200 dark:shadow-none"
-        />
+        Monthly
       </button>
 
-      <div className="flex items-center gap-3">
-        <span className={`text-sm font-black uppercase tracking-widest transition-colors ${billingCycle === "year" ? "text-slate-950 dark:text-white" : "text-slate-400 dark:text-slate-600"
-          }`}>
-          Yearly
+      <button
+        onClick={() => onChange("year")}
+        className={`relative z-10 flex items-center justify-center gap-1.5 px-5 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-150 flex-1 ${
+          billingCycle === "year"
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        <span>Annual</span>
+        <span className="bg-primary/10 border border-primary/25 text-primary text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full">
+          -20%
         </span>
-        <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">
-          Save 20%
-        </span>
-      </div>
+      </button>
     </div>
   );
 };

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, TrendingUp, Loader2, Sparkles, Clock, Check } from 'lucide-react';
+import { X, TrendingUp, Loader2, Sparkles, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useCurrentBusiness } from '@/hooks/use-current-business';
 import { cn } from '@/lib/utils';
@@ -60,19 +61,17 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     if (isOpen && businessId) {
       fetchBestTimes();
     }
   }, [isOpen, businessId]);
 
-
-
   const handleApplyToSchedule = async () => {
     if (!businessId || recommendations.length === 0) return;
     setIsApplying(true);
     try {
-      // Get or create posting schedule
       const res = await fetch('/api/social/scheduling/apply-best-times', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-business-id': businessId },
@@ -97,12 +96,12 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
   };
 
   const getHeatColor = (score: number) => {
-    if (score === 0) return 'bg-slate-100 dark:bg-slate-800/50';
+    if (score === 0) return 'bg-secondary/40';
     if (score >= 80) return 'bg-emerald-500';
-    if (score >= 60) return 'bg-emerald-400/80';
-    if (score >= 40) return 'bg-blue-400/70';
-    if (score >= 20) return 'bg-blue-300/50';
-    return 'bg-slate-200 dark:bg-slate-700';
+    if (score >= 60) return 'bg-emerald-500/70';
+    if (score >= 40) return 'bg-primary/70';
+    if (score >= 20) return 'bg-primary/40';
+    return 'bg-secondary';
   };
 
   return (
@@ -113,33 +112,36 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
             onClick={onClose}
           />
           <motion.div
             initial={{ x: '100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col overflow-hidden"
+            transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-card border-l border-border/80 shadow-2xl z-50 flex flex-col overflow-hidden text-foreground"
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
+            <div className="p-5 border-b border-border/70 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-slate-900 dark:text-white">Best Times to Post</h2>
-                    <p className="text-xs text-slate-500 font-medium">
+                    <h2 className="text-sm font-bold text-foreground">AI Best Times to Post</h2>
+                    <p className="text-[11px] text-muted-foreground font-mono">
                       {dataSource === 'analytics'
-                        ? `Based on ${postsAnalyzed} published posts`
-                        : 'Industry average recommendations'}
+                        ? `Derived from ${postsAnalyzed} published records`
+                        : 'Calibrated algorithmic baseline'}
                     </p>
                   </div>
                 </div>
-                <button onClick={onClose} className="h-8 w-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 transition-all">
+                <button
+                  onClick={onClose}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -147,46 +149,49 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
 
             {isLoading ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                  <p className="text-sm font-medium text-slate-500">Analyzing your post performance...</p>
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <p className="text-xs text-muted-foreground font-mono">Synthesizing engagement heatmap...</p>
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-5 space-y-6">
                 {dataSource === 'industry_average' && (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 flex gap-3">
-                    <Sparkles className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
-                      Showing industry-average recommendations. Publish more posts to unlock data-driven insights.
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex gap-2.5">
+                    <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      Showing algorithmic baseline. As your social accounts publish posts, engagement metrics will automatically fine-tune these slots.
                     </p>
                   </div>
                 )}
 
                 {/* Top Recommendations */}
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Top Slots</h3>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                    Top Recommended Windows
+                  </h3>
                   <div className="space-y-2">
                     {recommendations.map((rec, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                        <div className={cn(
-                          'h-8 w-8 rounded-lg flex items-center justify-center text-xs font-black text-white shrink-0',
-                          i === 0 ? 'bg-emerald-500' : i === 1 ? 'bg-blue-500' : 'bg-slate-400'
-                        )}>
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 p-3 bg-secondary/30 rounded-xl border border-border/70 text-xs"
+                      >
+                        <Badge
+                          variant={i === 0 ? "default" : "outline"}
+                          className="h-6 w-6 rounded-md p-0 flex items-center justify-center text-[10px] font-mono shrink-0"
+                        >
                           #{i + 1}
-                        </div>
+                        </Badge>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-slate-900 dark:text-white">{rec.dayName}</span>
-                            <span className="text-sm text-slate-500">at</span>
-                            <span className="text-sm font-bold text-slate-900 dark:text-white">{rec.label}</span>
-                          </div>
+                          <span className="font-semibold text-foreground">{rec.dayName}</span>
+                          <span className="text-muted-foreground mx-1">at</span>
+                          <span className="font-mono font-semibold text-foreground">{rec.label}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="text-xs font-black text-slate-500">{rec.score}%</div>
-                          <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <span className="font-mono font-bold text-foreground text-[11px]">{rec.score}%</span>
+                          <div className="w-12 h-1.5 bg-secondary rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-emerald-500 rounded-full transition-all"
+                              className="h-full bg-primary rounded-full"
                               style={{ width: `${rec.score}%` }}
                             />
                           </div>
@@ -199,13 +204,15 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
                 {/* Heatmap */}
                 {heatmap.length > 0 && (
                   <div>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">Engagement Heatmap</h3>
-                    <div className="overflow-x-auto">
-                      <div className="min-w-[380px]">
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                      Hourly Intensity Grid
+                    </h3>
+                    <div className="overflow-x-auto no-scrollbar">
+                      <div className="min-w-[340px]">
                         {/* Hour labels */}
-                        <div className="flex gap-0.5 mb-1 pl-8">
+                        <div className="flex gap-0.5 mb-1 pl-7">
                           {HOURS.filter((_, i) => i % 3 === 0).map(h => (
-                            <div key={h} className="flex-1 text-[9px] font-bold text-slate-400 text-center">
+                            <div key={h} className="flex-1 text-[9px] font-mono text-muted-foreground text-center">
                               {h === 12 ? '12p' : h > 12 ? `${h - 12}p` : `${h}a`}
                             </div>
                           ))}
@@ -213,29 +220,19 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
                         {/* Grid */}
                         {DAY_SHORT.map((day, dayIdx) => (
                           <div key={day} className="flex items-center gap-0.5 mb-0.5">
-                            <div className="w-7 text-[9px] font-bold text-slate-400 shrink-0">{day}</div>
+                            <div className="w-6 text-[9px] font-mono text-muted-foreground shrink-0">{day}</div>
                             {HOURS.map(hour => {
                               const score = getHeatmapScore(dayIdx, hour);
                               return (
                                 <div
                                   key={hour}
-                                  className={cn('flex-1 h-6 rounded-sm transition-all cursor-default', getHeatColor(score))}
+                                  className={cn('flex-1 h-5 rounded-xs transition-all cursor-default', getHeatColor(score))}
                                   title={`${day} ${hour}:00 — score: ${score}`}
                                 />
                               );
                             })}
                           </div>
                         ))}
-                        {/* Legend */}
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                          <span className="text-[10px] text-slate-400 font-medium">Low</span>
-                          <div className="flex gap-0.5">
-                            {['bg-slate-200', 'bg-blue-300/50', 'bg-blue-400/70', 'bg-emerald-400/80', 'bg-emerald-500'].map((c, i) => (
-                              <div key={i} className={`h-3 w-5 rounded-sm ${c}`} />
-                            ))}
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-medium">High</span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -244,17 +241,23 @@ export function BestTimesPanel({ isOpen, onClose }: BestTimesPanelProps) {
             )}
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex-shrink-0 flex gap-3">
-              <Button variant="outline" onClick={onClose} className="flex-1 rounded-xl font-bold border-slate-200 dark:border-slate-700">
-                Close
+            <div className="p-4 border-t border-border/70 flex-shrink-0 flex gap-2.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+                className="flex-1 h-9 rounded-xl text-xs font-semibold"
+              >
+                Dismiss
               </Button>
               <Button
+                size="sm"
                 onClick={handleApplyToSchedule}
                 disabled={isApplying || recommendations.length === 0}
-                className="flex-[2] h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 gap-2"
+                className="flex-[2] h-9 rounded-xl text-xs font-semibold gap-1.5 shadow-xs"
               >
-                {isApplying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                Apply to Schedule
+                {isApplying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                <span>Apply Slots</span>
               </Button>
             </div>
           </motion.div>

@@ -11,7 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useCurrentBusiness } from '@/hooks/use-current-business';
-import { PlusCircle, Edit, BarChart3, Megaphone, TrendingUp, DollarSign, Settings, Trash2, Pencil } from 'lucide-react';
+import { PlusCircle, Edit, BarChart3, Megaphone, TrendingUp, DollarSign, Settings, Trash2, Pencil, Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -60,164 +60,203 @@ export default function UserAdCampaignsPage() {
     }
   };
 
-  const statusColor: Record<string, string> = {
-    ACTIVE: 'bg-green-500',
-    PAUSED: 'bg-yellow-500',
-    DRAFT: 'bg-slate-400',
-    PENDING_REVIEW: 'bg-indigo-500',
-    COMPLETED: 'bg-blue-500',
-    REJECTED: 'bg-red-500',
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'ACTIVE':
+        return <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono uppercase">Active</Badge>;
+      case 'PAUSED':
+        return <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-mono uppercase">Paused</Badge>;
+      case 'PENDING_REVIEW':
+        return <Badge className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-mono uppercase">Review</Badge>;
+      case 'COMPLETED':
+        return <Badge variant="secondary" className="text-[10px] font-mono uppercase">Completed</Badge>;
+      case 'REJECTED':
+        return <Badge variant="destructive" className="text-[10px] font-mono uppercase">Rejected</Badge>;
+      default:
+        return <Badge variant="outline" className="text-[10px] font-mono uppercase">Draft</Badge>;
+    }
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-border/70 pb-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Megaphone className="h-7 w-7 text-primary" />
-            Ad Campaigns
-          </h1>
-          <p className="text-muted-foreground mt-1">Generate AI-powered ad copy and launch campaigns on Meta &amp; Google.</p>
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-5 w-5 text-primary" />
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
+              Autonomous Ad Campaigns
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Synthesize high-converting ad copy and manage multi-platform campaigns on Meta &amp; Google.
+          </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Link href="/ad-campaigns/generate">
-            <Button variant="outline">
-              <Edit className="mr-2 h-4 w-4" />
-              Generate Copy
+            <Button variant="outline" size="sm" className="text-xs font-semibold rounded-lg gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span>Generate Copy</span>
             </Button>
           </Link>
           <Link href="/ad-campaigns/builder">
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Campaign
+            <Button size="sm" className="text-xs font-semibold rounded-lg gap-1.5">
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span>New Campaign</span>
             </Button>
           </Link>
           <Link href="/ad-campaigns/settings">
-            <Button variant="outline" size="icon">
-              <Settings className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg">
+              <Settings className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Spend (30d)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-muted-foreground">Total Spend (30d)</CardTitle>
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <DollarSign className="h-3.5 w-3.5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalSpend.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Connected ad accounts metrics</p>
+            <div className="text-2xl font-bold font-mono text-foreground" suppressHydrationWarning>
+              ${stats.totalSpend.toFixed(2)}
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1">Connected ad accounts metrics</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-muted-foreground">Active Campaigns</CardTitle>
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <BarChart3 className="h-3.5 w-3.5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-mono text-foreground">
               {campaigns.filter(c => c.status === 'ACTIVE').length}
             </div>
-            <p className="text-xs text-muted-foreground">of {campaigns.length} total</p>
+            <p className="text-[11px] text-muted-foreground mt-1">of {campaigns.length} total campaigns</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. ROAS</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs font-medium text-muted-foreground">Avg. ROAS Target</CardTitle>
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <TrendingUp className="h-3.5 w-3.5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold font-mono text-foreground">
               {stats.avgRoas > 0 ? `${stats.avgRoas.toFixed(2)}x` : '—'}
             </div>
-            <p className="text-xs text-muted-foreground">Return on Ad Spend ratio</p>
+            <p className="text-[11px] text-muted-foreground mt-1">Return on Ad Spend ratio</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Campaigns</CardTitle>
-          <CardDescription>All ad campaigns for your business.</CardDescription>
+      <Card className="rounded-xl border border-border/80 bg-card shadow-xs">
+        <CardHeader className="pb-3 border-b border-border/60">
+          <CardTitle className="text-sm font-bold text-foreground">Campaign Matrix</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            All active, paused, and drafted ad campaigns for this workspace.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {isLoading || businessLoading ? (
-            <p className="py-6 text-center text-muted-foreground">Loading campaigns…</p>
+            <div className="flex items-center justify-center py-12 gap-2 text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span>Loading campaigns telemetry...</span>
+            </div>
           ) : campaigns.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-12 text-center">
-              <Megaphone className="h-12 w-12 text-muted-foreground/40" />
-              <div>
-                <p className="font-medium">No campaigns yet</p>
-                <p className="text-sm text-muted-foreground">Generate AI ad copy or launch your first campaign to get started.</p>
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Megaphone className="h-5 w-5" />
               </div>
-              <div className="flex gap-2">
-                <Link href="/ad-campaigns/generate"><Button variant="outline">Generate Copy</Button></Link>
-                <Link href="/ad-campaigns/builder"><Button>Launch Campaign</Button></Link>
+              <div>
+                <p className="text-xs font-bold text-foreground">No campaigns launched yet</p>
+                <p className="text-xs text-muted-foreground mt-0.5 max-w-sm">Generate AI ad copy or launch your first multi-network campaign to start driving paid conversions.</p>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Link href="/ad-campaigns/generate">
+                  <Button variant="outline" size="sm" className="text-xs font-medium rounded-lg">Generate Copy</Button>
+                </Link>
+                <Link href="/ad-campaigns/builder">
+                  <Button size="sm" className="text-xs font-semibold rounded-lg">Launch Campaign</Button>
+                </Link>
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Platform</TableHead>
-                  <TableHead>Objective</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Budget/Day</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {campaigns.map(c => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell>{c.platform}</TableCell>
-                    <TableCell>{c.objective}</TableCell>
-                    <TableCell>
-                      <Badge className={`${statusColor[c.status] ?? 'bg-slate-400'} text-white`}>
-                        {c.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{c.dailyBudget ? `$${c.dailyBudget}` : '—'}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Link href={`/ad-campaigns/${c.id}`}>
-                          <Button variant="ghost" size="sm">View</Button>
-                        </Link>
-                        <Link href={`/ad-campaigns/${c.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
-                        <AlertDialog open={deleteId === c.id} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700" onClick={() => setDeleteId(c.id)}>
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Campaign</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete &quot;{c.name}&quot;? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700">
-                                {deleting ? 'Deleting…' : 'Delete'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border/60">
+                    <TableHead className="text-xs">Name</TableHead>
+                    <TableHead className="text-xs">Platform</TableHead>
+                    <TableHead className="text-xs">Objective</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
+                    <TableHead className="text-xs">Budget/Day</TableHead>
+                    <TableHead className="text-right text-xs">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {campaigns.map(c => (
+                    <TableRow key={c.id} className="border-b border-border/40 hover:bg-secondary/40">
+                      <TableCell className="font-semibold text-xs text-foreground whitespace-nowrap">{c.name}</TableCell>
+                      <TableCell className="text-xs font-mono">{c.platform}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{c.objective}</TableCell>
+                      <TableCell>{getStatusBadge(c.status)}</TableCell>
+                      <TableCell className="text-xs font-mono font-semibold text-foreground">
+                        ${((c.dailyBudget ?? 0) / 100).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link href={`/ad-campaigns/${c.id}`}>
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                          <AlertDialog open={deleteId === c.id} onOpenChange={open => !open && setDeleteId(null)}>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-destructive hover:bg-destructive/10 rounded-lg"
+                                onClick={() => setDeleteId(c.id)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-xl border border-border/80 bg-card">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-base font-bold">Delete Campaign?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-xs text-muted-foreground">
+                                  This will permanently delete &ldquo;{c.name}&rdquo;. This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="text-xs rounded-lg">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={handleDelete}
+                                  disabled={deleting}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs rounded-lg font-semibold"
+                                >
+                                  {deleting ? 'Deleting...' : 'Delete'}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

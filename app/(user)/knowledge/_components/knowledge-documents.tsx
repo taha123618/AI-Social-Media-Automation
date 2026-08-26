@@ -7,6 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 import { registerKnowledgeDocument, searchKnowledgeChunks } from '../actions';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any[] }) {
   const router = useRouter();
@@ -42,7 +45,6 @@ export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any
       router.push(`?${query}`, { scroll: false });
     }
 
-    // Perform vector search when search term changes
     if (debouncedSearch.trim()) {
       performVectorSearch(debouncedSearch);
     } else {
@@ -54,7 +56,7 @@ export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any
     setIsSearching(true);
     try {
       const results = await searchKnowledgeChunks(query);
-      setVectorResults(results);
+      setVectorResults(results || []);
     } catch (error) {
       console.error('Vector search failed:', error);
       toast.error('Failed to search knowledge base');
@@ -66,11 +68,10 @@ export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any
   const handleAddDocument = async () => {
     setIsUploading(true);
     try {
-      // Simulate file picker by just registering a mock doc for Alpha
       const mockDocs = [
-        { name: 'Marketing Strategy 2024.pdf', type: 'application/pdf' },
-        { name: 'Brand Guidelines.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
-        { name: 'Product Specs.pdf', type: 'application/pdf' }
+        { name: 'Brand Strategy & Voice Guide.pdf', type: 'application/pdf' },
+        { name: 'Product Positioning Matrix.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+        { name: 'Target ICP Personas.pdf', type: 'application/pdf' },
       ];
       const randomDoc = mockDocs[Math.floor(Math.random() * mockDocs.length)];
 
@@ -85,68 +86,70 @@ export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any
 
   return (
     <div className="space-y-6">
-      <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-        <input
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
           type="text"
-          placeholder="Search documents..."
+          placeholder="Semantic vector search across ingested brand documents..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full h-11 rounded-xl border border-slate-200/60 bg-white/50 backdrop-blur-sm pl-11 pr-10 text-xs font-bold text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all dark:border-slate-800/60 dark:bg-slate-900/50 dark:text-white"
+          className="h-10 pl-10 pr-10 text-xs bg-secondary/30 rounded-lg border-border/70 text-foreground placeholder:text-muted-foreground"
         />
-        <AnimatePresence>
-          {searchTerm && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <X className="h-3.5 w-3.5 stroke-[3px]" />
-            </motion.button>
-          )}
-        </AnimatePresence>
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
+      {/* Upload Zone */}
       <button
         onClick={handleAddDocument}
         disabled={isUploading}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 p-6 text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all dark:border-slate-800 disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2.5 rounded-xl border-2 border-dashed border-border/80 bg-card/50 p-6 text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-all disabled:opacity-50"
       >
         {isUploading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
         ) : (
-          <Plus className="h-5 w-5" />
+          <Plus className="h-4 w-4" />
         )}
-        <span className="font-bold">{isUploading ? 'Registering...' : 'Add Document'}</span>
+        <span className="font-semibold text-xs">{isUploading ? 'Registering Document...' : 'Upload Knowledge Document (PDF, DOCX, TXT)'}</span>
       </button>
 
+      {/* Ingested Documents List */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
-          <Database className="h-4 w-4" />
-          <span>Knowledge Documents ({initialDocuments.length})</span>
+        <div className="flex items-center justify-between text-xs text-muted-foreground pb-1">
+          <div className="flex items-center gap-1.5 font-medium">
+            <Database className="h-3.5 w-3.5 text-primary" />
+            <span>Ingested Documents ({initialDocuments.length})</span>
+          </div>
+          <span className="font-mono text-[11px]">pgvector indexed</span>
         </div>
+
         {initialDocuments.map((doc, idx) => (
           <motion.div
             key={doc.id}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/50 shadow-sm hover:shadow-md transition-shadow"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className="flex items-center justify-between rounded-xl border border-border/80 bg-card p-4 shadow-xs hover:border-primary/40 transition-colors"
           >
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center dark:bg-slate-800">
-                <FileText className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <FileText className="h-4 w-4" />
               </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-foreground line-clamp-1">
                   {doc.filename}
                 </h4>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[10px] uppercase font-bold text-slate-400">{doc.fileType || 'PDF'}</span>
-                  <span className="text-[10px] text-slate-300">•</span>
-                  <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1" suppressHydrationWarning>
+                  <span className="text-[10px] uppercase font-mono font-semibold text-muted-foreground">{doc.fileType || 'PDF'}</span>
+                  <span className="text-[10px] text-muted-foreground/60">•</span>
+                  <span className="text-[10px] font-mono text-muted-foreground flex items-center gap-1" suppressHydrationWarning>
                     <Clock className="h-2.5 w-2.5" />
                     {new Date(doc.createdAt).toLocaleDateString()}
                   </span>
@@ -159,39 +162,40 @@ export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any
         ))}
 
         {initialDocuments.length === 0 && (
-          <div className="text-center py-10">
-            <p className="text-sm text-slate-400">No documents uploaded yet.</p>
+          <div className="text-center py-10 rounded-xl border border-border/60 bg-card/40">
+            <Database className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+            <p className="text-xs text-muted-foreground">No brand knowledge documents uploaded yet.</p>
           </div>
         )}
       </div>
 
       {/* Vector Search Results */}
       {(vectorResults.length > 0 || isSearching) && (
-        <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-            <Brain className="h-4 w-4" />
-            <span>AI-Powered Insights</span>
-            {isSearching && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+        <div className="mt-8 pt-6 border-t border-border/70 space-y-4">
+          <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+            <Brain className="h-4 w-4 text-primary" />
+            <span>Semantic RAG Chunks Retrieved</span>
+            {isSearching && <Loader2 className="h-3.5 w-3.5 animate-spin text-primary ml-1" />}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {vectorResults.map((result, idx) => (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                className="p-4 rounded-xl bg-secondary/30 border border-border/80 space-y-2"
               >
                 <div className="flex items-start gap-3">
-                  <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-slate-700 dark:text-slate-300">{result.content}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                        Similarity: {(result.similarity * 100).toFixed(1)}%
+                  <Zap className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <div className="space-y-1 min-w-0">
+                    <p className="text-xs text-foreground leading-relaxed">{result.content}</p>
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+                      <span className="text-primary font-bold">
+                        Cosine Similarity: {(result.similarity * 100).toFixed(1)}%
                       </span>
-                      <span className="text-xs text-slate-400">•</span>
-                      <span className="text-xs text-slate-500">From knowledge base</span>
+                      <span>•</span>
+                      <span>Grounding context</span>
                     </div>
                   </div>
                 </div>
@@ -199,8 +203,8 @@ export function KnowledgeDocuments({ initialDocuments }: { initialDocuments: any
             ))}
 
             {vectorResults.length === 0 && !isSearching && (
-              <div className="text-center py-6 text-slate-400">
-                <p className="text-sm">No relevant insights found for your search.</p>
+              <div className="text-center py-6 text-xs text-muted-foreground">
+                <p>No matching semantic vectors found for query.</p>
               </div>
             )}
           </div>
@@ -214,24 +218,24 @@ function StatusBadge({ status }: { status: string }) {
   switch (status) {
     case 'ACTIVE':
       return (
-        <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] font-mono uppercase gap-1">
           <CheckCircle2 className="h-3 w-3" />
           ACTIVE
-        </div>
+        </Badge>
       );
     case 'PROCESSING':
       return (
-        <div className="flex items-center gap-1 text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+        <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-mono uppercase gap-1">
           <Loader2 className="h-3 w-3 animate-spin" />
-          PROCESSING
-        </div>
+          INDEXING
+        </Badge>
       );
     default:
       return (
-        <div className="flex items-center gap-1 text-slate-600 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full text-[10px] font-bold">
+        <Badge variant="outline" className="text-[10px] font-mono uppercase gap-1">
           <AlertCircle className="h-3 w-3" />
           {status}
-        </div>
+        </Badge>
       );
   }
 }

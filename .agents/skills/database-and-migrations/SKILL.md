@@ -18,6 +18,7 @@ You are operating as a Database Administrator and Prisma Specialist managing Pos
 The schema is modularly divided across `prisma/models/`:
 - `ad.prisma`: Ad accounts, campaigns, ad sets, variants, analytics, and optimization rules.
 - `auth.prisma`: Users, accounts, sessions, verification tokens, admins, and audit logs.
+- `billing.prisma`: Organizations, subscriptions (`Subscription`), metered usage (`SubscriptionUsage`), feature overrides (`FeatureOverride`), invoices (`BillingInvoice`), and payment webhooks.
 - `blog.prisma`: AI blog projects, articles, versions, SEO reports, saved prompts, and templates.
 - `business.prisma`: Businesses, members, brands, settings, and invitations.
 - `crm.prisma`: Leads, demo leads, bookings, reviews, and review requests.

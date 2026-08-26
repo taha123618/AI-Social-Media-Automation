@@ -15,7 +15,7 @@ export default async function AdminDashboardLayout({
          <AdminSidebar adminRole={session?.role} />
          <SidebarInset>
             <AdminNavbar />
-            <main className="flex-1 p-6">
+            <main className="flex-1 p-6 bg-muted/40 min-h-[calc(100vh-4rem)]">
                {children}
             </main>
          </SidebarInset>

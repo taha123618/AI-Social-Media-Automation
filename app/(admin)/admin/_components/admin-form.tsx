@@ -21,8 +21,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2, UserPlus, Save, X, Shield, Mail, Lock, UserCog } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 const adminSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -68,26 +66,6 @@ export function AdminForm({ id }: AdminFormProps) {
       });
     }
   }, [id, isEdit, form]);
-
-  useGSAP(() => {
-    if (!isFetching) {
-      gsap.from(cardRef.current, {
-        y: 40,
-        opacity: 0,
-        scale: 0.98,
-        duration: 0.8,
-        ease: "power3.out"
-      });
-      gsap.from(".form-field", {
-        x: -20,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.5,
-        ease: "power2.out",
-        delay: 0.4
-      });
-    }
-  }, [isFetching]);
 
   async function onSubmit(data: z.infer<typeof adminSchema>) {
     setIsLoading(true);

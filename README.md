@@ -7,6 +7,10 @@ A high-performance enterprise SaaS platform for automated social media schedulin
 ## 🌟 Key Capabilities & Highlights
 
 - **Enterprise SaaS Billing & Plan Entitlements**: Centralized plan matrix (`Free`, `Starter`, `Pro`, `Enterprise`), transactional usage metering, automatic Free plan activation on registration, Stripe Checkout & Customer Portal integration, and idempotent webhook lifecycle management.
+- **Modern Premium SaaS Design System**: Dark-first Electric Violet & Indigo accent tokens, unified layout shell (`w-64` sidebar, `h-16` command header), hierarchical border radiuses (`rounded-md` to `rounded-2xl`), and smooth physics-based motion.
+- **AI Creative Studio Hub (`/studio`)**: Multimodal creation workspace unifying Flux Pro Image Synthesis, Runway/Luma AI Video Generation, and the Media Gallery with URL query persistence and `AnimatePresence`.
+- **Resource Quota Telemetry**: Integrated `UsageLimitIndicator` progress meters on user dashboards monitoring live capacity for posts, articles, and brand voices with actionable upgrade triggers.
+- **Multi-Tenant Workspace Hub**: Seamless tenant switching with `WorkspaceSwitcher` embedded in the sidebar footer, backed by automatic query cache invalidation.
 - **Route Protection & Security Hardening**: Strict proxy middleware enforcing authentication and multi-tenant isolation, safe open-redirect protections, magic byte media upload inspection, and HSTS security headers.
 - **AI Blog Writer**: TipTap rich text editor with real-time SEO auditing, context-aware Unsplash image insertion, and Gutenberg/Word/PDF/Markdown export serializers.
 - **Mastra Multi-Agent Engine**: 13 autonomous agents coordinating research, competitor monitoring, weather-based hooks, YouTube transcription, and multi-location franchises.
@@ -15,7 +19,7 @@ A high-performance enterprise SaaS platform for automated social media schedulin
 - **Ad Campaign Manager**: Automated ad copy synthesis, A/B variant testing, campaign launch queues, and live performance metrics sync.
 - **Video & Image Synthesis**: Script-to-video processing (HeyGen, Replicate) and high-resolution image generation (Flux, Stable Diffusion) saved directly to AWS S3 / Cloudflare R2.
 - **Review Booster & CRM**: Automated review generation (SMS/Email), AI response generation, and 5-star review-to-social post converter.
-- **Interactive Marketing & Admin Suite**: GSAP + Framer Motion animated landing pages with Lenis smooth scroll, plus an operational admin dashboard.
+- **Interactive Marketing & Admin Suite**: Framer Motion animated landing pages with Lenis smooth scroll, plus an operational admin dashboard.
 
 ---
 

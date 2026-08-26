@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { TrendingUp, Users, FileText, DollarSign, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -20,71 +19,68 @@ export function GrowthMetricsCard({ data }: GrowthMetricsProps) {
 
   const metrics = [
     {
-      label: 'Posts Published',
+      label: 'Published',
       value: data.postsPublished,
-      icon: <FileText className="h-4 w-4 text-blue-500" />,
-      color: 'bg-blue-500/10',
+      icon: <FileText className="h-3.5 w-3.5 text-primary" />,
     },
     {
       label: 'Engagement',
-      value: data.totalEngagement,
-      icon: <Activity className="h-4 w-4 text-purple-500" />,
-      color: 'bg-purple-500/10',
+      value: data.totalEngagement.toLocaleString(),
+      icon: <Activity className="h-3.5 w-3.5 text-accent" />,
     },
     {
-      label: 'Leads Captured',
+      label: 'Leads',
       value: data.leadsCaptured,
-      icon: <Users className="h-4 w-4 text-green-500" />,
-      color: 'bg-green-500/10',
+      icon: <Users className="h-3.5 w-3.5 text-emerald-500" />,
     },
     {
       label: 'Consistency',
       value: `${data.consistencyScore}%`,
-      icon: <TrendingUp className="h-4 w-4 text-orange-500" />,
-      color: 'bg-orange-500/10',
+      icon: <TrendingUp className="h-3.5 w-3.5 text-purple-400" />,
     },
     {
-      label: 'Rev. Impact',
+      label: 'Rev. ROI',
       value: data.estimatedRevenueImpact,
-      icon: <DollarSign className="h-4 w-4 text-emerald-500" />,
-      color: 'bg-emerald-500/10',
+      icon: <DollarSign className="h-3.5 w-3.5 text-primary" />,
     },
   ];
 
   return (
-    <Card className="overflow-hidden border-none shadow-xl shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900 rounded-[2rem]">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="h-2 w-2 rounded-full bg-blue-600" />
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Growth Assistant</p>
-        </div>
-        <CardTitle className="text-2xl font-black tracking-tighter">Performance Insights</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {metrics.map((metric, idx) => (
-            <motion.div
-              key={metric.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`p-2 rounded-xl ${metric.color}`}>
-                  {metric.icon}
-                </div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{metric.label}</p>
-              </div>
-              <p className="text-xl font-black text-slate-900 dark:text-white">{metric.value}</p>
-            </motion.div>
-          ))}
-        </div>
-        <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/20">
-          <p className="text-xs font-bold text-blue-700 dark:text-blue-400 leading-relaxed">
-            {data.summary}
+    <Card className="rounded-xl border border-border/80 bg-card p-5 shadow-xs">
+      <CardHeader className="p-0 pb-3 mb-3 border-b border-border/60">
+        <div className="flex items-center gap-2 mb-0.5">
+          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+          <p className="text-[10px] font-mono font-semibold uppercase tracking-wider text-primary">
+            Growth Telemetry
           </p>
         </div>
+        <CardTitle className="text-base font-bold text-foreground">
+          Autonomous Velocity
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0 space-y-3">
+        <div className="grid grid-cols-2 gap-2">
+          {metrics.map((metric, idx) => (
+            <div
+              key={idx}
+              className="p-3 rounded-lg bg-secondary/50 border border-border/40 text-left"
+            >
+              <div className="flex items-center gap-1.5 mb-1 text-muted-foreground">
+                {metric.icon}
+                <span className="text-[10px] font-medium uppercase">{metric.label}</span>
+              </div>
+              <div className="text-base font-bold font-mono text-foreground" suppressHydrationWarning>
+                {metric.value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {data.summary && (
+          <p className="text-xs text-muted-foreground leading-relaxed pt-2 border-t border-border/40">
+            {data.summary}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

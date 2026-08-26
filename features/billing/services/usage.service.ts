@@ -60,7 +60,7 @@ export class UsageService {
       },
     });
 
-    const subscription = business?.organization?.subscriptions;
+    const subscription = await this.getSubscriptionForBusiness(businessId);
     if (!subscription) {
       // If no subscription record, resolve Free plan defaults
       return { used: quantity, remaining: limit === -1 ? -1 : Math.max(0, limit - quantity) };
@@ -94,22 +94,66 @@ export class UsageService {
   }
 
   /**
+   * Helper to resolve active subscription for business with owner fallback.
+   */
+  private static async getSubscriptionForBusiness(businessId: string) {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      include: {
+        organization: {
+          include: {
+            subscriptions: true,
+          },
+        },
+        members: {
+          where: { role: 'OWNER' },
+          include: {
+            user: {
+              include: {
+                ownedOrganizations: {
+                  include: {
+                    subscriptions: true,
+                  },
+                },
+                organizationMemberships: {
+                  include: {
+                    organization: {
+                      include: {
+                        subscriptions: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!business) return null;
+
+    let subscription = business.organization?.subscriptions;
+    if (!subscription || (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIALING')) {
+      const owner = business.members[0]?.user;
+      const ownerOrg =
+        owner?.ownedOrganizations?.find((o) => o.subscriptions) ||
+        owner?.organizationMemberships?.find((m) => m.organization.subscriptions)?.organization;
+
+      if (ownerOrg?.subscriptions) {
+        subscription = ownerOrg.subscriptions;
+      }
+    }
+
+    return subscription || null;
+  }
+
+  /**
    * Get current usage count for a feature in active period.
    */
   static async getCurrentUsage(businessId: string, feature: FeatureKey): Promise<number> {
     try {
-      const business = await prisma.business.findUnique({
-        where: { id: businessId },
-        include: {
-          organization: {
-            include: {
-              subscriptions: true,
-            },
-          },
-        },
-      });
-
-      const subscription = business?.organization?.subscriptions;
+      const subscription = await this.getSubscriptionForBusiness(businessId);
       if (!subscription) return 0;
 
       const featureType = this.mapToFeatureType(feature);

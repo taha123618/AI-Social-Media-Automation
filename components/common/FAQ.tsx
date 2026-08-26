@@ -6,24 +6,24 @@ import React, { useState } from "react";
 
 const faqs = [
   {
-    question: "Do I need to be a prompted expert to use SocialAI?",
-    answer: "Not at all. SocialAI handles the technical prompting behind the scenes. You just describe your idea in natural language, and our engine takes care of the rest.",
+    question: "How do Mastra autonomous AI agents operate across channels?",
+    answer: "Our engine orchestrates 13 specialized Mastra agents. One agent conducts topical research, another formats the article with Gutenberg HTML serialization, while social agents schedule optimized variants across LinkedIn, X, and Instagram.",
   },
   {
-    question: "Which social media platforms do you support?",
-    answer: "We currently support Instagram, Twitter (X), LinkedIn, TikTok, YouTube, Threads, and Pinterest. We're constantly adding new integrations based on user demand.",
+    question: "Which social networks and CMS platforms are supported natively?",
+    answer: "We support direct 1-click publishing and scheduling for LinkedIn, X (Twitter), Instagram, TikTok, YouTube, Threads, as well as WordPress, Ghost, Webflow, and Shopify.",
   },
   {
-    question: "Is the content generated truly unique?",
-    answer: "Yes. Every post is generated from scratch based on your specific requirements and brand DNA. We don't use templates, ensuring your content stands out from the crowd.",
+    question: "How does Brand Voice isolation prevent hallucinations?",
+    answer: "We use pgvector embeddings with multi-tenant workspace scoping. Your brand tone, style guidelines, and approved reference materials are retrieved dynamically via RAG before any generation pass.",
   },
   {
-    question: "Can I use SocialAI for my team or agency?",
-    answer: "Absolutely. Our Agency and Enterprise plans include dedicated features for team collaboration, client approval flows, and multi-account management.",
+    question: "Can I manage multiple client workspaces with team roles?",
+    answer: "Yes. Our platform provides multi-tenant role-based access control (Admin, Editor, Viewer), client approval queues, and separated billing per organization.",
   },
   {
-    question: "What happens if I reach my monthly post limit?",
-    answer: "You'll receive a notification when you're close to your limit. You can easily upgrade your plan at any time or purchase additional content credits on the fly.",
+    question: "What happens when monthly quota generation limits are reached?",
+    answer: "You receive proactive in-app quota alerts. You can upgrade with 1 click to the next tier or purchase add-on consumption packs without interrupting active schedules.",
   },
 ];
 
@@ -31,50 +31,81 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-32 bg-slate-50 dark:bg-slate-950 relative transition-colors">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="text-[#2D46FF] dark:text-blue-400 font-black uppercase tracking-[0.2em] text-[10px] mb-4 block">Questions</span>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white mb-6 tracking-tight">
-            Frequently asked <span className="text-[#2D46FF] dark:text-blue-500">questions.</span>
-          </h2>
+    <section id="faq" className="py-24 bg-muted/20">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
+            KNOWLEDGE BASE
+          </div>
+          <motion.h2
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight"
+          >
+            Frequently Asked{" "}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Questions
+            </span>
+          </motion.h2>
+          <p className="text-muted-foreground text-base max-w-xl mx-auto">
+            Everything you need to know about autonomous social automation and multi-agent workflows.
+          </p>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm"
-            >
-              <button
-                onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-8 py-6 flex items-center justify-between text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+        <div className="space-y-3">
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className={`rounded-xl border bg-card overflow-hidden transition-all duration-200 ${
+                  isOpen
+                    ? "border-primary/40 shadow-sm shadow-primary/5"
+                    : "border-border/80 hover:border-border"
+                }`}
               >
-                <span className="text-lg font-black text-slate-950 dark:text-white pr-8">{faq.question}</span>
-                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                  {openIndex === index ? (
-                    <Minus className="w-4 h-4 text-slate-900 dark:text-white" />
-                  ) : (
-                    <Plus className="w-4 h-4 text-slate-900 dark:text-white" />
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left transition-colors hover:bg-muted/30"
+                  aria-expanded={isOpen}
+                >
+                  <span className={`text-sm md:text-base font-semibold pr-4 transition-colors ${isOpen ? "text-primary" : "text-foreground"}`}>
+                    {faq.question}
+                  </span>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                    isOpen ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+                  }`}>
+                    {isOpen ? (
+                      <Minus className="w-3.5 h-3.5" />
+                    ) : (
+                      <Plus className="w-3.5 h-3.5" />
+                    )}
+                  </div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <div className="px-6 pb-5 pt-1 text-sm text-muted-foreground leading-relaxed border-t border-border/40">
+                        {faq.answer}
+                      </div>
+                    </motion.div>
                   )}
-                </div>
-              </button>
-              <AnimatePresence>
-                {openIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="px-8 pb-8 text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

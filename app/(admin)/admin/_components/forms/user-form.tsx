@@ -21,42 +21,48 @@ const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal("")),
+  planId: z.enum(["free", "starter", "pro", "enterprise"]).optional(),
+  billingStatus: z.enum(["ACTIVE", "PAUSED", "CANCELED", "PAST_DUE", "TRIALING"]).optional(),
 });
+
+export type UserFormData = z.infer<typeof userSchema>;
 
 interface UserFormProps {
   initialData?: any;
-  onSubmit: (data: z.infer<typeof userSchema>) => Promise<any>;
+  onSubmit: (data: UserFormData) => Promise<any>;
 }
 
 export function UserForm({ initialData, onSubmit }: UserFormProps) {
   const router = useRouter();
-  const form = useForm<z.infer<typeof userSchema>>({
-    resolver: zodResolver(userSchema),
-    defaultValues: initialData || {
-      name: "",
-      email: "",
+  const form = useForm<UserFormData>({
+    resolver: zodResolver(userSchema) as any,
+    defaultValues: {
+      name: initialData?.name || "",
+      email: initialData?.email || "",
       password: "",
+      planId: initialData?.planId || "free",
+      billingStatus: initialData?.billingStatus || "ACTIVE",
     },
   });
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleSubmit = async (values: z.infer<typeof userSchema>) => {
+  const handleSubmit = async (values: UserFormData) => {
     try {
       await onSubmit(values);
       toast.success(initialData ? "User updated successfully" : "User created successfully");
       router.refresh();
       router.push("/admin/users");
-    } catch (error) {
-      toast.error("Something went wrong");
+    } catch (error: any) {
+      toast.error(error?.message || "Something went wrong");
     }
   };
 
   return (
-    <Form {...form} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+    <Form {...(form as any)} onSubmit={form.handleSubmit(handleSubmit) as any} className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="name"
           render={({ field }) => (
             <FormItem className="space-y-2">
@@ -69,7 +75,7 @@ export function UserForm({ initialData, onSubmit }: UserFormProps) {
           )}
         />
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="email"
           render={({ field }) => (
             <FormItem className="space-y-2">
@@ -82,7 +88,7 @@ export function UserForm({ initialData, onSubmit }: UserFormProps) {
           )}
         />
         <FormField
-          control={form.control}
+          control={form.control as any}
           name="password"
           render={({ field }) => (
             <FormItem className="space-y-2">
@@ -96,6 +102,31 @@ export function UserForm({ initialData, onSubmit }: UserFormProps) {
             </FormItem>
           )}
         />
+        {!initialData && (
+          <FormField
+            control={form.control as any}
+            name="planId"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel className="text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground/70">
+                  Initial Subscription Tier
+                </FormLabel>
+                <FormControl>
+                  <select
+                    {...field}
+                    className="w-full h-12 px-4 rounded-xl border border-border bg-muted/30 text-foreground font-medium text-sm focus:border-primary focus:outline-none transition-all"
+                  >
+                    <option value="free">Free Tier (Default)</option>
+                    <option value="starter">Starter Plan</option>
+                    <option value="pro">Pro Plan</option>
+                    <option value="enterprise">Enterprise Plan</option>
+                  </select>
+                </FormControl>
+                <FormMessage className="text-destructive text-xs font-bold" />
+              </FormItem>
+            )}
+          />
+        )}
       </div>
       <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
         <Button

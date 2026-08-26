@@ -1,72 +1,89 @@
 import Link from "next/link";
+import AppLogo from "./AppLogo";
+import { FaXTwitter, FaLinkedin, FaGithub, FaYoutube } from "react-icons/fa6";
+
+const socialLinks = [
+  { icon: FaXTwitter, href: "https://x.com", label: "X / Twitter" },
+  { icon: FaLinkedin, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: FaGithub, href: "https://github.com", label: "GitHub" },
+  { icon: FaYoutube, href: "https://youtube.com", label: "YouTube" },
+];
+
+const footerLinks = {
+  Product: [
+    { label: "AI Blog Writer", href: "/ai-blog-writer" },
+    { label: "Social Scheduler", href: "/social-media-management-tool" },
+    { label: "Pricing & Plans", href: "/pricing" },
+    { label: "Talk to Sales", href: "/talk-to-sales" },
+  ],
+  Platform: [
+    { label: "Agent Framework", href: "/#features" },
+    { label: "Tool Ecosystem", href: "/#tools" },
+    { label: "Documentation", href: "/#faq" },
+    { label: "Privacy Policy", href: "/privacy" },
+  ],
+  Account: [
+    { label: "Sign In", href: "/login" },
+    { label: "Create Workspace", href: "/register" },
+    { label: "Billing & Seats", href: "/settings/billing" },
+    { label: "Operator Console", href: "/dashboard" },
+  ],
+};
 
 export default function Footer() {
-   return (
-      <footer className="py-20 bg-slate-50 dark:bg-[#020617] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-white/5 transition-colors">
-         <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
-               <div className="col-span-2">
-                  <Link href="/" className="flex items-center gap-2 mb-8 group">
-                     {/* Logo container has its own bg brand color */}
-                     <div className="w-10 h-10 rounded-xl bg-[#2D46FF] flex items-center justify-center font-black text-white text-xl">
-                        S
-                     </div>
-                     <span className="text-xl font-black text-slate-950 dark:text-white tracking-tighter">SocialAI</span>
-                  </Link>
-                  <p className="max-w-xs mb-8 text-slate-500 dark:text-slate-500 leading-relaxed font-medium">
-                     The world's most advanced AI engine for social exponential growth.
-                     Join 25k+ creators scaling with automation.
-                  </p>
-                  <div className="flex gap-4">
-                     {/* Social placeholders */}
-                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#2D46FF] hover:text-white transition-colors cursor-pointer">𝕏</div>
-                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#2D46FF] hover:text-white transition-colors cursor-pointer">in</div>
-                     <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-white hover:bg-[#2D46FF] hover:text-white transition-colors cursor-pointer">gh</div>
-                  </div>
-               </div>
-
-               <div>
-                  <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs mb-8">Product</h4>
-                  <ul className="space-y-4 font-bold text-sm">
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">AI Blog Writer</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Social Engine</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Ad Copy Gen</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Pricing</Link></li>
-                  </ul>
-               </div>
-
-               <div>
-                  <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs mb-8">Company</h4>
-                  <ul className="space-y-4 font-bold text-sm">
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">About Us</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Careers</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Privacy Policy</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Terms</Link></li>
-                  </ul>
-               </div>
-
-               <div>
-                  <h4 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-xs mb-8">Support</h4>
-                  <ul className="space-y-4 font-bold text-sm">
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Help Center</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">API Docs</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Contact Sales</Link></li>
-                     <li><Link href="#" className="hover:text-[#2D46FF] dark:hover:text-white transition-colors">Status</Link></li>
-                  </ul>
-               </div>
+  return (
+    <footer className="bg-card border-t border-border/70 text-muted-foreground transition-colors">
+      <div className="container mx-auto px-4 max-w-6xl py-14">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
+          <div className="col-span-2 lg:col-span-2">
+            <div className="mb-4">
+              <AppLogo />
             </div>
-
-            <div className="pt-12 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-               <p className="text-xs font-bold text-slate-500">
-                  © 2026 SocialAI Technologies Inc. All rights reserved.
-               </p>
-               <div className="flex gap-8">
-                  <Link href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors">Instagram</Link>
-                  <Link href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors">Discord</Link>
-                  <Link href="#" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors">YouTube</Link>
-               </div>
+            <p className="max-w-xs mb-6 text-sm text-muted-foreground leading-relaxed">
+              Enterprise multi-agent social media automation, SEO-optimized blog writing, and predictive analytics engine.
+            </p>
+            <div className="flex gap-2">
+              {socialLinks.map(({ icon: Icon, href, label }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 rounded-lg bg-secondary border border-border/70 flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-150"
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </Link>
+              ))}
             </div>
-         </div>
-      </footer>
-   );
+          </div>
+
+          {/* Link columns */}
+          {Object.entries(footerLinks).map(([group, links]) => (
+            <div key={group} className="col-span-1">
+              <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">{group}</h4>
+              <ul className="space-y-2.5 text-xs">
+                {links.map(({ label, href }) => (
+                  <li key={label}>
+                    <Link href={href} className="hover:text-primary transition-colors">
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
+          <p>© {new Date().getFullYear()} SocialAI Platform. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/security" className="hover:text-primary transition-colors">Security Guardrails</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

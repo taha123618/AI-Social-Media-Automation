@@ -3,29 +3,44 @@ import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 import { Controller, ControllerProps, FieldPath, FieldValues } from "react-hook-form"
 
+const VALID_FORM_PROPS = new Set([
+  'action',
+  'acceptCharset',
+  'autoComplete',
+  'encType',
+  'method',
+  'name',
+  'noValidate',
+  'target',
+  'id',
+  'className',
+  'style',
+  'children',
+  'tabIndex',
+  'role',
+  'dir',
+  'lang',
+  'title',
+  'hidden',
+  'slot',
+  'spellCheck',
+]);
+
 const Form = React.forwardRef<
   React.ElementRef<"form">,
   React.FormHTMLAttributes<HTMLFormElement>
 >(({ className, ...props }, ref) => {
-  // Filter out react-hook-form props that shouldn't be on DOM elements
-  const {
-    handleSubmit,
-    setValue,
-    getValues,
-    resetField,
-    clearErrors,
-    setError,
-    setFocus,
-    getFieldState,
-    formState,
-    subscribe,
-    trigger,
-    register,
-    watch,
-    reset,
-    unregister,
-    ...domProps
-  } = props as any;
+  const domProps: Record<string, any> = {};
+  for (const [key, value] of Object.entries(props)) {
+    if (
+      VALID_FORM_PROPS.has(key) ||
+      key.startsWith('aria-') ||
+      key.startsWith('data-') ||
+      (/^on[A-Z]/.test(key) && typeof value === 'function')
+    ) {
+      domProps[key] = value;
+    }
+  }
 
   return (
     <form
