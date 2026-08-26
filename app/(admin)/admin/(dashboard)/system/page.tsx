@@ -7,8 +7,6 @@ import { Activity, AlertTriangle, ShieldCheck, Server, Layers, Cpu, MemoryStick,
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 const LOG_CARDS = [
   {
@@ -84,38 +82,6 @@ export default function SystemDashboardPage() {
 
   const cpuColor = cpuUsage > 80 ? "text-rose-500" : cpuUsage > 60 ? "text-amber-500" : "text-emerald-500";
   const memColor = memoryUsage > 80 ? "text-rose-500" : memoryUsage > 60 ? "text-amber-500" : "text-emerald-500";
-
-  useGSAP(() => {
-    gsap.from(".system-header", {
-      y: -24,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    });
-    gsap.from(".metric-card", {
-      y: 32,
-      opacity: 0,
-      stagger: 0.09,
-      duration: 0.75,
-      delay: 0.15,
-      ease: "power3.out",
-    });
-    gsap.from(".log-section-header", {
-      opacity: 0,
-      y: 16,
-      duration: 0.6,
-      delay: 0.5,
-      ease: "power2.out",
-    });
-    gsap.from(".log-card", {
-      y: 32,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.8,
-      delay: 0.6,
-      ease: "power3.out",
-    });
-  }, { scope: containerRef });
 
   return (
     <div ref={containerRef} className="space-y-10 pb-10">

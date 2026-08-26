@@ -8,20 +8,16 @@ import {
   Users,
   Settings,
   LogOut,
-  ChevronRight,
-  Menu,
   BarChart3,
   ShieldAlert,
   Workflow,
   Building2,
   Hash,
-  History,
   Server,
   FileText,
   CalendarCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -30,15 +26,11 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarProvider,
-  SidebarTrigger,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { logoutAdmin } from "../actions/admin.actions";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 const menuItems = [
   {
@@ -102,7 +94,6 @@ const menuItems = [
 export function AdminSidebar({ adminRole }: { adminRole?: string }) {
   const pathname = usePathname();
   const [isLoggingOut, startTransition] = React.useTransition();
-  const sidebarRef = React.useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     startTransition(async () => {
@@ -119,42 +110,35 @@ export function AdminSidebar({ adminRole }: { adminRole?: string }) {
     });
   }, [adminRole]);
 
-  useGSAP(() => {
-    gsap.from(".sidebar-item", {
-      x: -20,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.6,
-      ease: "power2.out",
-      delay: 0.2
-    });
-  }, { scope: sidebarRef });
-
   return (
-    <Sidebar collapsible="icon" ref={sidebarRef} className="border-r border-sidebar-border">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border px-6 py-4 bg-sidebar">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/20">
             A
           </div>
-          <span className="text-sidebar-foreground group-data-[collapsible=icon]:hidden">Social AI Admin</span>
+          <span className="text-sidebar-foreground group-data-[collapsible=icon]:hidden font-bold">
+            Social AI Admin
+          </span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="bg-sidebar">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground/50">Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground/60 text-xs font-semibold px-3 py-1">
+            Menu
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title} className="sidebar-item">
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
                     tooltip={item.title}
                     className={cn(
-                      "transition-all duration-300",
+                      "transition-colors duration-150 rounded-lg text-xs font-medium h-9 px-3",
                       pathname === item.url
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-xs"
                         : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                     )}
                   >
@@ -169,16 +153,18 @@ export function AdminSidebar({ adminRole }: { adminRole?: string }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border bg-sidebar p-4">
+      <SidebarFooter className="border-t border-sidebar-border bg-sidebar p-3">
         <SidebarMenu>
-          <SidebarMenuItem className="sidebar-item">
+          <SidebarMenuItem>
             <SidebarMenuButton
-              className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="w-full justify-start text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg h-8 text-xs cursor-pointer"
               onClick={handleLogout}
               disabled={isLoggingOut}
             >
-              <LogOut className="h-4 w-4" />
-              <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+              <LogOut className="h-3.5 w-3.5 mr-2" />
+              <span className="group-data-[collapsible=icon]:hidden">
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

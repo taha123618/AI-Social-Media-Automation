@@ -16,8 +16,6 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { format } from "date-fns";
 
 export default function SettingsClient({
@@ -33,16 +31,6 @@ export default function SettingsClient({
 }) {
    const containerRef = useRef<HTMLDivElement>(null);
    const [filter, setFilter] = React.useState("");
-
-   useGSAP(() => {
-      gsap.from(".log-item", {
-         opacity: 0,
-         x: -20,
-         stagger: 0.05,
-         duration: 0.5,
-         ease: "power2.out"
-      });
-   }, { scope: containerRef });
 
    const filteredLogs = initialLogs.filter(log =>
       log.event.toLowerCase().includes(filter.toLowerCase()) ||

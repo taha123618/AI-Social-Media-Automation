@@ -6,8 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Activity, AlertTriangle, Layers, ShieldCheck, ArrowRight, Settings, Server } from "lucide-react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 const MONITOR_MODULES = [
   {
@@ -58,30 +56,6 @@ const MONITOR_MODULES = [
 
 export default function SettingsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    gsap.from(".settings-header", {
-      y: -24,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    });
-    gsap.from(".settings-notice", {
-      opacity: 0,
-      y: 16,
-      duration: 0.6,
-      delay: 0.15,
-      ease: "power2.out",
-    });
-    gsap.from(".monitor-card", {
-      y: 32,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.8,
-      delay: 0.25,
-      ease: "power3.out",
-    });
-  }, { scope: containerRef });
 
   return (
     <div ref={containerRef} className="space-y-10 pb-10">

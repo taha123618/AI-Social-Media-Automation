@@ -26,8 +26,6 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 interface MaintenanceConfig {
   isEnabled: boolean;
@@ -112,24 +110,6 @@ export default function MaintenanceAdminPage() {
       toast.error(err.message || "Failed to save configuration");
     },
   });
-
-  // GSAP Entrance Animations
-  useGSAP(() => {
-    gsap.from(".maint-header", {
-      y: -20,
-      opacity: 0,
-      duration: 0.6,
-      ease: "power3.out",
-    });
-    gsap.from(".maint-card", {
-      y: 30,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.8,
-      delay: 0.1,
-      ease: "power3.out",
-    });
-  }, { scope: containerRef });
 
   // Add handlers
   const handleAddIp = () => {

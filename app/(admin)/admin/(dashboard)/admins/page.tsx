@@ -17,8 +17,6 @@ import { Plus, Users, RefreshCw, Shield, Search, Loader2, Trash2 } from "lucide-
 import Link from "next/link";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
 
 export default function AdminManagementPage() {
@@ -43,24 +41,6 @@ export default function AdminManagementPage() {
    useEffect(() => {
       fetchAdmins();
    }, []);
-
-   useGSAP(() => {
-      if (!isLoading) {
-         gsap.from(".admin-header", {
-            y: -20,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.out"
-         });
-         gsap.from(".table-container", {
-            y: 30,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            delay: 0.2
-         });
-      }
-   }, [isLoading]);
 
    async function handleDelete() {
       if (!deleteId) return;

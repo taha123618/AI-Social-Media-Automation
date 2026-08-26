@@ -18,8 +18,6 @@ import { Activity, RefreshCw, ArrowLeft, Info, Search, User } from "lucide-react
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import {
   Dialog,
   DialogContent,
@@ -112,22 +110,6 @@ export default function ActivityLogsPage() {
   const pageCount = total ? Math.ceil(total / 25) : 0;
 
   const handleRefresh = () => qc.invalidateQueries({ queryKey: ["system", "activity"] });
-
-  useGSAP(() => {
-    gsap.from(".activity-header", {
-      y: -24,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    });
-    gsap.from(".log-table", {
-      opacity: 0,
-      y: 24,
-      duration: 0.9,
-      delay: 0.25,
-      ease: "power2.out",
-    });
-  }, { scope: containerRef });
 
   return (
     <div ref={containerRef} className="space-y-10 pb-10">
