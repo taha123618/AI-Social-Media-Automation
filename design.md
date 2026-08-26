@@ -491,6 +491,26 @@ Mounted directly within `app/(user)/layout.tsx` to handle cross-page modal trigg
 * 4 modern stat cards with monospace telemetry.
 * AI auto-response generation dialog and 1-click testimonial-to-social-post converter.
 
+### 9.10 Admin Operations & Billing Command Center (`app/(admin)/admin/(dashboard)/billing/`)
+* **Executive Metrics Grid**: Real-time MRR, ARR run-rate, paying subscribers count, and tier distribution badges.
+* **Filterable Subscription Directory**: Searchable list with plan filters (`All`, `Free`, `Starter`, `Pro`, `Enterprise`) and status pills (`Active`, `Trialing`, `Past Due`, `Canceled`).
+* **Manage Override Modal**: 1-click plan upgrading, period extension date picker, usage quota counters reset, and audit trail note capture.
+* **Audit Overrides Trail**: Live table documenting which admin changed which subscription, timestamp, previous vs new plan, and reason note.
+* **Stripe Webhook Inspector**: Log of webhook events with status pills, payload inspector, and instant retry action.
+
+### 9.11 Reactive Feature Gating (`<FeatureGate />`, `useEntitlements()`)
+* **Dynamic Client Gate**: Resolves tenant subscription in real-time without page reload.
+* **Tier Lock Badges**: Glassmorphic lock overlay with gradient badge, feature capability bullet list, and instant 1-click Upgrade CTA.
+* **Gated Surfaces**:
+  - Growth Engine (`/analytics`): Unlocked for `Starter`, `Pro`, and `Enterprise`.
+  - Omni-Scheduler (`/schedule`): Unlocked for `Starter`, `Pro`, and `Enterprise`.
+  - Team Collaboration (`/team`): Unlocked for `Pro` and `Enterprise`.
+  - Developer API Access (`/settings`): Unlocked for `Pro` and `Enterprise`.
+
+### 9.12 Theme Switcher with View Transitions (`components/theme/animated-theme-toggle.tsx`)
+* Seamless circular expand view-transition animation when switching light/dark modes.
+* Fallback to standard transition if `document.startViewTransition` is not supported.
+
 ---
 
 ## 10. Performance & Accessibility Standards
@@ -521,3 +541,4 @@ node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
 # Full test suite
 bun test
 ```
+
