@@ -34,9 +34,8 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
     : { allowed: true };
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10">
-      <div className="space-y-6">
-        <TeamHeader userRole={userRole} />
+    <div className="mx-auto max-w-7xl space-y-6">
+      <TeamHeader userRole={userRole} />
 
         {!canCollaborate.allowed ? (
           <div className="mt-8">
@@ -51,7 +50,6 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
             {activeWorkspaceId && <TeamModals businessId={activeWorkspaceId} />}
           </>
         )}
-      </div>
     </div>
   );
 }

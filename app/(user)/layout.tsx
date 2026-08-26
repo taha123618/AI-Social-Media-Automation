@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/layout/user-sidebar";
 import { UserNavbar } from "@/components/user/layout/user-navbar";
 import { MobileBottomNav } from "@/components/user/layout/mobile-bottom-nav";
+import { GlobalModals } from "@/components/common/GlobalModals";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import QueryProvider from "@/app/providers/query-provider";
@@ -40,6 +41,7 @@ export default async function UserLayout({
         </SidebarInset>
       </SidebarProvider>
       <MobileBottomNav />
+      <GlobalModals />
     </QueryProvider>
   );
 }

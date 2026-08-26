@@ -12,6 +12,24 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import { useHasHydrated } from '@/hooks/use-has-hydrated';
 
 export function WorkspaceSwitcher() {
+   const hasHydrated = useHasHydrated();
+
+   if (!hasHydrated) {
+      return (
+         <div
+            suppressHydrationWarning
+            className="w-full h-11 rounded-lg bg-secondary/60 animate-pulse flex items-center px-3 mt-3"
+         >
+            <div className="h-5 w-5 rounded-md bg-secondary mr-2.5" />
+            <div className="h-3.5 w-24 bg-secondary rounded-md" />
+         </div>
+      );
+   }
+
+   return <WorkspaceSwitcherInner hasHydrated={hasHydrated} />;
+}
+
+function WorkspaceSwitcherInner({ hasHydrated }: { hasHydrated: boolean }) {
    const [isOpen, setIsOpen] = useState(false);
    const [isSwitching, setIsSwitching] = useState(false);
    const [isPending, startTransition] = useTransition();
@@ -19,7 +37,6 @@ export function WorkspaceSwitcher() {
    const router = useRouter();
    const pathname = usePathname();
    const queryClient = useQueryClient();
-   const hasHydrated = useHasHydrated();
 
    const { data, isLoading: isLoadingWorkspaces } = useQuery({
       queryKey: ['workspaces'],
@@ -33,10 +50,10 @@ export function WorkspaceSwitcher() {
       staleTime: 5 * 60 * 1000 // 5 minutes
    });
 
-   // Initialize activeId from data directly, avoiding effect-based state updates
+   // Initialize activeId from data directly
    const activeId = data?.currentId || null;
    const workspaces = data?.workspaces || [];
-   const isLoading = !hasHydrated || isLoadingWorkspaces;
+   const isLoading = isLoadingWorkspaces;
 
    useClickOutside(dropdownRef, () => setIsOpen(false));
 

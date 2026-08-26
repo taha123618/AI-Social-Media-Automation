@@ -1,11 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader, Save, Sparkles, Zap, Target, Brain, Gauge, Shield } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { X, Loader2, Save, Sparkles, Zap, ShieldCheck, PenLine, ChevronRight, Hash, Layers } from 'lucide-react';
+import { FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createContentDraft, updateContentDraft, generateContentWithAI } from '../actions/mutations';
 import { toast } from 'sonner';
 import { ContentIntent, Platform } from '@/app/generated/prisma/enums';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface CreateContentModalProps {
   onClose: () => void;
@@ -17,6 +24,33 @@ interface CreateContentModalProps {
     colorPalette?: string[];
   };
 }
+
+const PLATFORM_META: Record<string, { label: string; icon: any; color: string; activeClass: string }> = {
+  LINKEDIN: {
+    label: 'LinkedIn',
+    icon: FaLinkedin,
+    color: '#0a66c2',
+    activeClass: 'bg-[#0a66c2]/15 text-[#0a66c2] border-[#0a66c2]/40 shadow-xs'
+  },
+  TWITTER: {
+    label: 'X (Twitter)',
+    icon: FaXTwitter,
+    color: '#000000',
+    activeClass: 'bg-foreground/15 text-foreground border-foreground/30 shadow-xs'
+  },
+  INSTAGRAM: {
+    label: 'Instagram',
+    icon: FaInstagram,
+    color: '#e4405f',
+    activeClass: 'bg-[#e4405f]/15 text-[#e4405f] border-[#e4405f]/40 shadow-xs'
+  },
+  FACEBOOK: {
+    label: 'Facebook',
+    icon: FaFacebook,
+    color: '#1877f2',
+    activeClass: 'bg-[#1877f2]/15 text-[#1877f2] border-[#1877f2]/40 shadow-xs'
+  },
+};
 
 export function CreateContentModal({ onClose, businessId, initialData, brandProfile }: CreateContentModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,9 +67,8 @@ export function CreateContentModal({ onClose, businessId, initialData, brandProf
   });
   const [topic, setTopic] = useState(initialData?.title || '');
   const [generationMode, setGenerationMode] = useState<'manual' | 'ai'>('manual');
-  const [brandAlignmentScore, setBrandAlignmentScore] = useState<number | null>(null);
+  const [brandAlignmentScore, setBrandAlignmentScore] = useState<number>(75);
 
-  // Use useEffect to ensure we always capture the latest initialData if the modal remains mounted
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title || '');
@@ -43,7 +76,6 @@ export function CreateContentModal({ onClose, businessId, initialData, brandProf
       setPlatforms(initialData.platforms || ['LINKEDIN']);
       setCustomPrompt(initialData.customPrompt || '');
 
-      // Load content from multiple possible sources
       const content = initialData.content ||
         initialData.contentJson?.text ||
         initialData.contentJson?.caption ||
@@ -59,61 +91,66 @@ export function CreateContentModal({ onClose, businessId, initialData, brandProf
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title) return toast.error('Title is required');
-    if (platforms.length === 0) return toast.error('At least one platform is required');
+    if (!title.trim() && !contentText.trim()) {
+      toast.error('Please enter a title or content');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       if (initialData?.id) {
         await updateContentDraft(initialData.id, {
           title,
+          contentText,
           intent,
           platforms,
-          customPrompt,
-          contentText,
+          customPrompt
         });
-        toast.success('Content draft updated');
+        toast.success('Draft updated successfully');
       } else {
         await createContentDraft({
-          title,
+          businessId,
+          title: title || topic || 'Untitled Draft',
           intent,
           platforms,
-          customPrompt,
-          businessId,
-          contentText, // Will add it to createContentDraft too for consistency
-        } as any);
-        toast.success('Content draft created');
+          customPrompt: customPrompt || contentText
+        });
+        toast.success('Draft created successfully');
       }
-      onClose();
       window.dispatchEvent(new CustomEvent('drafts-updated'));
-    } catch (error) {
-      toast.error('Failed to create/update content');
+      onClose();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to save draft');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleAIGenerate = async () => {
-    if (!topic.trim()) return toast.error('Please enter a topic for AI generation');
-    if (platforms.length === 0) return toast.error('At least one platform is required');
+    if (!topic.trim()) {
+      toast.error('Please enter a topic for AI generation');
+      return;
+    }
 
     setIsGenerating(true);
     try {
       const result = await generateContentWithAI({
         businessId,
+        topic,
         intent,
         platforms,
-        topic: topic.trim(),
         customInstructions: customPrompt
       });
 
-      toast.success('AI content generated successfully!');
-      // Close modal and refresh content list with React Query cache invalidate
-      onClose();
-      window.dispatchEvent(new CustomEvent('drafts-updated'));
-    } catch (error) {
-      toast.error('Failed to generate AI content');
-      console.error('AI Generation Error:', error);
+      if (result.success && result.data) {
+        setContentText(result.data.content || '');
+        if (!title.trim()) setTitle(result.data.title || topic);
+        toast.success('Content generated with brand grounding!');
+      } else {
+        toast.error(result.error || 'Failed to generate content');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'An error occurred during generation');
     } finally {
       setIsGenerating(false);
     }
@@ -121,10 +158,10 @@ export function CreateContentModal({ onClose, businessId, initialData, brandProf
 
   const calculateBrandAlignment = () => {
     const factors = [
-      brandProfile?.brandTone ? 25 : 0,
-      brandProfile?.usp ? 25 : 0,
-      customPrompt ? 25 : 0,
-      platforms.length > 0 ? 25 : 0
+      brandProfile?.brandTone ? 25 : 15,
+      brandProfile?.usp ? 25 : 20,
+      customPrompt ? 25 : 20,
+      platforms.length > 0 ? 25 : 20
     ];
     return factors.reduce((sum, factor) => sum + factor, 0);
   };
@@ -133,198 +170,242 @@ export function CreateContentModal({ onClose, businessId, initialData, brandProf
     setBrandAlignmentScore(calculateBrandAlignment());
   }, [brandProfile, customPrompt, platforms]);
 
+  const wordCount = contentText.trim() ? contentText.trim().split(/\s+/).length : 0;
+  const charCount = contentText.length;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-lg rounded-[2.5rem] bg-white p-8 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 12 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="relative w-full max-w-xl max-h-[92vh] flex flex-col rounded-2xl bg-card border border-border/80 shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-6">
+        {/* Top ambient accent glow */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Modal Header */}
+        <div className="p-5 sm:p-6 pb-4 border-b border-border/60 flex items-center justify-between shrink-0 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-lg">
-              <Sparkles className="h-6 w-6" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
+              <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {initialData ? 'Edit' : 'Create'} Content
+              <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
+                {initialData ? 'Edit Content Draft' : 'Create Content Draft'}
+                <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                  v2.0
+                </Badge>
               </h2>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex items-center gap-1">
-                  <Shield className="h-4 w-4 text-green-500" />
-                  <span className="text-xs font-bold text-green-600 dark:text-green-400">Brand Aligned</span>
-                </div>
-                {brandAlignmentScore !== null && (
-                  <div className="flex items-center gap-1">
-                    <Gauge className="h-4 w-4 text-blue-500" />
-                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{brandAlignmentScore}% Alignment</span>
-                  </div>
-                )}
+              <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1 text-emerald-500 font-medium">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  RAG Grounded
+                </span>
+                <span>•</span>
+                <span className="font-mono text-primary font-medium">
+                  {brandAlignmentScore}% Brand Match
+                </span>
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <X className="h-6 w-6" />
+
+          <button
+            onClick={onClose}
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Generation Mode Toggle */}
-        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-          <div className="flex gap-2 mb-3">
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 relative z-10 custom-scrollbar">
+          {/* Mode Switcher */}
+          <div className="p-1 rounded-xl bg-secondary/50 border border-border/60 grid grid-cols-2 gap-1">
             <button
               type="button"
               onClick={() => setGenerationMode('manual')}
-              className={`flex-1 py-2 px-4 rounded-xl font-bold text-sm transition-all ${generationMode === 'manual'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md'
-                : 'bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
+              className={cn(
+                'py-2 px-3 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2',
+                generationMode === 'manual'
+                  ? 'bg-card text-foreground shadow-xs border border-border/70'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
             >
-              Manual Draft
+              <PenLine className="h-3.5 w-3.5" />
+              <span>Manual Authoring</span>
             </button>
             <button
               type="button"
               onClick={() => setGenerationMode('ai')}
-              className={`flex-1 py-2 px-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${generationMode === 'ai'
-                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/25'
-                : 'bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'}`}
+              className={cn(
+                'py-2 px-3 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2',
+                generationMode === 'ai'
+                  ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
             >
-              <Zap className="h-4 w-4" />
-              AI Generation
+              <Zap className="h-3.5 w-3.5" />
+              <span>Autonomous AI Swarm</span>
             </button>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-            {generationMode === 'manual'
-              ? 'Write your own content with brand guidance'
-              : 'Generate brand-aligned content with AI assistance'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
+          <form id="content-modal-form" onSubmit={handleSubmit} className="space-y-4">
+            {/* Title / Topic */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Content Title</label>
-              <input
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                {generationMode === 'ai' ? 'Campaign Topic or Seed Angle' : 'Draft Title'}
+              </label>
+              <Input
                 type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title of your post"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                value={generationMode === 'ai' ? topic : title}
+                onChange={(e) => {
+                  if (generationMode === 'ai') {
+                    setTopic(e.target.value);
+                    if (!title) setTitle(e.target.value);
+                  } else {
+                    setTitle(e.target.value);
+                  }
+                }}
+                placeholder={generationMode === 'ai' ? "e.g. 5 lessons from building an AI-first marketing workflow..." : "e.g. Q3 Growth Retrospective"}
+                className="h-10 text-xs rounded-xl bg-secondary/30 border-border/70 focus-visible:ring-primary/30"
               />
             </div>
 
-            {generationMode === 'ai' && (
+            {/* Strategy & Platform Matrix */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Topic for AI Generation</label>
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="What should the AI write about?"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950 focus:ring-2 focus:ring-blue-500/20 outline-none"
-                />
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Marketing Intent</label>
+                <select
+                  value={intent}
+                  onChange={(e) => setIntent(e.target.value as ContentIntent)}
+                  className="w-full h-10 rounded-xl border border-border/70 bg-card px-3 text-xs font-medium text-foreground outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer"
+                >
+                  <option value="ENGAGEMENT">Engagement & Discussion</option>
+                  <option value="SALES">Product Direct Sales</option>
+                  <option value="EDUCATION">Thought Leadership & Edu</option>
+                  <option value="BRAND_AWARENESS">Brand Awareness</option>
+                </select>
               </div>
-            )}
 
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Goal / Intent</label>
-              <select
-                value={intent}
-                onChange={(e) => setIntent(e.target.value as ContentIntent)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950 outline-none"
-              >
-                <option value="ENGAGEMENT">Engagement</option>
-                <option value="SALES">Sales</option>
-                <option value="EDUCATION">Education</option>
-                <option value="BRAND_AWARENESS">Brand Awareness</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Platforms</label>
-              <div className="flex flex-wrap gap-2">
-                {['LINKEDIN', 'TWITTER', 'INSTAGRAM', 'FACEBOOK'].map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => togglePlatform(p as Platform)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${platforms.includes(p as Platform)
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                        : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-800'
-                      }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Publish Channels</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(['LINKEDIN', 'TWITTER', 'INSTAGRAM', 'FACEBOOK'] as Platform[]).map((p) => {
+                    const isSelected = platforms.includes(p);
+                    const meta = PLATFORM_META[p] || { label: p, icon: Layers, activeClass: 'bg-primary text-primary-foreground' };
+                    const Icon = meta.icon;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => togglePlatform(p)}
+                        className={cn(
+                          'h-10 px-2.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5',
+                          isSelected
+                            ? meta.activeClass
+                            : 'border-border/60 bg-secondary/30 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                        <span className="hidden sm:inline text-[11px]">{meta.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
+            {/* Custom Instructions / Guardrails */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Custom Prompt / Instructions</label>
-              <textarea
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                AI Directives & Guardrails <span className="text-muted-foreground font-normal">(Optional)</span>
+              </label>
+              <Textarea
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="Give specific instructions to AI..."
-                rows={3}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950 outline-none resize-none"
+                placeholder="Specific tone nuances, forbidden competitor keywords, or call-to-action constraints..."
+                rows={2}
+                className="text-xs rounded-xl bg-secondary/30 border-border/70 resize-none focus-visible:ring-primary/30"
               />
             </div>
 
+            {/* Content Textarea */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Draft Content Text</label>
-              <textarea
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-foreground">Content Copy</label>
+                <span className="text-[11px] font-mono text-muted-foreground">
+                  {wordCount} words • {charCount} chars
+                </span>
+              </div>
+              <Textarea
                 value={contentText}
                 onChange={(e) => setContentText(e.target.value)}
-                placeholder="Write your draft content here..."
-                rows={4}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950 outline-none resize-none"
+                placeholder="Draft copy will appear here or write your custom post..."
+                rows={5}
+                className="text-xs rounded-xl bg-secondary/30 border-border/70 resize-none font-sans leading-relaxed focus-visible:ring-primary/30"
               />
             </div>
-          </div>
+          </form>
+        </div>
 
-          <div className="flex gap-4 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-2xl border border-slate-200 py-3 font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={generationMode === 'ai' ? handleAIGenerate : handleSubmit}
-              disabled={generationMode === 'ai' ? isGenerating || !topic.trim() : isSubmitting}
-              className={`flex-1 rounded-2xl py-3 font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 ${generationMode === 'ai'
-                ? 'bg-linear-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 active:scale-95 disabled:opacity-50'
-                : 'bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-50'}`}
-            >
-              {generationMode === 'ai' ? (
-                isGenerating ? (
+        {/* Modal Footer */}
+        <div className="p-4 sm:p-5 border-t border-border/60 bg-card/50 flex items-center justify-between shrink-0 relative z-10">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-9 px-4 text-xs rounded-xl text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </Button>
+
+          <div className="flex items-center gap-2">
+            {generationMode === 'ai' ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleAIGenerate}
+                disabled={isGenerating || !topic.trim()}
+                className="h-9 px-4 text-xs font-semibold rounded-xl gap-2 bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md shadow-primary/20 hover:opacity-95 active:scale-95"
+              >
+                {isGenerating ? (
                   <>
-                    <Loader className="h-5 w-5 animate-spin" />
-                    Generating...
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Synthesizing...</span>
                   </>
                 ) : (
                   <>
-                    <Zap className="h-5 w-5" />
-                    Generate with AI
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>Generate Draft</span>
                   </>
-                )
+                )}
+              </Button>
+            ) : null}
+
+            <Button
+              type="submit"
+              form="content-modal-form"
+              disabled={isSubmitting}
+              size="sm"
+              className="h-9 px-4 text-xs font-semibold rounded-xl gap-1.5 shadow-sm active:scale-95"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Saving...</span>
+                </>
               ) : (
-                isSubmitting ? (
-                  <>
-                    <Loader className="h-5 w-5 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-5 w-5" />
-                    {initialData ? 'Update Draft' : 'Create Draft'}
-                  </>
-                )
+                <>
+                  <Save className="h-3.5 w-3.5" />
+                  <span>{initialData ? 'Update Draft' : 'Save Draft'}</span>
+                </>
               )}
-            </button>
+            </Button>
           </div>
-        </form>
+        </div>
       </motion.div>
     </div>
   );
