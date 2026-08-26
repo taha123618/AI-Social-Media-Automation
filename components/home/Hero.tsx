@@ -224,15 +224,17 @@ export default function Hero() {
       </div>
 
       {/* Brand Logos Marquee */}
-      <div className="mt-20 border-y border-border/60 py-8 bg-muted/20">
-        <div className="container mx-auto px-4 mb-4 text-center">
+      <div className="mt-20 border-y border-border/60 py-8 bg-muted/20 overflow-hidden">
+        <div className="container mx-auto px-4 mb-5 text-center">
           <p className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
-            POWERING LEADING CREATORS & HIGH-GROWTH SAAS BRANDS
+            POWERING LEADING CREATORS &amp; HIGH-GROWTH SAAS BRANDS
           </p>
         </div>
-        <div className="flex gap-14 whitespace-nowrap overflow-hidden opacity-60">
-          {["LINKEDIN", "X / TWITTER", "INSTAGRAM", "TIKTOK", "YOUTUBE", "WORDPRESS", "GHOST", "SHOPIFY", "WEBFLOW"].map((network) => (
-            <div key={network} className="text-sm font-semibold tracking-wider text-muted-foreground hover:text-foreground transition-colors">
+        {/* Duplicate items for seamless loop */}
+        <div className="flex animate-marquee whitespace-nowrap opacity-50 hover:opacity-70 transition-opacity">
+          {["LINKEDIN", "X / TWITTER", "INSTAGRAM", "TIKTOK", "YOUTUBE", "WORDPRESS", "GHOST", "SHOPIFY", "WEBFLOW", "NOTION", "MEDIUM", "LINKEDIN", "X / TWITTER", "INSTAGRAM", "TIKTOK", "YOUTUBE", "WORDPRESS", "GHOST", "SHOPIFY", "WEBFLOW", "NOTION", "MEDIUM"].map((network, i) => (
+            <div key={i} className="inline-flex items-center gap-2 mx-8 text-sm font-semibold tracking-wider text-muted-foreground hover:text-foreground transition-colors shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
               {network}
             </div>
           ))}

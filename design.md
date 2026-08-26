@@ -1,75 +1,79 @@
 # Modern Premium SaaS Design System Strategy
 
-> **Project:** AI Social Media & Content Automation Platform  
-> **Framework:** Next.js 16 (App Router), React 19, Tailwind CSS, shadcn/ui, Radix UI, Framer Motion, Recharts, TipTap, Lucide Icons.  
-> **Accent Palette:** Electric Violet (`oklch(0.58 0.23 275)` / `oklch(0.65 0.22 275)`) & Deep Indigo (`oklch(0.55 0.22 260)`).
+> **Project:** AI Social Media & Content Automation Platform ("SocialAI")
+> **Stack:** Next.js 16 (App Router), React 19, Tailwind CSS v4, shadcn/ui, Radix UI, Framer Motion, GSAP + ScrollTrigger, Lenis Smooth Scroll, Recharts, TipTap, Lucide Icons.
+> **Accent Palette:** Electric Violet / Indigo — `oklch(0.58 0.23 275)` → `oklch(0.65 0.22 275)`.
 
 ---
 
 ## 1. Visual Identity & Design Philosophy
 
 ### 1.1 Core Aesthetic Principles
-* **Atmosphere**: Sophisticated, dark-first, intelligent, and performance-engineered. Avoid generic template aesthetics, tactical gaming UI, excessive visual noise, or playful cartoonish elements.
-* **Visual Direction**: Multi-layered slate surfaces, intentional OKLCH gradient accents, precise typography, micro-borders, and physics-based motion.
-* **Brand Impression**:
-  - **Multi-Agent Autonomy**: Communicates high-powered AI fleets operating seamlessly in the background.
-  - **Contextual Intelligence**: RAG grounding and vector memory reflected through high-precision telemetry.
-  - **Multi-Tenant Isolation**: Clean tenant context switching with zero visual friction.
-  - **Enterprise Reliability**: Clean data visualization, zero layout shifts, and predictable interaction models.
 
-### 1.2 Anti-Patterns & Hard Boundaries
-* ❌ **No Random Colors or Rainbow Gradients**: Never introduce uncurated hues; adhere strictly to the Electric Violet / Indigo scale.
-* ❌ **No Global 0px Border Radius**: Never enforce `--radius: 0rem` or `rounded-none` across standard interactive components.
-* ❌ **No Heavy Blocking Animations**: Never use DOM-mutating GSAP timelines or `textContent` number tweens that cause table jumps or hydration conflicts.
-* ❌ **No Placeholder Content**: Avoid `Lorem Ipsum` in production surfaces; always render realistic, domain-specific AI social content.
-* ❌ **No Harsh Dropshadows**: Use subtle tinted shadows (`shadow-xs`, `shadow-sm shadow-primary/25`) rather than heavy opaque black shadows.
+The platform communicates **multi-agent autonomy**, **contextual RAG intelligence**, **enterprise reliability**, and **analytical precision** through every design decision.
+
+* **Dark-First, Layered Surfaces**: Deep slate backgrounds (`hsl(225, 20%, 7%)`) with progressively lighter card surfaces (`hsl(225, 18%, 10%)`) and popover layers (`hsl(225, 18%, 12%)`).
+* **Controlled Electric Violet Accent**: Primary accent is strictly Electric Violet (`--primary: 258 90% 66%`). Used on CTAs, active nav items, icon containers, badge outlines, and focus rings.
+* **Typographic Precision**: Heavy use of `font-extrabold tracking-tight` for headings. `font-mono` reserved exclusively for quantitative telemetry, timestamps, and pricing.
+* **Physics Motion**: All interactive elements use spring-based or cubic-bezier easing. Never linear.
+* **Ambient Layering**: Subtle mesh-gradient backdrops (`mesh-gradient` CSS class) and blurred glow orbs at zero pointer-events to add depth without visual noise.
+
+### 1.2 What the Interface Communicates
+
+| Signal | Design Expression |
+| :--- | :--- |
+| **AI Autonomy** | Animated progress bars in hero mockup, "Synthesizing..." real-time status text |
+| **Scale & Velocity** | `font-mono` metric counters (`+148.2%`, `24.8K`), dispatch queue timestamps |
+| **Brand Safety / RAG** | "pgvector RAG" badge, "Deterministic tone adherence" copy |
+| **Enterprise Trust** | Star rating testimonials, Trust props (`14-Day Free Trial`, `Zero Credit Card`) |
+| **Premium SaaS** | `whileHover={{ y: -4 }}` card lifts, `backdrop-blur-md` navbar, `shadow-primary/25` CTAs |
+
+### 1.3 Hard Anti-Patterns (Never Do)
+
+* ❌ `--radius: 0rem` or `rounded-none` globally — destroys the balanced premium feel.
+* ❌ `gsap.from(".table-row")` on query-invalidated data tables — causes flash-of-content jitter.
+* ❌ `textContent: 0` GSAP number tweens on formatted stat strings — corrupts locale formatting.
+* ❌ Green/neon-green accents — the palette is Violet/Indigo only. Emerald is allowed exclusively for positive telemetry deltas (`+148.2%`, uptime badges).
+* ❌ `Lorem ipsum` in any production component — all content must be domain-specific and real.
+* ❌ `ScrollTrigger.registerPlugin()` at module top level — must be wrapped in `typeof window !== "undefined"` guard (see `lib/animations/gsap.ts`).
 
 ---
 
-## 2. Core Color Palette Tokens (CSS Variables)
+## 2. Color System
 
-The design system is powered by CSS variables mapped through Tailwind CSS and shadcn/ui primitives.
-
-### 2.1 CSS Variables Definition (`app/globals.css`)
+### 2.1 CSS Variable Definitions (`app/globals.css`)
 
 ```css
 @layer base {
   :root {
-    /* Base Surfaces & Typography */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
-
-    /* Card & Modal Surfaces */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary Accent: Electric Violet */
+    /* ✅ Primary: Electric Violet */
     --primary: 258 90% 66%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary & Muted Controls */
     --secondary: 220 14% 96%;
     --secondary-foreground: 222 47% 11%;
     --muted: 220 14% 96%;
     --muted-foreground: 215 16% 47%;
 
-    /* Accent: Indigo */
+    /* ✅ Accent: Indigo */
     --accent: 258 90% 66%;
     --accent-foreground: 0 0% 100%;
 
-    /* Functional Status */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Borders & Focus Rings */
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 258 90% 66%;
     --radius: 0.75rem;
 
-    /* Sidebar Variables */
+    /* Sidebar tokens */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 258 90% 66%;
@@ -81,41 +85,37 @@ The design system is powered by CSS variables mapped through Tailwind CSS and sh
   }
 
   .dark {
-    /* Base Surfaces & Typography */
+    /* ✅ Deep slate base: hsl(225, 20%, 7%) */
     --background: 225 20% 7%;
     --foreground: 0 0% 98%;
 
-    /* Card & Modal Surfaces */
+    /* Slightly elevated card surfaces */
     --card: 225 18% 10%;
     --card-foreground: 0 0% 98%;
     --popover: 225 18% 12%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary Accent: Luminous Electric Violet */
+    /* ✅ Primary: Electric Violet (same hue, dark-mode luminosity) */
     --primary: 258 90% 66%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary & Muted Controls */
     --secondary: 225 14% 16%;
     --secondary-foreground: 0 0% 98%;
     --muted: 225 14% 16%;
     --muted-foreground: 220 10% 65%;
 
-    /* Accent: Deep Indigo */
+    /* ✅ Accent: Deep Indigo */
     --accent: 230 75% 62%;
     --accent-foreground: 0 0% 100%;
 
-    /* Functional Status */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Borders & Focus Rings */
     --border: 225 14% 20%;
     --input: 225 14% 20%;
     --ring: 258 90% 66%;
     --radius: 0.75rem;
 
-    /* Sidebar Variables */
+    /* Sidebar dark tokens */
     --sidebar-background: 225 18% 9%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 258 90% 66%;
@@ -128,163 +128,359 @@ The design system is powered by CSS variables mapped through Tailwind CSS and sh
 }
 ```
 
-### 2.2 OKLCH Modern CSS Color Tokens
-* **Primary (Light)**: `oklch(0.58 0.23 275)` — Electric Violet for high-contrast CTA buttons and interactive active states.
-* **Primary (Dark)**: `oklch(0.65 0.22 275)` — Luminous Violet for dark-mode contrast readability.
-* **Accent**: `oklch(0.55 0.22 260)` — Deep Indigo for secondary badges, subtle gradient overlays, and hover states.
-* **Success Telemetry**: `oklch(0.62 0.19 145)` / `emerald-500` for positive metric trends (`+12.5%`) and optimal system uptime.
-* **Warning Quota**: `oklch(0.75 0.18 75)` / `amber-500` for quota usage approaching limits (>= 80%).
-* **Destructive Exhaustion**: `oklch(0.55 0.22 25)` / `rose-500` / `destructive` for quota exhaustion and deletion triggers.
+### 2.2 Semantic Color Usage Map
 
----
+| Token | Usage Contexts | Never Use For |
+| :--- | :--- | :--- |
+| `text-primary` / `bg-primary` | CTA buttons, active nav items, badge borders, focus rings, progress bars | Body text, neutral icons |
+| `text-accent` / `bg-accent` | Secondary badges, feature icon accent, gradient endpoint | Primary CTAs |
+| `text-muted-foreground` | Descriptions, subtitles, placeholder text, secondary labels | Headings, metric values |
+| `text-foreground` | Primary headings, card titles, stat numbers, body copy | Captions, helpers |
+| `emerald-500` / `text-emerald-500` | Positive metric trends (`+148.2%`), system uptime, healthy status | General accent |
+| `amber-500` | Quota warnings (>= 80% usage), `os X` traffic light (decorative) | Primary actions |
+| `destructive` | Quota exhaustion, delete actions, error states | Neutral warnings |
 
-## 3. Border Radius Hierarchy & Surface Geometry
+### 2.3 Gradient Patterns
 
-The application uses an intentional 5-tier radius scale to establish consistent visual rhythm across all components:
+```css
+/* Hero headline gradient — From Violet → Indigo → Purple */
+.gradient-headline {
+  background: linear-gradient(to right, var(--primary), var(--accent), theme('colors.purple.400'));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-| Radius Tier | Tailwind Class | Value | Usage & Application |
-| :--- | :--- | :--- | :--- |
-| **Micro / Compact** | `rounded-md` | `6px` | Compact status tags, dropdown menu items, sub-badges, tooltip popups |
-| **Interactive Controls** | `rounded-lg` | `8px` | Action buttons (`Button`), input boxes (`Input`), dropdown triggers (`SelectTrigger`), tab switchers, icon wrappers |
-| **Content Panels** | `rounded-xl` | `12px` | Standard cards (`Card`), modal dialogs (`DialogContent`), data table containers, metric panels |
-| **Hero / Visual Frames** | `rounded-2xl` | `16px` | Hero image wrappers, product preview mockups, auth card containers, onboarding wizard steps |
-| **Pill / Avatars** | `rounded-full` | `9999px` | User profile avatars, live status pulse dots, toggle switch pills |
+/* Pricing popular badge gradient */
+.gradient-popular-badge {
+  background: linear-gradient(to right, var(--primary), var(--accent));
+}
 
----
-
-## 4. Typography Scale & Monospace Policy
-
-### 4.1 Font Family Stack
-* **Primary UI Font**: `Geist Sans` / `Inter` (`font-sans`) for headings, body copy, descriptions, and labels.
-* **Monospace Font**: `Geist Mono` / `JetBrains Mono` (`font-mono`) strictly applied to quantitative telemetry:
-  - Metric counters & statistics (e.g. `1,280`, `99.9%`)
-  - Resource quota ratios (e.g. `3 / 5`, `12 / 50`)
-  - Subscription pricing & ROAS multipliers (e.g. `$29/mo`, `4.8x`)
-  - Timestamps, dates, and durations (e.g. `2026-08-26`, `10:45 AM`)
-  - UUIDs, transaction hashes, and status tokens
-
-### 4.2 Standard Type Scale
-* **Page H1**: `text-3xl font-bold tracking-tight text-foreground` (with `text-sm text-muted-foreground mt-1` subtitle).
-* **Section / Card H2**: `text-base font-bold text-foreground` (with `text-xs text-muted-foreground mt-0.5` subtitle).
-* **Form Label**: `text-xs font-semibold uppercase tracking-wider text-muted-foreground`.
-* **Body / Paragraph**: `text-xs text-muted-foreground leading-relaxed`.
-* **Badge / Tag**: `text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md`.
-
----
-
-## 5. Layout Shell Parity (`app/(user)/*` & `app/(admin)/*`)
-
-The user dashboard and admin operations portal share an identical structural layout shell:
-
-```text
-+-------------------------------------------------------------------------------+
-| Sidebar (w-64)                     | Top Navbar (h-16, sticky, backdrop-blur) |
-| [Brand Logo + Title]               | [SidebarTrigger] [Breadcrumb] [Search]  |
-|                                    +------------------------------------------+
-| Nav Sections:                      | Main Content Area (p-6, bg-muted/40)    |
-| - Overview                         |                                          |
-| - AI Generation & Media            | [Page Header + Action CTAs]              |
-| - Autonomous Strategy              |                                          |
-| - Publishing & Reach               | [KPI Metrics Grid (4 columns)]           |
-| - Workspace & Team                 |                                          |
-|                                    | [Resource Quota Telemetry (3 columns)]   |
-| Footer:                            |                                          |
-| - WorkspaceSwitcher (Active Tenant)| [Primary Workspace Grid (7 columns)]     |
-| - Sign Out Button                  |                                          |
-+-------------------------------------------------------------------------------+
-```
-
-### 5.1 Main Layout Specification (`layout.tsx`)
-```tsx
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { UserSidebar } from "@/components/user/layout/user-sidebar";
-import { UserNavbar } from "@/components/user/layout/user-navbar";
-
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <SidebarProvider>
-      <UserSidebar />
-      <SidebarInset>
-        <UserNavbar />
-        <main className="flex-1 p-6 bg-muted/40 min-h-[calc(100vh-4rem)]">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+/* Ambient mesh backdrop (absolute, -z-10, pointer-events-none) */
+.mesh-gradient {
+  background: radial-gradient(ellipse 60% 50% at 50% -10%, oklch(0.65 0.22 275 / 0.12), transparent),
+              radial-gradient(ellipse 40% 35% at 85% 20%, oklch(0.55 0.22 260 / 0.08), transparent);
 }
 ```
 
 ---
 
-## 6. Core Component Architectural Patterns
+## 3. Typography System
 
-### 6.1 Multi-Tenant Workspace Switcher (`WorkspaceSwitcher`)
-* **Placement**: Located in the sidebar footer directly above the Sign Out action.
-* **Component Features**:
-  - Displays current active workspace name and building icon with green/primary active dot.
-  - Dropdown menu revealing available user workspaces with checkmark on the active tenant.
-  - Full-screen animated overlay (`<AnimatePresence>`) with spinning loader during switching.
-  - Invalidates all React Query cache keys and performs `router.refresh()` for immediate server state synchronization.
+### 3.1 Font Stack
+* **`font-sans`**: `Geist Sans` / `Inter` — UI text, headings, body copy.
+* **`font-mono`**: `Geist Mono` / `JetBrains Mono` — Exclusively for quantitative data.
 
-### 6.2 Resource Quota Telemetry (`UsageLimitIndicator`)
-* **Placement**: Prominently featured on the main dashboard (`app/(user)/dashboard/page.tsx`).
-* **Visual States**:
-  - **Normal Operation**: Electric Violet bar (`bg-primary`) indicating current consumption.
-  - **Warning Threshold (>= 80%)**: Amber bar (`bg-amber-500`) alerting user of approaching limits.
-  - **Quota Exhausted**: Destructive red bar (`bg-destructive`) with inline alert and direct link to upgrade.
-  - **Unlimited Tier**: Displays a bold "Unlimited" badge for Pro/Enterprise accounts.
+### 3.2 Type Scale
 
-### 6.3 AI Creative Studio (`app/(user)/studio/page.tsx`)
-* **Architecture**: Multimodal creative hub uniting:
-  - `images`: AI Image Studio (Flux Pro prompt generation, aspect ratio selector, visual styles).
-  - `videos`: AI Video Studio (Cinematic Runway / Luma generation with RAG context injection).
-  - `gallery`: Cloud Media Library (Searchable asset gallery with quick-filter tags).
-* **State Synchronization**:
-  - URL query persistence (`/studio?tab=images|videos|gallery`).
-  - Animated pill selector with active border glow and `<AnimatePresence mode="wait">` panel switching.
+| Role | Tailwind Classes | Applied On |
+| :--- | :--- | :--- |
+| **Hero H1** | `text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.08]` | Main homepage headline |
+| **Section H2** | `text-3xl md:text-5xl font-extrabold tracking-tight` | Features, Pricing, Workflow section titles |
+| **Card H3** | `text-base font-bold text-foreground` | Feature cards, testimonial names, step titles |
+| **Page Title** | `text-3xl font-bold tracking-tight text-foreground` | Dashboard, Studio, Settings page headers |
+| **Section Header** | `text-base font-bold text-foreground` | Card titles, metric panel labels |
+| **Body** | `text-sm text-muted-foreground leading-relaxed` | Descriptions, card subtitles |
+| **Caption / Label** | `text-xs text-muted-foreground` | Form labels, secondary meta |
+| **Badge** | `text-[10px] font-mono font-semibold uppercase tracking-wider` | Feature badges (`AGENTIC CMS`, `PGVECTOR RAG`) |
+| **Metric Counter** | `text-xl font-mono font-bold text-foreground` | `+148.2%`, `24.8K`, `$29` |
+| **Micro Badge** | `text-[10px] font-mono text-primary` | Scheduled timestamps (`09:00 AM`) |
 
-### 6.4 AI Blog Writer & Rich Text Editor (`features/ai-blog/`)
-* **Editor Integration**: TipTap rich text engine with heading enforcement, bulleted lists, and blockquotes.
-* **Live SEO Gauge**: Real-time 0-100 score indicator analyzing title length, meta description, and keyword density.
-* **Contextual Image Injection**: Automatic Unsplash modal analyzing section headings for visual insertion.
-* **Platform Serializers**: Multi-export to WordPress Gutenberg, Medium, Webflow, Shopify, Notion, Word (.docx), and PDF.
+### 3.3 `font-mono` Policy
+Reserve `font-mono` strictly for:
+- Numerical metrics and percentages (`+148.2%`, `24.8K`, `99.9%`)
+- Pricing amounts (`$29`, `$99`)
+- Quota counters (`3 / 5`, `12 / 50`)
+- Timestamps (`09:00 AM`, `2026-08-26`)
+- URL / hostname displays (`app.socialai.internal/workspace/fleet`)
+- Status codes, UUIDs, and transaction hashes
 
 ---
 
-## 7. Motion Physics & Animation Rules
+## 4. Border Radius Hierarchy
 
-### 7.1 Motion Tokens & Transition Presets
+| Tier | Class | px | Applied On |
+| :--- | :--- | :--- | :--- |
+| Micro | `rounded-md` | 6 | Dropdown items, status tags, `font-mono` hostname chips, small icon badges |
+| Control | `rounded-lg` | 8 | Buttons (`h-11`, `h-12`), form inputs, tab triggers, pricing feature check circles |
+| Card | `rounded-xl` | 12 | Feature cards, workflow step cards, testimonial cards, stat panels, dialog content |
+| Hero Frame | `rounded-2xl` | 16 | Homepage product preview mockup, auth card containers, onboarding steps |
+| Pill | `rounded-full` | 9999 | Announcement pills, plan badges, avatar initials circles, status pulse dots, `Most Popular` badge |
+
+---
+
+## 5. Homepage Architecture (`app/(marketing)/page.tsx`)
+
+The marketing homepage is built from 6 dynamically-imported React components (`next/dynamic`) for optimal code splitting and hydration performance:
+
+```text
+layout.tsx (MarketingLayout)
+  └── Navbar (sticky, backdrop-blur-md)
+  └── <main>
+      ├── Hero          — Announcement pill, H1, CTA pair, trust props, product mockup, marquee
+      ├── Features      — 6-card 3-column grid with icon, badge, title, description, hover lift
+      ├── ToolsShowcase — Platform integrations carousel with visual preview
+      ├── UseCases      — Industry vertical use case panels
+      ├── Workflow      — 4-step alternating timeline with GSAP scrub progress line
+      └── Pricing       — Annual/monthly toggle with 3-tier PricingCard grid
+  └── Testimonials  (injected via layout, horizontal scroll strip)
+  └── FAQ           (injected via layout, accordion)
+  └── CTA           (injected via layout, full-width conversion section)
+  └── Footer        (injected via layout)
+  └── ScrollToTop
+```
+
+### 5.1 Announcement Pill Pattern
+```tsx
+<div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 shadow-xs backdrop-blur-md">
+  <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+  <span className="text-xs font-semibold text-primary tracking-tight">V2.0 is live: Multi-channel AI Scheduling</span>
+  <ChevronRight className="w-3.5 h-3.5 text-primary" />
+</div>
+```
+
+### 5.2 Section Header Pattern (Reused Across All Sections)
+```tsx
+{/* Eyebrow badge */}
+<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4">
+  INTELLIGENT CAPABILITIES
+</div>
+{/* Gradient headline */}
+<h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+  Autonomous Engine. <br />
+  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+    Compounding Organic Reach.
+  </span>
+</h2>
+```
+
+### 5.3 Product Preview Mockup (Hero)
+A `rounded-2xl` browser-chrome frame containing a 12-column mini dashboard:
+- **Col 1-3 (Mini Sidebar)**: 4 nav items (one `bg-primary` active, rest `bg-muted/40`).
+- **Col 4-9 (Generation Card + Metrics)**: AI Writer card with animated progress bar + `+148.2%` / `24.8K` stat grid in `font-mono`.
+- **Col 10-12 (Dispatch Queue)**: 3 timestamped slots in `font-mono` + "DISPATCH QUEUE" button.
+- **Floating badge**: `animate={{ y: [0, -6, 0] }}` floating indicator card (Mastra Dispatcher, 5 channels).
+
+---
+
+## 6. Animation Architecture
+
+### 6.1 Animation Libraries & Their Roles
+
+| Library | Role | When to Use |
+| :--- | :--- | :--- |
+| **Framer Motion** | Component-level micro-interactions and scroll-triggered `whileInView` animations | Feature cards, testimonials, pricing cards, hero fade-in stagger, tab transitions, `AnimatePresence` panel switching |
+| **GSAP + ScrollTrigger** | Scroll-scrubbed progress lines and parallax-style visual narrative effects | Workflow section progress line (`scaleY` scrub), complex multi-element scroll choreography |
+| **Lenis** | Smooth inertial scrolling for premium scroll feel | Applied globally via `ClientWrapper`, respects `prefers-reduced-motion` |
+
+### 6.2 Centralized Animation Config (`lib/animations/motion.ts`)
 ```typescript
-export const MOTION_PRESETS = {
-  instant: { duration: 0.15, ease: "easeOut" },
-  smooth: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
-  spring: { type: "spring", stiffness: 300, damping: 25 },
-  fadeUp: {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -8 },
-    transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+import { Variants } from "framer-motion";
+
+export const fadeIn: Variants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+};
+
+export const staggerContainer: Variants = {
+  initial: {},
+  animate: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.3 },
   },
+};
+
+export const slideUp: Variants = {
+  initial: { y: 100, opacity: 0 },
+  animate: { y: 0, opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+};
+
+export const scaleIn: Variants = {
+  initial: { scale: 0.9, opacity: 0 },
+  animate: { scale: 1, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
+export const floatingAnimation = {
+  animate: { y: [0, -10, 0], transition: { duration: 5, repeat: Infinity, ease: "easeInOut" } },
 };
 ```
 
-### 7.2 Non-Blocking Motion Principles
-1. **Zero Input Delay**: Animations must never prevent immediate user typing, button clicks, or dropdown selections.
-2. **Zero Layout Shifts on Tables**: Never apply entrance delays or `gsap.from` staggered translations on data tables or logs.
-3. **No String Number Morphing**: Avoid `textContent: 0` GSAP numerical mutations that corrupt formatted numbers or cause hydration mismatches.
-4. **Hydration Guards**: Dynamic skeletons and portal overlays must utilize `useHasHydrated()` and `suppressHydrationWarning`.
+### 6.3 GSAP Config (`lib/animations/gsap.ts`)
+```typescript
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// ✅ MUST be guarded — Never call at module top-level
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.config({ nullTargetWarn: false, autoSleep: 60 });
+  ScrollTrigger.config({ limitCallbacks: true });
+}
+
+export const scrollAnimationDefaults = {
+  start: "top 85%", end: "bottom 15%",
+  toggleActions: "play none none reverse",
+};
+
+export const transitionFast = { duration: 0.3, ease: "power2.out" };
+export const transitionMedium = { duration: 0.5, ease: "power3.out" };
+export const transitionSlow = { duration: 0.8, ease: "power4.out" };
+
+export { gsap, ScrollTrigger };
+```
+
+### 6.4 Workflow GSAP Scrub Pattern (`Workflow.tsx`)
+```typescript
+useEffect(() => {
+  const ctx = gsap.context(() => {
+    // Scroll-scrubbed progress line (scaleY: 0 → 1)
+    gsap.fromTo(progressRef.current, { scaleY: 0 }, {
+      scaleY: 1, ease: "none",
+      scrollTrigger: { trigger: sectionRef.current, start: "top 20%", end: "bottom 80%", scrub: 1 },
+    });
+
+    // Step cards alternate x-entrance from left/right
+    gsap.utils.toArray<HTMLElement>(".workflow-step").forEach((step, i) => {
+      gsap.fromTo(step, { opacity: 0, x: i % 2 === 0 ? -30 : 30 }, {
+        opacity: 1, x: 0, duration: 0.8,
+        scrollTrigger: { trigger: step, start: "top 85%", end: "top 55%", scrub: 1 },
+      });
+    });
+  }, sectionRef);
+  return () => ctx.revert(); // ✅ Always clean up ctx
+}, []);
+```
+
+**Rules for GSAP usage:**
+1. Always use `gsap.context()` scoped to a `ref` — prevents memory leaks.
+2. Always return `ctx.revert()` from `useEffect` cleanup.
+3. Never target generic class selectors (`.table-row`, `.card`) that could match sibling components.
+4. Scrub animations only on non-critical reading content — not on interactive forms or data tables.
 
 ---
 
-## 8. Verification & Quality Assurance Standards
+## 7. Interactive Component Patterns
 
-Before approving any UI change, execute:
+### 7.1 Feature Card (`Features.tsx`)
+```tsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  transition={{ delay: idx * 0.08, duration: 0.4 }}
+  className="group p-6 rounded-xl border border-border/80 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
+>
+  {/* Icon container + monospace badge */}
+  <div className="flex items-center justify-between mb-4">
+    <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+      {feature.icon}
+    </div>
+    <span className="text-[10px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+      {feature.badge}
+    </span>
+  </div>
+  {/* Title with group-hover color transition */}
+  <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+    {feature.title}
+  </h3>
+  {/* Footer CTA link */}
+  <div className="mt-4 pt-4 border-t border-border/60 flex items-center text-xs font-semibold text-primary group-hover:translate-x-0.5 transition-transform">
+    <span>Explore Capability</span>
+    <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
+  </div>
+</motion.div>
+```
 
+### 7.2 PricingCard (`PricingCard.tsx`)
+* `whileHover={{ y: -4 }}` spring lift on all cards.
+* Popular card: `border-primary ring-1 ring-primary/30 shadow-xl shadow-primary/10` ring treatment.
+* `AnimatePresence` on discount badge (`billingCycle === 'year'`) with `y: 5 → 0` entrance.
+* Price amount in `text-4xl sm:text-5xl font-extrabold font-mono` tracking-tight.
+* Checkout: `fetch('/api/billing/checkout')` → redirect to Stripe URL, else fallback to `/settings/billing`.
+* Unauthenticated: redirect to `/register?plan={id}&cycle={monthly|annual}`.
+
+### 7.3 PricingToggle (`PricingToggle.tsx`)
+* Spring-animated sliding indicator between Monthly / Annually options.
+* Saves 20% badge appears with fade-in on annual selection.
+
+### 7.4 Testimonials (`Testimonials.tsx`)
+* Horizontal scrollable strip (`.no-scrollbar`, `overflow-x-auto`).
+* Each card: `w-[300px] shrink-0 rounded-xl border border-border/80 bg-card`.
+* `whileHover={{ y: -3 }}` micro-lift.
+* Avatar: `rounded-full bg-primary/10` with 2-letter `font-mono` initials.
+
+---
+
+## 8. Navigation & Shell
+
+### 8.1 Marketing Navbar (`components/common/Navbar.tsx`)
+* Sticky, `h-16`, `bg-background/80 backdrop-blur-md border-b border-border`.
+* Contains: Logo, Nav links (Features, Pricing, Integrations, Blog), CTA (`Get Started → Register`), `ModeToggle`.
+
+### 8.2 App Dashboard Shells (User & Admin)
+Both `app/(user)/*` and `app/(admin)/*` share identical structure:
+```
+SidebarProvider
+  └── Sidebar (w-64, collapsible="icon")
+      ├── Header: Brand logo + "SocialAI" + subtitle
+      ├── Nav Groups: Overview / AI Generation & Media / Autonomous Strategy / Publishing & Reach / Workspace & Team
+      └── Footer: WorkspaceSwitcher + Sign Out
+  └── SidebarInset
+      ├── Navbar (h-16, sticky, backdrop-blur-md, breadcrumb + search + ModeToggle)
+      └── main (p-6 bg-muted/40 min-h-[calc(100vh-4rem)])
+```
+
+---
+
+## 9. Key App-Level Feature UIs
+
+### 9.1 AI Creative Studio (`app/(user)/studio/`)
+* Tabbed multimodal hub: `images` → `videos` → `gallery`.
+* URL sync: `?tab=images|videos|gallery` via `useSearchParams` / `useRouter`.
+* `AnimatePresence mode="wait"` between tab panels.
+* Pill tab switcher with active `border-primary` ring glow.
+
+### 9.2 Resource Quota Telemetry (`UsageLimitIndicator`)
+* Visual progress bar on dashboard (billing cycle capacity).
+* Tracks: `ai_posts`, `ai_articles`, `brand_voice_profiles`.
+* Color progression: `bg-primary` → `bg-amber-500` (>=80%) → `bg-destructive` (100%).
+* `limit === -1` → "Unlimited" badge for Pro/Enterprise.
+
+### 9.3 Workspace Switcher (`WorkspaceSwitcher`)
+* Sidebar footer dropdown showing active tenant.
+* `AnimatePresence` fullscreen overlay during switching.
+* On switch: `queryClient.invalidateQueries()` + `router.refresh()`.
+
+### 9.4 AI Blog Writer (`features/ai-blog/`)
+* TipTap rich text editor with live SEO score (0-100 gauge).
+* Real-time Unsplash image insertion via heading keyword analysis.
+* Multi-platform export: WordPress Gutenberg, Medium, Webflow, Shopify, Notion, `.docx`, PDF.
+
+---
+
+## 10. Performance & Accessibility Standards
+
+### 10.1 Hydration Safety
+```tsx
+// Dynamic imports for route-level code splitting
+const Hero = dynamic(() => import("@/components/home/Hero"));
+const Features = dynamic(() => import("@/components/home/Features"));
+
+// Hydration guard for conditional browser-only renders
+const hasMounted = useHasHydrated();
+if (!hasMounted) return <Skeleton className="h-[X]" />;
+```
+
+### 10.2 `prefers-reduced-motion`
+Lenis and all GSAP `ScrollTrigger` effects must check:
+```typescript
+const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (!prefersReduced) { /* initialize Lenis / GSAP */ }
+```
+
+### 10.3 Verification Commands
 ```bash
-# Verify TypeScript integrity with 8GB heap space allocation
+# TypeScript integrity (with 8GB heap for large codebases)
 node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
 
-# Run full unit and integration test suite
+# Full test suite
 bun test
 ```

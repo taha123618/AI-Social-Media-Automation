@@ -168,4 +168,29 @@
   .dark .glow-primary {
     box-shadow: 0 0 45px -5px rgba(139, 92, 246, 0.3);
   }
+
+  /* Hides scrollbar while keeping scroll functionality (used in Testimonials strip) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Gradient text shorthand — primary→accent headline pattern */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent;
+  }
+}
+
+/* Marquee keyframe — used in Hero brand ticker strip */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+  will-change: transform;
 }

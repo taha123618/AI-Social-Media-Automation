@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/animations/motion";
+import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
 import { Rocket, Sparkles, Send, TrendingUp } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const steps = [
   {
