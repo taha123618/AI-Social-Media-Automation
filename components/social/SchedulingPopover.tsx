@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { 
-  Calendar as CalendarIcon, Clock, ChevronDown, 
-  MapPin, Globe, Sparkles, Check
+  Calendar as CalendarIcon, Clock, 
+  Globe, Sparkles, Check
 } from 'lucide-react';
 import { 
   Popover, PopoverContent, PopoverTrigger 
@@ -17,7 +17,7 @@ import {
 import { format } from 'date-fns';
 
 interface SchedulingPopoverProps {
-  scheduledDateTime: Date | null;
+  scheduledDateTime: Date | string | null | undefined;
   onDateTimeChange: (date: Date | null) => void;
   children?: React.ReactNode;
 }
@@ -29,42 +29,61 @@ const BEST_TIMES = [
   { time: '09:00 PM', label: 'Late Night' },
 ];
 
+function parseSafeDate(val: Date | string | null | undefined): Date | undefined {
+  if (!val) return undefined;
+  const d = typeof val === 'string' || typeof val === 'number' ? new Date(val) : val;
+  return d instanceof Date && !isNaN(d.getTime()) ? d : undefined;
+}
+
+function formatSafeDate(val: Date | string | null | undefined, formatStr: string, fallback = ''): string {
+  const d = parseSafeDate(val);
+  if (!d) return fallback;
+  try {
+    return format(d, formatStr);
+  } catch {
+    return fallback;
+  }
+}
+
 export function SchedulingPopover({
   scheduledDateTime,
   onDateTimeChange,
   children
 }: SchedulingPopoverProps) {
-  const [date, setDate] = useState<Date | undefined>(scheduledDateTime || undefined);
-  const [time, setTime] = useState(scheduledDateTime ? format(scheduledDateTime, 'hh:mm a') : '09:00 AM');
-
-  const handleSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    if (selectedDate) {
-      updateDateTime(selectedDate, time);
-    }
-  };
+  const safeDate = parseSafeDate(scheduledDateTime);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(safeDate);
+  const [time, setTime] = useState<string>(safeDate ? formatSafeDate(safeDate, 'hh:mm a', '09:00 AM') : '09:00 AM');
 
   const updateDateTime = (d: Date, t: string) => {
-    const [timeStr, period] = t.split(' ');
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    const [timeStr, period] = (t || '09:00 AM').split(' ');
+    const [hours, minutes] = (timeStr || '09:00').split(':').map(Number);
     
-    let adjustedHours = hours;
-    if (period === 'PM' && hours < 12) adjustedHours += 12;
-    if (period === 'AM' && hours === 12) adjustedHours = 0;
+    let adjustedHours = isNaN(hours) ? 9 : hours;
+    const adjustedMinutes = isNaN(minutes) ? 0 : minutes;
+
+    if (period === 'PM' && adjustedHours < 12) adjustedHours += 12;
+    if (period === 'AM' && adjustedHours === 12) adjustedHours = 0;
 
     const newDate = new Date(d);
     newDate.setHours(adjustedHours);
-    newDate.setMinutes(minutes);
+    newDate.setMinutes(adjustedMinutes);
     newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
     
     onDateTimeChange(newDate);
   };
 
+  const handleSelect = (newDate: Date | undefined) => {
+    setSelectedDate(newDate);
+    if (newDate) {
+      updateDateTime(newDate, time);
+    }
+  };
+
   const handleTimeChange = (newTime: string) => {
     setTime(newTime);
-    if (date) {
-      updateDateTime(date, newTime);
-    }
+    const targetDate = selectedDate || safeDate || new Date();
+    updateDateTime(targetDate, newTime);
   };
 
   return (
@@ -73,7 +92,7 @@ export function SchedulingPopover({
         {children || (
           <Button variant="outline" className="h-11 rounded-xl px-6 font-bold gap-2 border-slate-200 dark:border-slate-800">
             <CalendarIcon className="h-4 w-4" />
-            {scheduledDateTime ? format(scheduledDateTime, 'MMM dd, hh:mm a') : 'Pick Time'}
+            {safeDate ? formatSafeDate(safeDate, 'MMM dd, hh:mm a', 'Pick Time') : 'Pick Time'}
           </Button>
         )}
       </PopoverTrigger>
@@ -86,7 +105,7 @@ export function SchedulingPopover({
             </div>
             <Calendar
               mode="single"
-              selected={date}
+              selected={selectedDate || safeDate}
               onSelect={handleSelect}
               initialFocus
               className="rounded-xl border-none p-0"
@@ -129,6 +148,7 @@ export function SchedulingPopover({
                  {BEST_TIMES.map((item) => (
                    <button
                      key={item.time}
+                     type="button"
                      onClick={() => handleTimeChange(item.time)}
                      className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs font-bold ${
                        time === item.time
@@ -150,6 +170,7 @@ export function SchedulingPopover({
                     Greenwich Mean Time (GMT+0)
                 </div>
                 <Button 
+                    type="button"
                     className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl"
                     onClick={() => {}}
                 >

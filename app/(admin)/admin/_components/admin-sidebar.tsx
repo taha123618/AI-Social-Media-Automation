@@ -16,6 +16,7 @@ import {
   Server,
   FileText,
   CalendarCheck,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -52,6 +53,11 @@ const menuItems = [
     title: "User Registry",
     url: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Billing & Plans",
+    url: "/admin/billing",
+    icon: CreditCard,
   },
   {
     title: "Workflows",

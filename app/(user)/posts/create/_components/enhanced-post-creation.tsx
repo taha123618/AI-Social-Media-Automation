@@ -36,6 +36,22 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+function parseSafeDate(val: Date | string | null | undefined): Date | undefined {
+  if (!val) return undefined;
+  const d = typeof val === 'string' || typeof val === 'number' ? new Date(val) : val;
+  return d instanceof Date && !isNaN(d.getTime()) ? d : undefined;
+}
+
+function formatSafeDate(val: Date | string | null | undefined, formatStr: string, fallback = ''): string {
+  const d = parseSafeDate(val);
+  if (!d) return fallback;
+  try {
+    return format(d, formatStr);
+  } catch {
+    return fallback;
+  }
+}
+
 interface SocialAccount {
   id: string;
   platform: Platform;
@@ -608,8 +624,9 @@ export function EnhancedPostCreation({
         await publishPostNow(currentDraftId);
         toast.success('Post published successfully!');
       } else if (action === 'schedule') {
-        await schedulePost(currentDraftId, postData.scheduledDateTime!);
-        toast.success(`Post scheduled for ${format(postData.scheduledDateTime!, 'MMM dd, p')}`);
+        const scheduleDate = parseSafeDate(postData.scheduledDateTime) || new Date();
+        await schedulePost(currentDraftId, scheduleDate);
+        toast.success(`Post scheduled for ${formatSafeDate(scheduleDate, 'MMM dd, p')}`);
       } else {
         // queue — draft is already saved above
         toast.success('Post saved to queue!');
@@ -841,7 +858,7 @@ export function EnhancedPostCreation({
             <button disabled={!isAccountConnected} className={`flex items-center h-11 rounded-xl px-6 font-bold border border-slate-200 dark:border-slate-800 transition-all gap-2 ${!isAccountConnected ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
               <Calendar className="h-4 w-4 text-slate-500" />
               <span className="text-sm text-slate-700 dark:text-slate-300">
-                {mounted && postData.scheduledDateTime ? format(postData.scheduledDateTime, 'MMM dd, p') : 'Pick Time'}
+                {mounted && postData.scheduledDateTime ? formatSafeDate(postData.scheduledDateTime, 'MMM dd, p', 'Pick Time') : 'Pick Time'}
               </span>
             </button>
           </SchedulingPopover>

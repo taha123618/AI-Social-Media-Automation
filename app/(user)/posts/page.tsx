@@ -44,6 +44,17 @@ import { LabelsModal } from '@/components/social/LabelsModal';
 import { Tag as TagIcon } from 'lucide-react';
 import { useDeleteContentDraft } from '@/hooks/use-content-draft';
 
+function safeFormatDate(val: any, formatStr: string, fallback = 'Unscheduled'): string {
+  if (!val) return fallback;
+  const d = typeof val === 'string' || typeof val === 'number' ? new Date(val) : val;
+  if (!d || !(d instanceof Date) || isNaN(d.getTime())) return fallback;
+  try {
+    return format(d, formatStr);
+  } catch {
+    return fallback;
+  }
+}
+
 interface PostUI {
   id: string;
   content: string;
@@ -271,7 +282,7 @@ export default function PostsPage() {
     }
 
     if (successCount > 0) {
-      toast.success(`Rescheduled ${successCount} posts to ${format(scheduledAt, 'MMM d, p')}`);
+      toast.success(`Rescheduled ${successCount} posts to ${safeFormatDate(scheduledAt, 'MMM d, p')}`);
       setIsRescheduleOpen(false);
       setSelectedPostIds([]);
       refetch();
@@ -582,11 +593,11 @@ export default function PostsPage() {
                                       </span>
                                     </div>
                                     <div
-                                      className="text-[11px] font-bold text-slate-400 ml-5.5 pl-0.5 tracking-tight uppercase opacity-60"
-                                      suppressHydrationWarning
-                                    >
-                                      {post.postedAt || post.scheduledFor ? format(post.postedAt || post.scheduledFor!, 'EEE, MMM d, h:mmaaa') : 'Unscheduled'}
-                                    </div>
+                                       className="text-[11px] font-bold text-slate-400 ml-5.5 pl-0.5 tracking-tight uppercase opacity-60"
+                                       suppressHydrationWarning
+                                     >
+                                       {safeFormatDate(post.postedAt || post.scheduledFor, 'EEE, MMM d, h:mmaaa', 'Unscheduled')}
+                                     </div>
 
                                   </div>
                                 </DropdownMenuTrigger>
