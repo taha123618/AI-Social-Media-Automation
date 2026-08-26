@@ -118,7 +118,7 @@ export default function Workflow() {
         </div>
 
         <div className="relative max-w-3xl mx-auto">
-          {/* Central vertical progress track */}
+          {/* Central vertical progress track — desktop only */}
           <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border/70 -translate-x-1/2 hidden md:block">
             <div
               ref={progressRef}
@@ -127,14 +127,23 @@ export default function Workflow() {
             />
           </div>
 
+          {/* Mobile left-border timeline */}
+          <div className="absolute left-4 top-0 bottom-0 w-px bg-border/50 md:hidden" />
+
           <div className="space-y-10 relative">
             {steps.map((step, index) => (
               <div
                 key={index}
-                className={`flex flex-col md:flex-row items-center gap-6 workflow-step ${
+                className={`flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 pl-10 md:pl-0 relative workflow-step ${
                   index % 2 !== 0 ? "md:flex-row-reverse" : ""
                 }`}
               >
+                {/* Mobile: left dot node */}
+                <div className="absolute left-0 top-5 md:hidden z-10">
+                  <div className="w-8 h-8 rounded-full bg-card border-2 border-primary flex items-center justify-center shadow-sm shadow-primary/20">
+                    <span className="text-[10px] font-mono font-bold text-primary">{step.number}</span>
+                  </div>
+                </div>
                 {/* Card */}
                 <div className="flex-1">
                   <div

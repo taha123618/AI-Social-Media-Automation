@@ -157,7 +157,7 @@ export default function BlogDashboardEnhanced() {
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
           <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
           {["ALL", "DRAFT", "GENERATING", "REVIEW", "PUBLISHED"].map((status) => (
             <button

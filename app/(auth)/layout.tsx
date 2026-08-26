@@ -15,7 +15,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       {/* Accent indigo glow — bottom right */}
       <div className="absolute bottom-1/4 -right-32 w-[400px] h-[400px] bg-accent/8 dark:bg-accent/10 blur-[100px] rounded-full pointer-events-none -z-0" />
 
-      <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12 relative z-10">
+      <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:py-12 pt-safe pb-safe relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}

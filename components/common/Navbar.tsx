@@ -30,6 +30,17 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const navItems = [
     { name: "Features", href: "/#features" },
     { name: "Tools", href: "/#tools" },
@@ -103,7 +114,7 @@ export default function Navbar() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 md:hidden text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+            className="p-2 md:hidden text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors touch-manipulation"
             aria-label="Toggle navigation menu"
           >
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

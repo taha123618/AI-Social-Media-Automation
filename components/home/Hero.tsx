@@ -91,10 +91,69 @@ export default function Hero() {
             />
           </motion.div>
 
-          {/* Product Preview Card */}
+          {/* ─── MOBILE Preview: Metric strip + mini schedule card ─────────── */}
           <motion.div
             variants={fadeIn}
-            className="relative mx-auto max-w-5xl rounded-2xl border border-border/80 bg-card/90 shadow-2xl overflow-hidden aspect-[16/10] group"
+            className="md:hidden mt-4 mb-0 flex flex-col gap-3"
+          >
+            {/* Live generation card */}
+            <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shrink-0 shadow-md shadow-primary/25">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold text-foreground">Autonomous Multi-Agent Writer</div>
+                <div className="text-[11px] text-primary font-medium mb-2">Synthesizing LinkedIn &amp; X Carousel...</div>
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: "10%" }}
+                    animate={{ width: "85%" }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="h-full bg-primary rounded-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Stat counters */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 rounded-xl bg-card border border-border/70 text-center">
+                <TrendingUp className="w-4 h-4 text-emerald-500 mx-auto mb-1" />
+                <div className="text-2xl font-mono font-extrabold text-foreground">+148%</div>
+                <div className="text-[10px] uppercase font-medium text-muted-foreground">Impression Velocity</div>
+              </div>
+              <div className="p-4 rounded-xl bg-card border border-border/70 text-center">
+                <Users className="w-4 h-4 text-primary mx-auto mb-1" />
+                <div className="text-2xl font-mono font-extrabold text-foreground">24.8K</div>
+                <div className="text-[10px] uppercase font-medium text-muted-foreground">Audience Reached</div>
+              </div>
+            </div>
+
+            {/* Mini dispatch schedule */}
+            <div className="p-4 rounded-xl bg-card border border-border/80">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-foreground">Dispatch Calendar</span>
+                <Calendar className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <div className="space-y-2">
+                {[
+                  { time: "09:00 AM", title: "Topical SEO Thread" },
+                  { time: "01:30 PM", title: "Product Teardown Reel" },
+                  { time: "05:00 PM", title: "Weekly Growth Insights" },
+                ].map((slot, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/40 border border-border/50">
+                    <span className="text-[10px] font-mono text-primary font-bold shrink-0">{slot.time}</span>
+                    <span className="text-xs font-medium text-foreground truncate">{slot.title}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* ─── DESKTOP Preview: Full 12-col mockup ──────────────────────── */}
+          <motion.div
+            variants={fadeIn}
+            className="relative mx-auto max-w-5xl rounded-2xl border border-border/80 bg-card/90 shadow-2xl overflow-hidden aspect-[16/10] group hidden md:block"
           >
             {/* Top Toolbar */}
             <div className="h-11 border-b border-border/70 bg-muted/40 flex items-center px-5 justify-between">
@@ -143,10 +202,9 @@ export default function Hero() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-foreground">Autonomous Multi-Agent Writer</h4>
-                      <p className="text-[11px] text-primary font-medium">Synthesizing LinkedIn & X Carousel...</p>
+                      <p className="text-[11px] text-primary font-medium">Synthesizing LinkedIn &amp; X Carousel...</p>
                     </div>
                   </div>
-
                   <div className="space-y-2 mb-4">
                     <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
@@ -157,12 +215,10 @@ export default function Hero() {
                       />
                     </div>
                   </div>
-
                   <div className="p-3 rounded-lg bg-card border border-border/80 text-xs text-foreground/80 leading-relaxed">
                     &ldquo;Scaling social presence requires continuous topical authority rather than manual intermittent posting. Here is our 4-layer framework...&rdquo;
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-4 rounded-xl bg-card border border-border/70 text-center">
                     <TrendingUp className="w-5 h-5 text-emerald-500 mx-auto mb-1.5" />

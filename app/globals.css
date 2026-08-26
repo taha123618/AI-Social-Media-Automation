@@ -194,3 +194,55 @@
   animation: marquee 28s linear infinite;
   will-change: transform;
 }
+
+/* ─── Mobile / Touch Utilities ─────────────────────────────────── */
+
+/* Remove iOS/Android tap flash */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Touch-optimized interactive elements */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Safe-area padding utilities for notched devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Bottom nav safe area (combines fixed height + safe area) */
+.pb-bottom-nav {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+.bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Scroll snap for horizontal card strips (Testimonials) */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+
+/* Prevent overscroll bounce leaking through containers */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}

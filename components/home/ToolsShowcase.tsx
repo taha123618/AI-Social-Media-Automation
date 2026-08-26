@@ -88,7 +88,7 @@ export default function ToolsShowcase() {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-left"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left"
         >
           {tools.map((tool, index) => (
             <motion.div

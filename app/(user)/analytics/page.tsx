@@ -66,29 +66,31 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="overview">
-            <Activity className="h-4 w-4 mr-2" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="growth">
-            <Rocket className="h-4 w-4 mr-2" />
-            Growth Engine
-          </TabsTrigger>
-          <TabsTrigger value="insights">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            AI Insights
-          </TabsTrigger>
-          <TabsTrigger value="consistency">
-            <Activity className="h-4 w-4 mr-2" />
-            Consistency Score
-          </TabsTrigger>
-          <TabsTrigger value="leads">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Lead Tracking
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <div className="overflow-x-auto no-scrollbar pb-1">
+          <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-5 p-1 bg-secondary/80 rounded-xl border border-border/70">
+            <TabsTrigger value="overview" className="text-xs font-semibold px-3 py-1.5 whitespace-nowrap">
+              <Activity className="h-3.5 w-3.5 mr-1.5" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="growth" className="text-xs font-semibold px-3 py-1.5 whitespace-nowrap">
+              <Rocket className="h-3.5 w-3.5 mr-1.5" />
+              Growth Engine
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="text-xs font-semibold px-3 py-1.5 whitespace-nowrap">
+              <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+              AI Insights
+            </TabsTrigger>
+            <TabsTrigger value="consistency" className="text-xs font-semibold px-3 py-1.5 whitespace-nowrap">
+              <Activity className="h-3.5 w-3.5 mr-1.5" />
+              Consistency Score
+            </TabsTrigger>
+            <TabsTrigger value="leads" className="text-xs font-semibold px-3 py-1.5 whitespace-nowrap">
+              <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+              Lead Tracking
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="insights" className="mt-6">
           {insightsLoading ? (

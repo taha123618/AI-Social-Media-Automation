@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/layout/user-sidebar";
 import { UserNavbar } from "@/components/user/layout/user-navbar";
+import { MobileBottomNav } from "@/components/user/layout/mobile-bottom-nav";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import QueryProvider from "@/app/providers/query-provider";
@@ -33,11 +34,12 @@ export default async function UserLayout({
         <UserSidebar user={user} />
         <SidebarInset className="bg-background">
           <UserNavbar />
-          <main className="flex-1 p-6 bg-muted/40 min-h-[calc(100vh-4rem)]">
+          <main className="flex-1 p-4 md:p-6 bg-muted/40 min-h-[calc(100vh-4rem)] pb-bottom-nav md:pb-6">
             {children}
           </main>
         </SidebarInset>
       </SidebarProvider>
+      <MobileBottomNav />
     </QueryProvider>
   );
 }

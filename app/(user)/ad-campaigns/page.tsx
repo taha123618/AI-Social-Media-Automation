@@ -191,70 +191,72 @@ export default function UserAdCampaignsPage() {
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-border/60">
-                  <TableHead className="text-xs">Name</TableHead>
-                  <TableHead className="text-xs">Platform</TableHead>
-                  <TableHead className="text-xs">Objective</TableHead>
-                  <TableHead className="text-xs">Status</TableHead>
-                  <TableHead className="text-xs">Budget/Day</TableHead>
-                  <TableHead className="text-right text-xs">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {campaigns.map(c => (
-                  <TableRow key={c.id} className="border-b border-border/40 hover:bg-secondary/40">
-                    <TableCell className="font-semibold text-xs text-foreground">{c.name}</TableCell>
-                    <TableCell className="text-xs font-mono">{c.platform}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{c.objective}</TableCell>
-                    <TableCell>{getStatusBadge(c.status)}</TableCell>
-                    <TableCell className="text-xs font-mono font-semibold text-foreground">
-                      ${((c.dailyBudget ?? 0) / 100).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Link href={`/ad-campaigns/${c.id}`}>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg">
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                        </Link>
-                        <AlertDialog open={deleteId === c.id} onOpenChange={open => !open && setDeleteId(null)}>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-xs text-destructive hover:bg-destructive/10 rounded-lg"
-                              onClick={() => setDeleteId(c.id)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-xl border border-border/80 bg-card">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="text-base font-bold">Delete Campaign?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-xs text-muted-foreground">
-                                This will permanently delete &ldquo;{c.name}&rdquo;. This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="text-xs rounded-lg">Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={handleDelete}
-                                disabled={deleting}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs rounded-lg font-semibold"
-                              >
-                                {deleting ? 'Deleting...' : 'Delete'}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border/60">
+                    <TableHead className="text-xs">Name</TableHead>
+                    <TableHead className="text-xs">Platform</TableHead>
+                    <TableHead className="text-xs">Objective</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
+                    <TableHead className="text-xs">Budget/Day</TableHead>
+                    <TableHead className="text-right text-xs">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {campaigns.map(c => (
+                    <TableRow key={c.id} className="border-b border-border/40 hover:bg-secondary/40">
+                      <TableCell className="font-semibold text-xs text-foreground whitespace-nowrap">{c.name}</TableCell>
+                      <TableCell className="text-xs font-mono">{c.platform}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{c.objective}</TableCell>
+                      <TableCell>{getStatusBadge(c.status)}</TableCell>
+                      <TableCell className="text-xs font-mono font-semibold text-foreground">
+                        ${((c.dailyBudget ?? 0) / 100).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Link href={`/ad-campaigns/${c.id}`}>
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </Link>
+                          <AlertDialog open={deleteId === c.id} onOpenChange={open => !open && setDeleteId(null)}>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-destructive hover:bg-destructive/10 rounded-lg"
+                                onClick={() => setDeleteId(c.id)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-xl border border-border/80 bg-card">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-base font-bold">Delete Campaign?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-xs text-muted-foreground">
+                                  This will permanently delete &ldquo;{c.name}&rdquo;. This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="text-xs rounded-lg">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={handleDelete}
+                                  disabled={deleting}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs rounded-lg font-semibold"
+                                >
+                                  {deleting ? 'Deleting...' : 'Delete'}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

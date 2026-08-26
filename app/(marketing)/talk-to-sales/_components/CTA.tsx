@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import gsap from "gsap";
+import { gsap } from "@/lib/animations/gsap";
 import { useGSAP } from "@gsap/react";
 import { ArrowRight, Calendar, Shield, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";

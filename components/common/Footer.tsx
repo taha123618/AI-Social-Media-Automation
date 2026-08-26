@@ -35,8 +35,7 @@ export default function Footer() {
     <footer className="bg-card border-t border-border/70 text-muted-foreground transition-colors">
       <div className="container mx-auto px-4 max-w-6xl py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
-          {/* Brand column */}
-          <div className="col-span-2">
+          <div className="col-span-2 lg:col-span-2">
             <div className="mb-4">
               <AppLogo />
             </div>
@@ -61,7 +60,7 @@ export default function Footer() {
 
           {/* Link columns */}
           {Object.entries(footerLinks).map(([group, links]) => (
-            <div key={group}>
+            <div key={group} className="col-span-1">
               <h4 className="text-foreground font-semibold text-xs uppercase tracking-wider mb-4">{group}</h4>
               <ul className="space-y-2.5 text-xs">
                 {links.map(({ label, href }) => (

@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
 import { ArrowRight, Sparkles, Zap, Brain, Shield, TrendingUp, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TextType from "@/components/TextType";

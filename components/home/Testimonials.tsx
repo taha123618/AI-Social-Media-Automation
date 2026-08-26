@@ -104,8 +104,8 @@ export default function Testimonials() {
         </motion.div>
       </div>
 
-      {/* Scrollable testimonials strip */}
-      <div className="flex gap-4 overflow-x-auto pb-4 px-4 no-scrollbar max-w-6xl mx-auto">
+      {/* Scrollable testimonials strip with mobile snap */}
+      <div className="flex gap-4 overflow-x-auto pb-4 px-4 no-scrollbar scroll-snap-x overscroll-contain max-w-6xl mx-auto">
         {reviews.map((review, index) => (
           <motion.div
             key={index}
@@ -113,9 +113,17 @@ export default function Testimonials() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.3, delay: index * 0.06 }}
+            className="snap-start"
           >
             <TestimonialCard review={review} />
           </motion.div>
+        ))}
+      </div>
+
+      {/* Mobile scroll hint dots */}
+      <div className="flex items-center justify-center gap-1.5 mt-3 md:hidden">
+        {reviews.map((_, i) => (
+          <div key={i} className={`rounded-full transition-all duration-200 ${i === 0 ? "w-4 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-border"}`} />
         ))}
       </div>
 

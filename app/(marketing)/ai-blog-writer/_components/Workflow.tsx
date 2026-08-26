@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
 import { useGSAP } from "@gsap/react";
 import { Lightbulb, Search, Cpu, Eye, Send, CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";

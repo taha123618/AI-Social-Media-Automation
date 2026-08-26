@@ -3,8 +3,7 @@
 import { useRef, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
 import { ArrowRight, Calendar, Sparkles, Shield, Zap, Users, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMousePosition } from "@/hooks/use-mouse-position";

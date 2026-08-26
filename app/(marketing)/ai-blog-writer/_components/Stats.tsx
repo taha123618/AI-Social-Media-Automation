@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/animations/gsap";
 import { useGSAP } from "@gsap/react";
 import { Users, FileText, TrendingUp, Star, Globe, Clock } from "lucide-react";
 import { useCountUp } from "@/hooks/use-count-up";
