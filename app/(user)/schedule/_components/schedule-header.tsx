@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Zap, Clock, TrendingUp, X, Check, Loader2 } from 'lucide-react';
+import { Plus, Zap, Clock, TrendingUp, Check, Loader2, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useCurrentBusiness } from '@/hooks/use-current-business';
 import { BestTimesPanel } from './best-times-panel';
@@ -51,80 +52,64 @@ export function ScheduleHeader() {
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-slate-200/60 dark:border-slate-800/60 pb-10"
-      >
-        <div className="relative">
-          <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1 h-16 bg-linear-to-b from-blue-600 to-cyan-600 rounded-full hidden md:block" />
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex -space-x-1">
-              <div className="h-2.5 w-2.5 rounded-full bg-blue-500 animate-pulse" />
-              <div className="h-2.5 w-2.5 rounded-full bg-cyan-500 animate-pulse [animation-delay:0.2s]" />
-            </div>
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-blue-600 dark:text-blue-400">
-              Content Planner
-            </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border/80 shadow-xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+              Omni Content Scheduler
+            </span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white">
-            Omni <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-600 via-cyan-600 to-emerald-600 dark:from-blue-400 dark:via-cyan-400 dark:to-emerald-400">Schedule</span>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+            Omni Schedule
+            <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+              AI Timetable
+            </Badge>
           </h1>
-          <p className="mt-4 text-lg font-bold text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
-            Master your multi-channel deployment with <span className="text-slate-900 dark:text-white underline decoration-blue-500/30 underline-offset-4">strategic timing</span> and visual orchestration.
+          <p className="text-xs text-muted-foreground">
+            Orchestrate multi-platform posting windows, AI heatmaps, and continuous autopilot queues.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Best Times button */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setShowBestTimes(true)}
-            className="group h-12 gap-2 rounded-2xl border-slate-200 dark:border-slate-700 font-bold text-slate-600 dark:text-slate-300 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all px-5"
+            className="h-9 rounded-xl px-3.5 text-xs font-semibold gap-1.5"
           >
-            <TrendingUp className="h-4 w-4 group-hover:scale-110 transition-transform" />
-            Best Times
+            <TrendingUp className="h-3.5 w-3.5 text-primary" />
+            <span>AI Peak Times</span>
           </Button>
 
-          {/* Autopilot toggle */}
           <Button
+            size="sm"
             onClick={handleToggleAutopilot}
             disabled={isTogglingAutopilot}
-            className={`h-12 gap-2 rounded-2xl font-bold px-5 transition-all ${autopilot?.enabled
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/25'
-                : 'bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/25'
-              }`}
+            variant={autopilot?.enabled ? "default" : "outline"}
+            className="h-9 rounded-xl px-3.5 text-xs font-semibold gap-1.5"
           >
             {isTogglingAutopilot ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : autopilot?.enabled ? (
-              <Check className="h-4 w-4" />
+              <Check className="h-3.5 w-3.5" />
             ) : (
-              <Zap className="h-4 w-4" />
+              <Zap className="h-3.5 w-3.5 text-primary" />
             )}
-            {autopilot?.enabled ? (
-              <span className="flex items-center gap-1.5">
-                Autopilot ON
-                {autopilot.daysLeft && (
-                  <span className="bg-white/20 text-[10px] font-black px-1.5 py-0.5 rounded-full">
-                    {autopilot.daysLeft}d left
-                  </span>
-                )}
-              </span>
-            ) : '30-Day Autopilot'}
+            <span>{autopilot?.enabled ? `Autopilot ON (${autopilot.daysLeft || 30}d)` : '30-Day Autopilot'}</span>
           </Button>
 
-          <Link
-            href="/posts/create"
-            className="group relative flex h-12 items-center gap-3 rounded-2xl bg-linear-to-br from-blue-600 to-indigo-700 px-8 text-xs font-black text-white shadow-2xl shadow-blue-500/25 transition-all hover:scale-[1.03] active:scale-95 overflow-hidden uppercase tracking-widest"
-          >
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Plus className="h-5 w-5 transition-transform group-hover:rotate-90 stroke-[3px]" />
-            CREATE POST
+          <Link href="/posts/create">
+            <Button
+              size="sm"
+              className="h-9 rounded-xl px-4 text-xs font-semibold shadow-xs gap-1.5 active:scale-95"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Schedule Post</span>
+            </Button>
           </Link>
         </div>
-      </motion.div>
+      </div>
 
       <BestTimesPanel isOpen={showBestTimes} onClose={() => setShowBestTimes(false)} />
     </>

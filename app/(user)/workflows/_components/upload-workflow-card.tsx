@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Image as ImageIcon, Camera, Sparkles, Clock, Check, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useCurrentBusiness } from '@/hooks/use-current-business';
@@ -20,9 +21,9 @@ interface UploadWorkflowCardProps {
 }
 
 const CATEGORY_CONFIG = {
-  JOB_PHOTO: { label: 'Job Photo', icon: Camera, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800' },
-  BEFORE_AFTER: { label: 'Before & After', icon: ImageIcon, color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/20', border: 'border-violet-200 dark:border-violet-800' },
-  PRODUCT: { label: 'Product', icon: ImageIcon, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800' },
+  JOB_PHOTO: { label: 'Job Asset', icon: Camera, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/30' },
+  BEFORE_AFTER: { label: 'Transformation', icon: ImageIcon, color: 'text-violet-400', bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
+  PRODUCT: { label: 'Product Hero', icon: ImageIcon, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
 };
 
 export function UploadWorkflowCard({ workflowId, workflowName, uploadCategory, autoCaption, autoSchedule, platform, lastPostPreview, initialResult }: UploadWorkflowCardProps) {
@@ -32,7 +33,7 @@ export function UploadWorkflowCard({ workflowId, workflowName, uploadCategory, a
   const [files, setFiles] = useState<File[]>([]);
   const [result, setResult] = useState<{ id: string; content: string | null; imageUrls: string[] } | null>(initialResult || null);
 
-  const config = CATEGORY_CONFIG[uploadCategory];
+  const config = CATEGORY_CONFIG[uploadCategory] || CATEGORY_CONFIG.JOB_PHOTO;
 
   const handleUpload = useCallback(async (uploadFiles: File[]) => {
     if (!businessId || !workflowId) return;
@@ -56,7 +57,7 @@ export function UploadWorkflowCard({ workflowId, workflowName, uploadCategory, a
       if (data.success) {
         setResult(data.draft);
         setFiles([]);
-        toast.success('Images uploaded — draft created!');
+        toast.success('Images ingested — autonomous draft created!');
       } else {
         toast.error(data.error || 'Upload failed');
       }
@@ -90,42 +91,34 @@ export function UploadWorkflowCard({ workflowId, workflowName, uploadCategory, a
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden"
+      className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden text-foreground"
     >
       <div className="p-5 space-y-4">
         <div className="flex items-center gap-3">
-          <div className={cn('p-2 rounded-xl', config.bg)}>
-            <config.icon className={cn('h-5 w-5', config.color)} />
+          <div className={cn('h-9 w-9 rounded-xl flex items-center justify-center', config.bg, config.border, 'border')}>
+            <config.icon className={cn('h-4 w-4', config.color)} />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{workflowName}</h3>
-            <p className="text-xs text-slate-500 font-medium">{config.label} upload</p>
+            <h3 className="text-xs sm:text-sm font-bold text-foreground truncate">{workflowName}</h3>
+            <p className="text-[11px] text-muted-foreground font-mono">{config.label} ingestion</p>
           </div>
-          <div className="flex items-center gap-1.5">
-              {autoCaption && <Sparkles className="h-3.5 w-3.5 text-purple-500" aria-label="Auto-caption enabled" />}
-            {autoSchedule && <Clock className="h-3.5 w-3.5 text-blue-500" aria-label="Auto-schedule enabled" />}
+          <div className="flex items-center gap-1">
+            {autoCaption && <Badge variant="outline" className="text-[9px] font-mono py-0 text-primary border-primary/30">Vision</Badge>}
+            {autoSchedule && <Badge variant="outline" className="text-[9px] font-mono py-0 text-emerald-500 border-emerald-500/30">Auto</Badge>}
           </div>
         </div>
 
-        {/* Last post preview */}
-        {lastPostPreview && !result && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-            <Check className="h-3 w-3 text-emerald-500 shrink-0" />
-            <span className="text-xs text-slate-500 truncate">Last published: {lastPostPreview.slice(0, 60)}</span>
-          </div>
-        )}
-
-        {/* Upload area */}
+        {/* Upload drop zone */}
         <div
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
           onDragLeave={() => setIsDragOver(false)}
           onDrop={handleDrop}
           onClick={() => document.getElementById(`upload-input-${workflowId}`)?.click()}
           className={cn(
-            'relative flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed transition-all cursor-pointer',
+            'relative flex flex-col items-center justify-center gap-2 p-6 rounded-xl border border-dashed transition-all cursor-pointer text-center',
             isDragOver
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
-              : 'border-slate-200 dark:border-slate-700 hover:border-blue-300 hover:bg-slate-50 dark:hover:bg-slate-800/50',
+              ? 'border-primary bg-primary/10 ring-1 ring-primary/30'
+              : 'border-border/80 bg-secondary/20 hover:border-primary/40 hover:bg-secondary/40'
           )}
         >
           <input
@@ -138,67 +131,50 @@ export function UploadWorkflowCard({ workflowId, workflowName, uploadCategory, a
           />
 
           {isUploading ? (
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
           ) : (
-            <Upload className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+            <Upload className="h-6 w-6 text-muted-foreground" />
           )}
-          <div className="text-center">
+
+          <div>
             {files.length > 0 ? (
-              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+              <p className="text-xs font-semibold text-emerald-500">
                 {files.length} {files.length === 1 ? 'image' : 'images'} selected
               </p>
             ) : (
               <>
-                <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
-                  {isDragOver ? 'Drop images here' : 'Drag & drop or click to upload'}
+                <p className="text-xs font-semibold text-foreground">
+                  {isDragOver ? 'Drop images here' : 'Drop images or browse'}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Photos will be captioned{autoSchedule ? ' and scheduled' : ''} automatically
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  Synthesizes caption {autoSchedule ? '& queues automatically' : ''}
                 </p>
               </>
             )}
           </div>
         </div>
 
-        {/* Upload result */}
+        {/* Result preview */}
         {result && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="space-y-3 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-200 dark:border-emerald-800"
-          >
+          <div className="p-3 rounded-xl bg-secondary/30 border border-border/70 text-xs space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-600" />
-                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">Draft created</span>
-              </div>
-              <button onClick={() => setResult(null)} className="text-slate-400 hover:text-slate-600">
-                <X className="h-4 w-4" />
+              <span className="font-bold text-emerald-500 font-mono text-[10px] uppercase">Draft Created</span>
+              <button onClick={() => setResult(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
             {result.content && (
-              <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{result.content}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">{result.content}</p>
             )}
-            <div className="flex gap-2">
-              {result.imageUrls.slice(0, 3).map((url, i) => {
-                const previewUrl = url.startsWith('pending://')
-                  ? `/api/social/proxy-image?url=${encodeURIComponent(url)}`
-                  : url;
-                return (
-                  <div key={i} className="h-10 w-10 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                    <img src={previewUrl} alt="" className="h-full w-full object-cover" />
-                  </div>
-                );
-              })}
-            </div>
             <Button
+              variant="outline"
               size="sm"
-              onClick={() => window.open(`/posts/edit/${result.id}`, '_blank')}
-              className="w-full h-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs"
+              onClick={() => window.dispatchEvent(new CustomEvent('edit-content', { detail: { content: result } }))}
+              className="w-full h-7 text-xs rounded-lg gap-1 text-primary"
             >
-              Edit Draft
+              <span>Inspect Draft</span>
             </Button>
-          </motion.div>
+          </div>
         )}
       </div>
     </motion.div>

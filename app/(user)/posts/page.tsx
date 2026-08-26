@@ -8,7 +8,7 @@ import {
   Loader2, Search, Plus, RefreshCcw,
   TrendingUp, Calendar as CalendarIcon, Filter, MoreVertical,
   Edit2, Trash2, Copy, Eye, BarChart3,
-  Sparkles, CheckCircle2, Clock, AlertCircle, MessageSquare
+  Sparkles, CheckCircle2, Clock, AlertCircle, MessageSquare, X
 } from 'lucide-react';
 import {
   FaFacebook,
@@ -313,50 +313,55 @@ export default function PostsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 flex flex-col">
+    <div className="space-y-6">
       {/* Header Area */}
-      <header className="px-8 py-8 space-y-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Post Management</h1>
-            <p className="text-sm font-medium text-slate-500">Oversee your social strategy and analyze performance across platforms.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSyncMetrics}
-              disabled={isSyncing}
-              className="h-10 rounded-xl px-4 font-bold border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 gap-2 transition-all active:scale-95"
-            >
-              <RefreshCcw className={cn("h-4 w-4 text-slate-400", isSyncing && "animate-spin text-blue-500")} />
-              <span className="text-slate-600 dark:text-slate-300">{isSyncing ? 'Syncing...' : 'Sync metrics'}</span>
-            </Button>
-            <Button
-              onClick={() => router.push('/posts/create')}
-              className="h-10 rounded-xl px-5 font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all active:scale-95 gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Create Post
-            </Button>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border/80 shadow-xs">
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+            Post Management
+            <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+              Multi-Channel
+            </Badge>
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Oversee autonomous cross-platform publication, live performance metrics, and campaigns.
+          </p>
         </div>
+        <div className="flex items-center gap-2.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSyncMetrics}
+            disabled={isSyncing}
+            className="h-9 rounded-xl px-3.5 text-xs font-semibold gap-1.5"
+          >
+            <RefreshCcw className={cn("h-3.5 w-3.5 text-muted-foreground", isSyncing && "animate-spin text-primary")} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync Telemetry'}</span>
+          </Button>
+          <Button
+            onClick={() => router.push('/posts/create')}
+            size="sm"
+            className="h-9 rounded-xl px-4 text-xs font-semibold shadow-xs gap-1.5 active:scale-95"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Create Post</span>
+          </Button>
+        </div>
+      </div>
 
-        {/* Analytics Overview */}
-        <PostAnalyticsCards
-          stats={{
-            totalReach: analyticsData?.data?.impressions || 0,
-            engagementRate: parseFloat(analyticsData?.data?.engagementRate || '0'),
-            scheduledCount: posts.filter((p: PostUI) => !p.isDeleted && (p.status === 'SCHEDULED' as any)).length,
-            growth: analyticsData?.data?.growthNum || 0
-          }}
-        />
-
-      </header>
+      {/* Analytics Overview */}
+      <PostAnalyticsCards
+        stats={{
+          totalReach: analyticsData?.data?.impressions || 0,
+          engagementRate: parseFloat(analyticsData?.data?.engagementRate || '0'),
+          scheduledCount: posts.filter((p: PostUI) => !p.isDeleted && (p.status === 'SCHEDULED' as any)).length,
+          growth: analyticsData?.data?.growthNum || 0
+        }}
+      />
 
       {/* Filter & Search Bar */}
-      <div className="flex items-center gap-4 flex-1">
-        <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 w-full overflow-x-auto no-scrollbar">
+      <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-3">
+        <div className="flex items-center gap-2 border-b border-border/60 pb-3 overflow-x-auto no-scrollbar">
           {['all', 'DRAFT', 'SCHEDULED', 'PUBLISHED', 'Trash'].map((tab) => {
             const count = posts.filter((p: PostUI) => {
               if (tab === 'Trash') return p.isDeleted;
@@ -365,61 +370,57 @@ export default function PostsPage() {
               return p.status === tab;
             }).length;
 
+            const isCurrent = activeTab === tab;
+
             return (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
-                className={`relative px-6 py-4 text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === tab
-                  ? 'text-slate-900 dark:text-white'
-                  : 'text-slate-400 hover:text-slate-600'
-                  }`}
+                className={cn(
+                  'h-8 px-3 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer',
+                  isCurrent
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+                )}
               >
-                {tab === 'all' ? 'All Posts' : tab.charAt(0) + tab.slice(1).toLowerCase()}
+                <span>{tab === 'all' ? 'All Posts' : tab.charAt(0) + tab.slice(1).toLowerCase()}</span>
                 <span className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-black transition-all",
-                  activeTab === tab
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
-                    : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600"
+                  'px-1.5 py-0.2 rounded-md text-[10px] font-mono',
+                  isCurrent
+                    ? 'bg-primary-foreground/20 text-primary-foreground'
+                    : 'bg-secondary text-muted-foreground'
                 )}>
                   {count}
                 </span>
-                {activeTab === tab && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute bottom-px left-4 right-4 h-[2px] bg-slate-900 dark:bg-white rounded-full"
-                  />
-                )}
               </button>
             );
           })}
         </div>
 
-      </div>
-
-      <div className="px-8 py-2 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-6 flex-1">
-          <div className="relative flex-1 max-w-md group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 transition-colors group-focus-within:text-slate-900 dark:group-focus-within:text-white" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by content or campaign..."
+              placeholder="Search content, caption, or labels..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 h-11 bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl focus:ring-0 focus:bg-slate-100 dark:focus:bg-slate-800 transition-all font-medium text-sm"
+              className="pl-9 h-9 bg-secondary/30 border-border/70 rounded-xl text-xs"
             />
           </div>
-          <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-900/50 p-1 rounded-2xl">
-            {['FACEBOOK', 'INSTAGRAM', 'LINKEDIN'].map((p) => (
+
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {['all', 'FACEBOOK', 'INSTAGRAM', 'LINKEDIN', 'TWITTER'].map((p) => (
               <Button
                 key={p}
-                variant="ghost"
+                variant={selectedPlatform === p ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setSelectedPlatform(p)}
-                className={`h-9 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedPlatform === p
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-600'
-                  }`}
+                className={cn(
+                  'h-8 px-2.5 rounded-lg text-[10px] font-mono uppercase font-bold tracking-wider',
+                  selectedPlatform === p ? 'shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                )}
               >
-                {p}
+                {p === 'all' ? 'All Platforms' : p}
               </Button>
             ))}
           </div>
@@ -427,8 +428,7 @@ export default function PostsPage() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 px-8 pb-12">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden relative">
+      <div className="rounded-2xl border border-border/80 bg-card shadow-xs overflow-hidden relative">
           {isLoading && (
             <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
               <motion.div
@@ -773,62 +773,64 @@ export default function PostsPage() {
               </AnimatePresence>
             </tbody>
           </table>
-        </div>
-      </main>
+      </div>
 
       {/* Floating Action Bar for Selection */}
       <AnimatePresence>
         {selectedPostIds.length > 0 && (
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
+            initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 h-16 bg-slate-900 dark:bg-white px-8 rounded-3xl shadow-2xl z-50 flex items-center gap-8 min-w-[500px]"
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2.5 bg-card/95 backdrop-blur-xl text-foreground rounded-2xl shadow-2xl border border-border/90"
           >
-            <div className="flex items-center gap-3">
-              <span className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-black text-white">
+            <div className="flex items-center gap-2 pr-3 border-r border-border/70">
+              <Badge variant="default" className="h-6 px-2 text-[11px] font-mono">
                 {selectedPostIds.length}
-              </span>
-              <span className="text-sm font-bold text-white dark:text-slate-900">Posts Selected</span>
+              </Badge>
+              <span className="text-xs font-medium text-muted-foreground hidden sm:inline">Posts Selected</span>
             </div>
-            <div className="h-8 w-px bg-slate-800 dark:bg-slate-200" />
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="outline"
+                size="sm"
                 onClick={handleBulkDuplicate}
-                className="text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-bold px-4 h-10 rounded-xl gap-2"
+                className="h-8 px-3 text-xs font-semibold rounded-lg gap-1.5"
               >
-                <Copy className="h-4 w-4" />
-                Duplicate
-                </Button>
+                <Copy className="h-3.5 w-3.5" />
+                <span>Duplicate</span>
+              </Button>
               <Button
-                variant="ghost"
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setRescheduleIds(selectedPostIds);
                   setIsRescheduleOpen(true);
                 }}
-                className="text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-bold px-4 h-10 rounded-xl gap-2"
+                className="h-8 px-3 text-xs font-semibold rounded-lg gap-1.5 text-primary"
               >
-                <RefreshCcw className="h-4 w-4" />
-                Reschedule
+                <RefreshCcw className="h-3.5 w-3.5" />
+                <span>Reschedule</span>
               </Button>
               <Button
-                variant="ghost"
+                variant="destructive"
+                size="sm"
                 onClick={handleBulkDelete}
-                className="text-red-400 hover:bg-red-950 font-bold px-4 h-10 rounded-xl gap-2"
+                className="h-8 px-3 text-xs font-semibold rounded-lg gap-1.5"
               >
-                <Trash2 className="h-4 w-4" />
-                Delete
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Delete</span>
               </Button>
+
+              <button
+                onClick={() => setSelectedPostIds([])}
+                className="h-7 w-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors ml-1"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <Button
-                variant="ghost"
-              size="icon"
-              onClick={() => setSelectedPostIds([])}
-              className="ml-auto text-slate-500 hover:text-white"
-            >
-              <Plus className="h-5 w-5 rotate-45" />
-            </Button>
           </motion.div>
         )}
       </AnimatePresence>

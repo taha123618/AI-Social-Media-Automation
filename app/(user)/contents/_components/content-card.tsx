@@ -9,21 +9,23 @@ import {
   X,
   Calendar,
   Eye,
-  Edit,
+  Edit2,
   Trash2,
   MoreVertical,
   Share2,
-  Loader,
-  ExternalLink,
-  ChevronRight,
-  Zap
+  Loader2,
+  Zap,
+  Sparkles
 } from 'lucide-react';
+import { FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 import { ContentDraft } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteContentDraft } from '../actions/mutations';
 import { useDeleteContentDraft } from '@/hooks/use-content-draft';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ContentCardProps {
   content: ContentDraft;
@@ -31,6 +33,15 @@ interface ContentCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
 }
+
+const PLATFORM_ICONS: Record<string, any> = {
+  LINKEDIN: FaLinkedin,
+  LINKED_IN: FaLinkedin,
+  TWITTER: FaXTwitter,
+  X: FaXTwitter,
+  INSTAGRAM: FaInstagram,
+  FACEBOOK: FaFacebook,
+};
 
 export function ContentCard({ content, index = 0, isSelected = false, onSelect }: ContentCardProps) {
   const [showActions, setShowActions] = useState(false);
@@ -42,7 +53,6 @@ export function ContentCard({ content, index = 0, isSelected = false, onSelect }
 
   const isDeleting = isDeletingLocal || isDelPending;
 
-  // Close dropdown when clicking outside
   useClickOutside(menuRef, () => {
     setShowActions(false);
     setShowConfirmDelete(false);
@@ -53,7 +63,6 @@ export function ContentCard({ content, index = 0, isSelected = false, onSelect }
     try {
       await deleteDraftMutation(content.id);
       toast.success('Content draft deleted successfully');
-      // No need for window.dispatchEvent as react-query will magically update the UI
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete content draft');
@@ -84,258 +93,239 @@ export function ContentCard({ content, index = 0, isSelected = false, onSelect }
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const statusColors: Record<string, string> = {
-      GENERATED: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      PENDING_REVIEW: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-      APPROVED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-      REJECTED: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-      SCHEDULED: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-      POSTED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-      FAILED: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-    };
-    return statusColors[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400';
-  };
-
-  const getStatusIcon = (status: string) => {
-    const iconProps = { className: 'h-3.5 w-3.5' };
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'GENERATED':
-        return <Loader {...iconProps} className="h-3.5 w-3.5 animate-spin" />;
-      case 'PENDING_REVIEW':
-        return <Clock {...iconProps} />;
       case 'APPROVED':
-        return <Check {...iconProps} />;
-      case 'REJECTED':
-        return <X {...iconProps} />;
-      case 'SCHEDULED':
-        return <Calendar {...iconProps} />;
       case 'POSTED':
-        return <Check {...iconProps} />;
+        return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] font-mono">Approved</Badge>;
+      case 'SCHEDULED':
+        return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-[10px] font-mono">Scheduled</Badge>;
+      case 'PENDING_REVIEW':
+        return <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/30 text-[10px] font-mono">Review</Badge>;
+      case 'REJECTED':
       case 'FAILED':
-        return <X {...iconProps} />;
+        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 text-[10px] font-mono">Failed</Badge>;
       default:
-        return null;
+        return <Badge variant="outline" className="bg-secondary text-muted-foreground border-border text-[10px] font-mono">Draft</Badge>;
     }
   };
 
+  const rawText = typeof content.generatedContent === 'string'
+    ? content.generatedContent
+    : (content.generatedContent as any)?.text || JSON.stringify(content.generatedContent, null, 2);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -10, scale: 1.01 }}
-      className={`group relative flex flex-col h-full rounded-[2.5rem] border ${isSelected ? 'border-blue-500 bg-blue-50/30 dark:border-blue-400 dark:bg-blue-900/20' : 'border-slate-200/60 bg-white/70 dark:border-slate-800/60 dark:bg-slate-900/70'} backdrop-blur-xl p-8 transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden cursor-pointer`}
+      transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.3), ease: 'easeOut' }}
+      className={cn(
+        'group relative flex flex-col justify-between rounded-2xl border bg-card p-5 transition-all shadow-xs hover:shadow-md hover:border-primary/40 overflow-hidden',
+        isSelected ? 'border-primary ring-1 ring-primary/30 bg-primary/5' : 'border-border/80'
+      )}
       onClick={(e) => {
-        // If clicking on a button or action, don't toggle select
         if ((e.target as HTMLElement).closest('button')) return;
         onSelect?.();
       }}
     >
-      {/* Selection Indicator */}
-      <div className={`absolute top-6 left-6 z-20 h-6 w-6 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300 dark:border-slate-600 bg-white/50 dark:bg-slate-800/50 opacity-0 group-hover:opacity-100'}`}>
-        {isSelected && <Check className="h-4 w-4 text-white stroke-[4px]" />}
-      </div>
-      {/* Background Decor */}
-      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] pointer-events-none">
-        <svg className="h-full w-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0H100V100H0V0Z" fill="url(#content-grid)" />
-          <defs>
-            <pattern id="content-grid" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-        </svg>
+      {/* Top selection indicator */}
+      <div className={cn(
+        'absolute top-4 left-4 z-20 h-5 w-5 rounded-md border flex items-center justify-center transition-all cursor-pointer',
+        isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-border bg-card opacity-0 group-hover:opacity-100'
+      )}>
+        {isSelected && <Check className="h-3.5 w-3.5 stroke-[3px]" />}
       </div>
 
-      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/5 blur-[80px] transition-all duration-700 group-hover:bg-blue-500/10 group-hover:scale-125" />
-
-      {/* Action dropdown  */}
-      <div ref={menuRef}>
-
-        {showConfirmDelete ? (
-          <motion.div
-            initial={{ opacity: 0, y: 15, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.9 }}
-            className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-[1.5rem] border border-rose-200/60 bg-white backdrop-blur-xl p-5 shadow-3xl dark:border-rose-800/60 dark:bg-slate-900/90"
-          >
-            <div className="mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/30">
-                  <Trash2 className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-base text-slate-900 dark:text-white">Confirm Deletion</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">This action cannot be undone</p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Are you sure you want to discard <span className="font-semibold text-slate-900 dark:text-white">&quot;{content.title || 'Untitled Content'}&quot;</span>?
-              </p>
-            </div>
-            <div className="flex gap-2.5">
-              <Button
-                onClick={() => {
-                  setShowConfirmDelete(false);
-                  setShowActions(true);
-                }}
-                disabled={isDeleting}
-                className="flex-1 rounded-xl border border-slate-200 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </Button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex-1 rounded-xl bg-linear-to-r from-rose-600 to-rose-700 py-3 text-xs font-bold text-white shadow-lg shadow-rose-500/25 hover:from-rose-700 hover:to-rose-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader className="h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </>
-                )}
-              </button>
-            </div>
-          </motion.div>
-        ) : showActions ? (
-          <motion.div
-            initial={{ opacity: 0, y: 15, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.9 }}
-              className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white backdrop-blur-xl p-3 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
-            >
-              {[
-                { icon: <Eye className="h-4.5 w-4.5" />, label: 'Deep Analysis', onClick: () => window.dispatchEvent(new CustomEvent('view-content-details', { detail: { content } })) },
-                {
-                  icon: <Edit className="h-4.5 w-4.5" />,
-                  label: 'Polish Draft',
-                  onClick: () => window.dispatchEvent(new CustomEvent('edit-content', { detail: { content: JSON.parse(JSON.stringify(content)) } })),
-                  isPrimary: true
-                },
-                {
-                  icon: isCopied ? <Check className="h-4.5 w-4.5 text-emerald-500" /> : <Share2 className="h-4.5 w-4.5" />,
-                  label: isCopied ? 'Copied!' : 'Copy Content',
-                  onClick: handleCopy
-                },
-                { icon: <Calendar className="h-4.5 w-4.5" />, label: 'Schedule Post', onClick: () => window.dispatchEvent(new CustomEvent('open-scheduler', { detail: { content } })) }
-              ].map((action, i) => (
-                <button
-                  key={i}
-                  onClick={() => { action.onClick(); setShowActions(false); }}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-black transition-all group/item disabled:opacity-50 disabled:cursor-not-allowed ${action.isPrimary
-                  ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-600/20 dark:text-blue-300 dark:hover:bg-blue-600/30 border border-blue-200/50 dark:border-blue-600/30'
-                  : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800'
-                  }`}
-                disabled={isDeleting}
-              >
-                <div className={`transition-all ${action.isPrimary
-                  ? 'text-blue-600 group-hover/item:text-blue-700 group-hover/item:scale-110'
-                  : 'text-slate-400 group-hover/item:text-blue-600 group-hover/item:scale-110'
-                  }`}>
-                  {action.icon}
-                </div>
-                <span className={action.isPrimary ? 'text-blue-700 dark:text-blue-300' : ''}>
-                    {action.label}
-                </span>
-              </button>
-            ))}
-            <div className="my-2 h-px bg-slate-100 dark:bg-slate-800" />
-            <button
-              onClick={() => { setShowConfirmDelete(true); setShowActions(false); }}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-black text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-all group/del disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <Loader className="h-4.5 w-4.5 animate-spin" />
-              ) : (
-                <Trash2 className="h-4.5 w-4.5 text-rose-400 group-hover/del:text-rose-600 group-hover/del:scale-110 transition-all" />
-              )}
-              {isDeleting ? 'Deleting...' : 'Discard Draft'}
-            </button>
-          </motion.div>
-        ) : null}
-      </div>
-
-      <div className="relative z-10 flex items-start justify-between gap-6 mb-6">
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <div className={`flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getStatusColor(content.status)} shadow-xs`}>
-              {getStatusIcon(content.status)}
-              {content.status?.replace('_', ' ') || 'DRAFT'}
-            </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-linear-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 px-3 py-1 text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest border border-white dark:border-slate-600 shadow-xs">
+      <div>
+        {/* Top Badges & Actions */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex flex-wrap items-center gap-1.5 pl-6 sm:pl-7">
+            {getStatusBadge(content.status)}
+            <Badge variant="secondary" className="text-[10px] font-mono font-medium uppercase tracking-wider">
               {content.intent?.replace('_', ' ') || 'ENGAGEMENT'}
-            </div>
+            </Badge>
             {content.workflow && (
-              <div className="flex items-center gap-1.5 rounded-full bg-linear-to-r from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 px-3 py-1 text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest border border-purple-200 dark:border-purple-800/50 shadow-xs">
-                <Zap className="h-3 w-3" />
-                {content.workflow.name}
-              </div>
+              <Badge variant="outline" className="text-[10px] font-mono bg-violet-500/10 text-violet-400 border-violet-500/30 gap-1">
+                <Zap className="h-2.5 w-2.5" />
+                <span>{content.workflow.name}</span>
+              </Badge>
             )}
           </div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white line-clamp-2 leading-[1.2] tracking-tighter transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
-            {content.title || 'Untitled Content'}
-          </h3>
+
+          <div className="relative shrink-0" ref={menuRef}>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowActions(!showActions);
+                setShowConfirmDelete(false);
+              }}
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+              aria-label="Actions menu"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+
+            <AnimatePresence>
+              {showConfirmDelete ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 6 }}
+                  className="absolute right-0 top-10 z-50 w-64 rounded-xl border border-destructive/30 bg-popover/95 backdrop-blur-xl p-4 shadow-xl text-foreground"
+                >
+                  <h4 className="font-bold text-xs text-destructive mb-1">Delete Draft?</h4>
+                  <p className="text-[11px] text-muted-foreground mb-3 leading-tight">
+                    This action will permanently remove this draft from the workspace.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowConfirmDelete(false)}
+                      className="flex-1 h-7 text-xs rounded-lg"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex-1 h-7 text-xs rounded-lg gap-1"
+                    >
+                      {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                      <span>Delete</span>
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : showActions ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 6 }}
+                  className="absolute right-0 top-10 z-50 w-52 rounded-xl border border-border bg-popover/95 backdrop-blur-xl p-1.5 shadow-xl text-foreground"
+                >
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('view-content-details', { detail: { content } }));
+                      setShowActions(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Deep Inspection</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('edit-content', { detail: { content: JSON.parse(JSON.stringify(content)) } }));
+                      setShowActions(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    <Edit2 className="h-3.5 w-3.5" />
+                    <span>Polish Copy</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleCopy();
+                      setShowActions(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+                  >
+                    {isCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Share2 className="h-3.5 w-3.5 text-muted-foreground" />}
+                    <span>{isCopied ? 'Copied!' : 'Copy Text'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('open-scheduler', { detail: { content } }));
+                      setShowActions(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Schedule Post</span>
+                  </button>
+
+                  <div className="my-1 h-px bg-border/60" />
+
+                  <button
+                    onClick={() => {
+                      setShowConfirmDelete(true);
+                      setShowActions(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Discard Draft</span>
+                  </button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* <div className="relative"  */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowActions(!showActions);
-          }}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 transition-all hover:bg-white hover:text-blue-600 hover:border-blue-200 hover:shadow-lg dark:hover:bg-slate-700 dark:hover:text-blue-400 dark:hover:border-blue-800 group"
-          title="More options"
-          aria-label="More options"
-        >
-          <MoreVertical className="h-5 w-5 transition-transform group-hover:rotate-90" />
-        </button>
+        {/* Title */}
+        <h3 className="text-sm sm:text-base font-bold text-foreground line-clamp-2 leading-snug tracking-tight mb-2 group-hover:text-primary transition-colors">
+          {content.title || 'Untitled Content Draft'}
+        </h3>
 
-
-
-        {/* </div> */}
+        {/* Snippet Preview */}
+        {rawText && (
+          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed font-sans mb-4">
+            {rawText}
+          </p>
+        )}
       </div>
 
-      <div className="mt-auto relative z-10">
-        <div className="flex flex-wrap gap-2 mb-8">
-          {content.platforms.map((platform) => (
-            <div
-              key={platform}
-              className="rounded-lg bg-blue-600/5 dark:bg-blue-500/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-blue-600 dark:text-blue-400 border border-blue-500/10"
-            >
-              {platform}
-            </div>
-          ))}
+      {/* Footer */}
+      <div className="pt-3 border-t border-border/60 space-y-2.5">
+        {/* Platforms */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {content.platforms.map((platform) => {
+            const Icon = PLATFORM_ICONS[platform] || Sparkles;
+            return (
+              <span
+                key={platform}
+                className="h-6 px-2 rounded-md bg-secondary/50 border border-border/70 text-[10px] font-medium text-foreground flex items-center gap-1"
+              >
+                <Icon className="h-2.5 w-2.5 text-primary" />
+                <span>{platform.slice(0, 4)}</span>
+              </span>
+            );
+          })}
         </div>
 
-        <div className="flex items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-blue-600 shadow-sm border border-slate-100 dark:border-slate-800 group-hover:rotate-6 transition-transform">
-              <Clock className="h-5 w-5 stroke-[2.5px]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-black">Generation Date</span>
-              <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight" suppressHydrationWarning>
-                {format(new Date(content.createdAt), 'MMM d, yyyy')}
-              </span>
-            </div>
+        {/* Timestamp & Fast Inspect Action */}
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono" suppressHydrationWarning>
+            <Clock className="h-3 w-3 text-muted-foreground/70" />
+            <span>{format(new Date(content.createdAt), 'MMM d, yyyy')}</span>
           </div>
 
-          {/* <Button
-            onClick={() => window.dispatchEvent(new CustomEvent('view-content-details', { detail: { content } }))}
-            className="group/btn relative flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/25 transition-all hover:scale-110 active:scale-90 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-            <ChevronRight className="h-7 w-7 stroke-[3px] transition-transform group-hover/btn:translate-x-0.5" />
-          </Button> */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.dispatchEvent(new CustomEvent('view-content-details', { detail: { content } }))}
+              className="h-7 px-2 text-xs rounded-md gap-1 text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+            >
+              <Eye className="h-3 w-3" />
+              <span>View</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.dispatchEvent(new CustomEvent('edit-content', { detail: { content: JSON.parse(JSON.stringify(content)) } }))}
+              className="h-7 px-2 text-xs rounded-md gap-1 text-primary hover:bg-primary/10"
+            >
+              <Edit2 className="h-3 w-3" />
+              <span>Edit</span>
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>

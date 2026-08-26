@@ -221,27 +221,34 @@ export function ReviewsDashboard({ businessData }: { businessData: BusinessData 
    }
 
    return (
-      <div className="container mx-auto p-6 space-y-8">
+      <div className="space-y-6">
          {/* Header */}
-         <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-         >
-            <div>
-               <h1 className="text-3xl font-bold">Review Manager</h1>
-               <p className="text-slate-500 mt-1">
-                  Manage reviews, generate responses, and create social proof
+         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border/80 shadow-xs">
+            <div className="space-y-1">
+               <div className="flex items-center gap-2 mb-1">
+                  <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+                     Social Proof & Reputation
+                  </span>
+               </div>
+               <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+                  Review Manager
+                  <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                     Reputation Engine
+                  </Badge>
+               </h1>
+               <p className="text-xs text-muted-foreground">
+                  Ingest customer feedback, auto-generate brand-aligned responses, and convert 5-star testimonials into social posts.
                </p>
             </div>
-            <div className="flex items-center gap-3">
-               <div className="flex items-center space-x-2 bg-white dark:bg-slate-800 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2.5">
+               <div className="flex items-center space-x-2.5 bg-secondary/40 px-3.5 py-1.5 rounded-xl border border-border/70">
                   <div className="flex flex-col">
                      <div className="flex items-center gap-1.5">
-                        <Sparkles className="h-3.5 w-3.5 text-blue-500" />
-                        <Label htmlFor="auto-reviews" className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Autopilot Requests</Label>
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        <Label htmlFor="auto-reviews" className="text-[11px] font-semibold text-foreground cursor-pointer">Autopilot Requests</Label>
                      </div>
-                     <span className="text-[10px] text-slate-500 font-medium">Auto-send after checkout</span>
+                     <span className="text-[9px] text-muted-foreground font-mono">Auto-dispatch after checkout</span>
                   </div>
                   <Switch
                      id="auto-reviews"
@@ -250,48 +257,48 @@ export function ReviewsDashboard({ businessData }: { businessData: BusinessData 
                      disabled={isSettingsLoading}
                   />
                </div>
-               <Button onClick={() => setShowRequestModal(true)} className="rounded-2xl h-11 px-6 bg-linear-to-br from-blue-600 to-indigo-700 hover:scale-105 transition-all shadow-lg shadow-blue-500/20 text-white">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Request Review
+               <Button onClick={() => setShowRequestModal(true)} size="sm" className="h-9 rounded-xl px-4 text-xs font-semibold gap-1.5 shadow-xs active:scale-95">
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Request Review</span>
                </Button>
             </div>
-         </motion.div>
+         </div>
 
          {/* Stats Cards */}
-         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+         <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
             <StatCard
                title="Total Reviews"
                value={stats.total.toString()}
                icon={Star}
-               description="All time"
+               description="All time verified"
             />
             <StatCard
                title="Average Rating"
                value={stats.averageRating.toFixed(1)}
                icon={Star}
-               description="Out of 5 stars"
+               description="Out of 5.0 stars"
             />
             <StatCard
-               title="Pending Responses"
+               title="Pending Replies"
                value={stats.pendingResponses.toString()}
                icon={MessageSquare}
-               description="Need attention"
+               description="Needs attention"
             />
             <StatCard
-               title="Pending Requests"
+               title="Active Requests"
                value={stats.pendingRequests.toString()}
                icon={Mail}
-               description="Follow-up needed"
+               description="Follow-up active"
             />
          </div>
 
          {/* Tabs */}
-         <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
-               <TabsTrigger value="all">All Reviews</TabsTrigger>
-               <TabsTrigger value="pending">Pending Response</TabsTrigger>
-               <TabsTrigger value="convertible">Create Posts</TabsTrigger>
-               <TabsTrigger value="requests">Sent Requests</TabsTrigger>
+         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="h-9 p-1 bg-secondary/50 rounded-xl border border-border/80">
+               <TabsTrigger value="all" className="h-7 px-3 text-xs font-semibold rounded-lg">All Reviews</TabsTrigger>
+               <TabsTrigger value="pending" className="h-7 px-3 text-xs font-semibold rounded-lg">Pending Replies</TabsTrigger>
+               <TabsTrigger value="convertible" className="h-7 px-3 text-xs font-semibold rounded-lg">Social Proof Posts</TabsTrigger>
+               <TabsTrigger value="requests" className="h-7 px-3 text-xs font-semibold rounded-lg">Sent Inquiries</TabsTrigger>
             </TabsList>
 
             <TabsContent value={activeTab} className="mt-6">
@@ -431,16 +438,14 @@ function StatCard({
    description: string;
 }) {
    return (
-      <Card>
-         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className="h-5 w-5 text-slate-600" />
-         </CardHeader>
-         <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-slate-500">{description}</p>
-         </CardContent>
-      </Card>
+      <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-1">
+         <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">{title}</span>
+            <Icon className="h-4 w-4 text-primary" />
+         </div>
+         <div className="text-2xl font-mono font-bold text-foreground">{value}</div>
+         <p className="text-[11px] text-muted-foreground">{description}</p>
+      </div>
    );
 }
 
