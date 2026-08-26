@@ -121,26 +121,34 @@ Both User and Admin dashboard layouts must share the exact same structural grid:
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/layout/user-sidebar";
 import { UserNavbar } from "@/components/user/layout/user-navbar";
+import { MobileBottomNav } from "@/components/user/layout/mobile-bottom-nav";
+import { GlobalModals } from "@/components/common/GlobalModals";
+import QueryProvider from "@/app/providers/query-provider";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <UserSidebar />
-      <SidebarInset>
-        <UserNavbar />
-        <main className="flex-1 p-6 bg-muted/40 min-h-[calc(100vh-4rem)]">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <QueryProvider>
+      <SidebarProvider defaultOpen={true}>
+        <UserSidebar />
+        <SidebarInset className="bg-background">
+          <UserNavbar />
+          <main className="flex-1 p-4 md:p-6 bg-muted/40 min-h-[calc(100vh-4rem)] pb-bottom-nav md:pb-6">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+      <MobileBottomNav />
+      <GlobalModals />
+    </QueryProvider>
   );
 }
 ```
 
 ### Key Layout Specifications:
 - **Sidebar Width**: `w-64` (256px), collapsible to icon mode (`collapsible="icon"`).
-- **Navbar Height**: `h-16` (64px), sticky top header (`bg-background/80 backdrop-blur-md`), dynamic breadcrumbs, command search bar, and `ModeToggle`.
-- **Main Container**: `p-6 bg-muted/40 min-h-[calc(100vh-4rem)]`.
+- **Navbar Height**: `h-16` (64px), sticky top header (`bg-background/80 backdrop-blur-md`), dynamic breadcrumbs, command search bar, and `ThemeToggleAnimated` (`ModeToggle`).
+- **Main Container**: `p-4 md:p-6 bg-muted/40 min-h-[calc(100vh-4rem)] pb-bottom-nav md:pb-6`.
+- **Global Modals Orchestrator**: Mounted once in layout for seamless trigger of content creation, workflow builder, member invitations, and scheduling modals.
 
 ---
 

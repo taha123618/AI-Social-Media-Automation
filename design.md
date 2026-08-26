@@ -409,11 +409,11 @@ useEffect(() => {
 
 ---
 
-## 8. Navigation & Shell
+## 8. Navigation, Shell & Modals
 
 ### 8.1 Marketing Navbar (`components/common/Navbar.tsx`)
 * Sticky, `h-16`, `bg-background/80 backdrop-blur-md border-b border-border`.
-* Contains: Logo, Nav links (Features, Pricing, Integrations, Blog), CTA (`Get Started → Register`), `ModeToggle`.
+* Contains: Logo, Nav links (Features, Pricing, Integrations, Blog), CTA (`Get Started → Register`), and `ThemeToggleAnimated` (`ModeToggle`).
 
 ### 8.2 App Dashboard Shells (User & Admin)
 Both `app/(user)/*` and `app/(admin)/*` share identical structure:
@@ -424,9 +424,24 @@ SidebarProvider
       ├── Nav Groups: Overview / AI Generation & Media / Autonomous Strategy / Publishing & Reach / Workspace & Team
       └── Footer: WorkspaceSwitcher + Sign Out
   └── SidebarInset
-      ├── Navbar (h-16, sticky, backdrop-blur-md, breadcrumb + search + ModeToggle)
-      └── main (p-6 bg-muted/40 min-h-[calc(100vh-4rem)])
+      ├── Navbar (h-16, sticky, backdrop-blur-md, breadcrumb + search + ThemeToggleAnimated)
+      └── main (p-4 md:p-6 bg-muted/40 min-h-[calc(100vh-4rem)] pb-bottom-nav md:pb-6)
+MobileBottomNav (mobile viewports)
+GlobalModals (central modal orchestrator)
 ```
+
+### 8.3 Animated Theme Transitions (`components/common/ThemeToggleAnimated.tsx`)
+* **View Transitions API Integration**: Executes a radial `circle-blur` expansion originating from the top-right when switching to dark mode, and reversing from the bottom-left when switching to light mode.
+* **Synchronized State**: Seamlessly coordinates `next-themes` state, `localStorage`, and the document `dark` CSS class.
+* **Component Surface**: `rounded-xl border border-border/80 bg-card hover:bg-secondary/60` with spring micro-scaling on hover/active.
+
+### 8.4 Central Global Modals Architecture (`components/common/GlobalModals.tsx`)
+Mounted directly within `app/(user)/layout.tsx` to handle cross-page modal triggers without prop drilling:
+* **Create Content Modal** (`create-content-modal.tsx`): Single post vs. multi-channel campaign generation with live token/char counters and AI platform chips.
+* **Create Workflow Modal** (`create-workflow-modal.tsx`): Visual node pipeline graph with step connectors and execution triggers.
+* **Invite Member Modal** (`invite-member-modal.tsx`): Role selection cards (`ADMIN`, `EDITOR`, `VIEWER`) and invite dispatch.
+* **Content Details Modal** (`content-details-modal.tsx`): 1-click clipboard copy feedback and platform pills.
+* **Schedule Content Modal** (`schedule-content-modal.tsx`): 14-day horizontal date carousel with peak time presets.
 
 ---
 
@@ -438,21 +453,43 @@ SidebarProvider
 * `AnimatePresence mode="wait"` between tab panels.
 * Pill tab switcher with active `border-primary` ring glow.
 
-### 9.2 Resource Quota Telemetry (`UsageLimitIndicator`)
-* Visual progress bar on dashboard (billing cycle capacity).
-* Tracks: `ai_posts`, `ai_articles`, `brand_voice_profiles`.
-* Color progression: `bg-primary` → `bg-amber-500` (>=80%) → `bg-destructive` (100%).
-* `limit === -1` → "Unlimited" badge for Pro/Enterprise.
+### 9.2 Contents Library (`app/(user)/contents/`)
+* Grid of interactive cards with platform icons (Instagram, LinkedIn, X, Facebook, YouTube, TikTok).
+* Multi-select checkboxes and floating batch action bar (`bottom-20 md:bottom-8`) for bulk scheduling and deletion.
+* Quick inspection preview trigger and platform pill chips.
 
-### 9.3 Workspace Switcher (`WorkspaceSwitcher`)
-* Sidebar footer dropdown showing active tenant.
-* `AnimatePresence` fullscreen overlay during switching.
-* On switch: `queryClient.invalidateQueries()` + `router.refresh()`.
+### 9.3 Post Management (`app/(user)/posts/`)
+* Horizontal scrollable filter tabs with dynamic count badges (`All`, `Drafts`, `Scheduled`, `Published`, `Trash`).
+* Synchronized BullMQ telemetry trigger with rotating reload animation.
+* Floating multi-select action toolbar for batch status changes and deletion.
 
-### 9.4 AI Blog Writer (`features/ai-blog/`)
-* TipTap rich text editor with live SEO score (0-100 gauge).
-* Real-time Unsplash image insertion via heading keyword analysis.
-* Multi-platform export: WordPress Gutenberg, Medium, Webflow, Shopify, Notion, `.docx`, PDF.
+### 9.4 Workflow Engine (`app/(user)/workflows/`)
+* Visual pipeline step chips representing autonomous Mastra agent executions (`Weather Trigger`, `RAG Context`, `Copy Generation`, `Auto Publish`).
+* Operational status switches with optimistic UI feedback.
+* Media ingestion dropzone with vision captioning indicators and draft inspection.
+
+### 9.5 Omni Schedule (`app/(user)/schedule/`)
+* Interactive calendar grid with today's indicator, month navigation, and engagement prediction chips.
+* 30-Day Autopilot toggle in header card.
+* Slide-over heatmap drawer (`best-times-panel.tsx`) showing hourly engagement intensity with 1-tap "Apply Slots" sync.
+
+### 9.6 Posting Schedule Queue (`app/(user)/post-schedule/`)
+* Chronological queue timeline cards with platform badges and status pills.
+* Real-time BullMQ worker and Cron engine telemetry chips.
+
+### 9.7 Multi-Location Hub (`app/(user)/multi-location/`)
+* AI Regional Strategist modal for localized tone adaptation.
+* Safe GPS branch detection with OpenStreetMap Nominatim reverse geocoding.
+* Aggregate metrics cards and 1-click localized copy adaptation dialog.
+
+### 9.8 Social Engagement Unified Inbox (`app/(user)/engagement/`)
+* 2-pane direct message stream with unified channel filter buttons (Instagram, Facebook, LinkedIn, X, YouTube).
+* Real-time chat dispatcher with instant reply triggers.
+
+### 9.9 Review & Reputation Manager (`app/(user)/reviews/`)
+* Autopilot review requests switch for post-checkout inquiries.
+* 4 modern stat cards with monospace telemetry.
+* AI auto-response generation dialog and 1-click testimonial-to-social-post converter.
 
 ---
 

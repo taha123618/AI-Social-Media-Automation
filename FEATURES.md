@@ -117,3 +117,17 @@ This document provides a comprehensive overview of all features and modules impl
   - `multiLocationAgent`: Coordinates franchise locations and localizes messaging.
   - `blogWriterAgent`: Orchestrates deep-dive long-form article synthesis.
   - `socialMediaAgent`, `adCopyAgent`, `analyticsAgent`, `complianceAgent`, `audioVideoAgent`, `schedulingAgent`.
+
+---
+
+### 9. Modernized UI Suite & Theme Transition Engine (`components/`, `app/(user)/`)
+- **Animated Theme Switcher (`components/common/ThemeToggleAnimated.tsx`)**: View Transitions API radial circle-blur expanding toggle synchronized with `next-themes` and `localStorage`.
+- **Central Global Modals (`components/common/GlobalModals.tsx`)**: Unified dialog orchestrator mounted in `app/(user)/layout.tsx` managing content creation, workflow builder, member invitations, and content scheduling.
+- **Contents Library (`app/(user)/contents/`)**: Multi-platform asset management with floating batch selection toolbar and instant media inspector.
+- **Post Management (`app/(user)/posts/`)**: Tabbed status filtering (`All`, `Draft`, `Scheduled`, `Published`, `Trash`) with real-time sync telemetry.
+- **Workflow Engine (`app/(user)/workflows/`)**: Node step pipeline badges, execution status toggles, and drag-and-drop media ingestion dropzone.
+- **Omni Schedule (`app/(user)/schedule/`)**: Interactive calendar with AI peak times drawer and hourly intensity heatmap.
+- **Posting Schedule (`app/(user)/post-schedule/`)**: Queue timeline cards with BullMQ and Cron engine status pills.
+- **Multi-Location Hub (`app/(user)/multi-location/`)**: AI Regional Strategist dialog, GPS branch geocoding, and 1-click regional copy adaptation.
+- **Social Engagement Unified Inbox (`app/(user)/engagement/`)**: 2-pane direct message stream with unified channel filter buttons (Instagram, Facebook, LinkedIn, X, YouTube) and instant reply dispatcher.
+- **Review & Reputation Manager (`app/(user)/reviews/`)**: Autopilot requests switch, 4 stat cards with monospace telemetry, sentiment indicators, and AI auto-response generation.
