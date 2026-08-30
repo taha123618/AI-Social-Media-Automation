@@ -13,7 +13,7 @@ A high-performance enterprise SaaS platform for automated social media schedulin
 - **Multi-Tenant Workspace Hub**: Seamless tenant switching with `WorkspaceSwitcher` embedded in the sidebar footer, backed by automatic query cache invalidation.
 - **Route Protection & Security Hardening**: Strict proxy middleware enforcing authentication and multi-tenant isolation, safe open-redirect protections, magic byte media upload inspection, and HSTS security headers.
 - **AI Blog Writer**: TipTap rich text editor with real-time SEO auditing, context-aware Unsplash image insertion, and Gutenberg/Word/PDF/Markdown export serializers.
-- **Mastra Multi-Agent Engine**: 13 autonomous agents coordinating research, competitor monitoring, weather-based hooks, YouTube transcription, and multi-location franchises.
+- **Custom AI Multi-Agent Engine**: 13 autonomous agents coordinating research, competitor monitoring, weather-based hooks, YouTube transcription, and multi-location franchises (`services/ai/*`).
 - **Social Media Autopilot & Scheduling**: Intelligent multi-platform scheduling (Meta, LinkedIn, X, TikTok, YouTube) with BullMQ queues, optimal time-slot jitter, and background retry pipelines.
 - **Business Knowledge Base (RAG)**: Document ingestion (PDF/TXT) with PostgreSQL + `pgvector` cosine similarity embeddings.
 - **Ad Campaign Manager**: Automated ad copy synthesis, A/B variant testing, campaign launch queues, and live performance metrics sync.
@@ -29,13 +29,13 @@ A high-performance enterprise SaaS platform for automated social media schedulin
 | :--- | :--- |
 | **Frontend UI** | Next.js 16 (App Router), React 19, Tailwind CSS, Radix UI, Framer Motion, GSAP, Lenis, Recharts, TipTap Editor |
 | **Backend & APIs** | Next.js Route Handlers, Server Actions, Zod Validation, Better Auth (Prisma Adapter), Stripe SDK |
-| **AI Framework & Engines** | Mastra Framework (`mastra/`), Vercel AI SDK (`ai`, `@ai-sdk/*`), LangChain (`@langchain/*`) |
-| **Model Providers** | OpenAI (`gpt-4o`, `gpt-4o-mini`), Anthropic (`claude-3-5-sonnet`), Google Gemini (`gemini-2.0-flash`), Groq, OpenRouter, Ollama |
+| **AI Framework & Engines** | Custom AI Engine (`services/ai/*`), OpenRouter (dev), OpenAI (prod), LangChain (`@langchain/*`) |
+| **Model Providers** | OpenAI (`gpt-4o`, `gpt-4o-mini`), Anthropic (`claude-3-5-sonnet`), Google Gemini (`gemini-2.0-flash`), OpenRouter |
 | **Database & ORM** | PostgreSQL 18 with `pgvector` extension, Prisma 7 (`@prisma/client` 7.9.1, output `app/generated/prisma`) |
 | **Queue & Cache** | BullMQ, Redis (`ioredis`), TSX background worker processes |
 | **Cloud Storage** | AWS S3 / Cloudflare R2 presigned URLs, S3 client |
 | **Containers & Deploy** | Multi-stage Docker, Docker Compose, NGINX Reverse Proxy, Kubernetes & Helm manifests |
-| **Observability** | Prometheus Metrics (`/api/metrics`), Alertmanager Webhooks, Grafana, Loki, Pino Logger, DuckDB spans |
+| **Observability** | Prometheus Metrics (`/api/metrics`), Alertmanager Webhooks, Grafana, Loki, Pino Logger |
 
 ---
 
@@ -71,10 +71,7 @@ bun run setup
 # Terminal 1: Next.js App Router (localhost:3000)
 bun run dev
 
-# Terminal 2: Mastra Multi-Agent Studio (localhost:4111)
-npm run dev
-
-# Terminal 3: BullMQ Background Workers
+# Terminal 2: BullMQ Background Workers
 bun run workers
 ```
 

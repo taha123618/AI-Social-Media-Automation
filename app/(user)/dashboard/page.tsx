@@ -254,7 +254,7 @@ export default async function UserDashboardPage({
                   AI Content Generation Engine
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                  Launch autonomous Mastra agents to produce high-ranking content.
+                  Launch autonomous AI agents to produce high-ranking content.
                 </CardDescription>
               </div>
               <Badge variant="outline" className="text-[10px] font-mono">

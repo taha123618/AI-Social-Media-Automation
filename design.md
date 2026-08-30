@@ -258,7 +258,7 @@ A `rounded-2xl` browser-chrome frame containing a 12-column mini dashboard:
 - **Col 1-3 (Mini Sidebar)**: 4 nav items (one `bg-primary` active, rest `bg-muted/40`).
 - **Col 4-9 (Generation Card + Metrics)**: AI Writer card with animated progress bar + `+148.2%` / `24.8K` stat grid in `font-mono`.
 - **Col 10-12 (Dispatch Queue)**: 3 timestamped slots in `font-mono` + "DISPATCH QUEUE" button.
-- **Floating badge**: `animate={{ y: [0, -6, 0] }}` floating indicator card (Mastra Dispatcher, 5 channels).
+- **Floating badge**: `animate={{ y: [0, -6, 0] }}` floating indicator card (Autonomous AI Dispatcher, 5 channels).
 
 ---
 
@@ -464,7 +464,7 @@ Mounted directly within `app/(user)/layout.tsx` to handle cross-page modal trigg
 * Floating multi-select action toolbar for batch status changes and deletion.
 
 ### 9.4 Workflow Engine (`app/(user)/workflows/`)
-* Visual pipeline step chips representing autonomous Mastra agent executions (`Weather Trigger`, `RAG Context`, `Copy Generation`, `Auto Publish`).
+* Visual pipeline step chips representing autonomous AI agent executions (`Weather Trigger`, `RAG Context`, `Copy Generation`, `Auto Publish`).
 * Operational status switches with optimistic UI feedback.
 * Media ingestion dropzone with vision captioning indicators and draft inspection.
 

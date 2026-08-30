@@ -68,7 +68,7 @@ Current fields to extend:
 - `lastOptimizedAt` (DateTime)
 - `createdAt` (DateTime)
 
-### 2. Mastra Agents & Tools
+### 2. Custom AI Agents & Tools (`services/ai/*`)
 
 #### 2.1 Business Summary Generation Agent
 **Purpose:** Automatically generate business summaries from profile data
@@ -251,12 +251,13 @@ User Selection: Publish Date/Time + Recurring Config
 - [ ] Create ContentScheduleRecurrence model
 - [ ] Run migrations
 
-### Phase 2: Mastra Agents & Tools (Week 2)
-- [ ] Build BusinessSummary generation tool
+### Phase 2: Custom AI Agents & Tools (Week 2)
+- [ ] Implement tools in `services/ai/tools/`
+- [ ] Add to `services/ai/index.ts`sSummary generation tool
 - [ ] Build ContentGeneration tool with intent logic
 - [ ] Build SchedulingIntelligence tool
 - [ ] Create and register agents
-- [ ] Add to mastra/index.ts
+- [ ] Add to services/ai/index.ts
 
 ### Phase 3: API Routes (Week 2-3)
 - [ ] Business profile endpoints
@@ -342,7 +343,7 @@ enum SchedulingMode {
 
 ## Dependencies
 
-- Existing Mastra infrastructure
+- Existing custom AI infrastructure (`services/ai/*`)
 - Existing authentication system
 - Existing Prisma schema
 - OpenAI API (GPT-4 Turbo, DALL-E 3)

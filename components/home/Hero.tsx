@@ -177,7 +177,7 @@ export default function Hero() {
                 {[
                   { label: "Content Pipeline", active: true },
                   { label: "Analytics & ROI", active: false },
-                  { label: "Mastra Swarm", active: false },
+                  { label: "AI Agent Swarm", active: false },
                   { label: "Brand Voice RAG", active: false },
                 ].map((item, idx) => (
                   <div
@@ -271,7 +271,7 @@ export default function Hero() {
                 <Send className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-[9px] font-bold text-muted-foreground uppercase">Mastra Dispatcher</div>
+                <div className="text-[9px] font-bold text-muted-foreground uppercase">AI Dispatcher</div>
                 <div className="text-xs font-semibold text-foreground">Scheduled 5 Channels</div>
               </div>
             </motion.div>

@@ -11,7 +11,7 @@ import TextType from "@/components/TextType";
 const WORDS = ["Ranks on Google", "Drives Organic Traffic", "Converts Inbound Leads", "Builds Topical Authority"];
 
 const FLOATING_ELEMENTS = [
-  { icon: Brain, label: "Mastra Swarm Active", x: "12%", y: "18%", delay: 0 },
+  { icon: Brain, label: "AI Swarm Active", x: "12%", y: "18%", delay: 0 },
   { icon: Shield, label: "pgvector Grounded", x: "82%", y: "22%", delay: 0.5 },
   { icon: TrendingUp, label: "Gutenberg HTML", x: "10%", y: "72%", delay: 1 },
   { icon: Zap, label: "1-Click CMS Export", x: "85%", y: "70%", delay: 1.5 },
@@ -178,7 +178,7 @@ export default function Hero() {
                 Traditional content production cycles suffer from high operational latency. By pairing autonomous research swarms with deterministic RAG retrieval, growth fleets publish pillar content at 10x velocity.
               </p>
               <pre className="p-3 rounded-lg bg-secondary/50 border border-border/50 text-xs font-mono text-foreground whitespace-pre-wrap">
-{`<!-- wp:heading {"level":2} -->
+                {`<!-- wp:heading {"level":2} -->
 <h2>Core Ingestion & Serialization Flow</h2>
 <!-- /wp:heading -->`}
               </pre>

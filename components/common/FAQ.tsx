@@ -6,8 +6,8 @@ import React, { useState } from "react";
 
 const faqs = [
   {
-    question: "How do Mastra autonomous AI agents operate across channels?",
-    answer: "Our engine orchestrates 13 specialized Mastra agents. One agent conducts topical research, another formats the article with Gutenberg HTML serialization, while social agents schedule optimized variants across LinkedIn, X, and Instagram.",
+    question: "How do autonomous AI agents operate across channels?",
+    answer: "Our engine orchestrates 13 specialized autonomous agents. One agent conducts topical research, another formats the article with Gutenberg HTML serialization, while social agents schedule optimized variants across LinkedIn, X, and Instagram.",
   },
   {
     question: "Which social networks and CMS platforms are supported natively?",

@@ -30,9 +30,9 @@ graph TD
         Knowledge["RAG & Knowledge Base"]
     end
     
-    subgraph "AI Engines"
-        DirectAI["Direct AI SDK / LangChain (LLMs & Vision)"]
-        MastraEngine["Mastra AI Framework (mastra/*)"]
+    subgraph "AI Engines (services/ai/*)"
+        DirectAI["Dynamic AIService (OpenRouter dev / OpenAI prod)"]
+        CustomEngine["Custom AI Agents, Tools & Workflows"]
     end
     
     subgraph "Background & Data Services"
@@ -50,7 +50,7 @@ graph TD
     API --> Feature
     
     Feature --> DirectAI
-    Feature --> MastraEngine
+    Feature --> CustomEngine
     Feature --> Redis
     Feature --> Postgres
     Feature --> S3
@@ -90,10 +90,10 @@ features/
   workflow/            # Automated multi-step business pipelines
 ```
 
-### 3) Mastra Agent Engine (`mastra/`)
-- Multi-agent orchestration located at the project root (`mastra/index.ts`).
+### 3) Custom AI Engine (`services/ai/`)
+- Unified multi-agent orchestration and tool execution located at `services/ai/index.ts`.
 - 13 autonomous agents coordinating research, competitor analysis, weather hooks, YouTube transcription, and multi-location sync.
-- Dual storage with LibSQL for relational state and DuckDB for observability spans.
+- Pure TypeScript workflows chaining multi-step generation, verification, and SEO optimization.
 
 ### 4) Asynchronous & Background Processing
 - BullMQ workers connected via Redis to handle heavy async workloads (video rendering, batch post publishing, embedding generation, metrics sync).

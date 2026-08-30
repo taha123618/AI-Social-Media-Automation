@@ -6,7 +6,7 @@ version: 0.1.0
 appVersion: "0.1.0"
 keywords:
   - nextjs
-  - mastra
+  - multi-agent
   - ai
   - saas
   - bullmq

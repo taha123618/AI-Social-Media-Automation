@@ -19,7 +19,7 @@ Load the relevant `.agents/skills/*/SKILL.md` file when working in a specific do
 - **Frontend / UI / Components:** `.agents/skills/frontend-ui-development/SKILL.md`
 - **Queues / Workers / BullMQ:** `.agents/skills/background-processing/SKILL.md`
 - **Storage / S3 / Assets:** `.agents/skills/cloud-storage/SKILL.md`
-- **AI Agents / Mastra:** `.agents/skills/ai-agent-development/SKILL.md`
+- **AI Agents :** `.agents/skills/ai-agent-development/SKILL.md`
 - **AI Providers / Models:** `.agents/skills/ai-provider-development/SKILL.md`
 - **Auth / Security:** `.agents/skills/authentication-and-security/SKILL.md`
 - **Architecture / Design:** `.agents/skills/architecture-and-system-design/SKILL.md`

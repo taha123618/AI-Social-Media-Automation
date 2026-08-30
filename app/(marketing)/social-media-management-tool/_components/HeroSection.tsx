@@ -40,7 +40,7 @@ export default function HeroSection() {
           </h1>
 
           <p className="text-base sm:text-lg text-muted-foreground font-normal mb-8 max-w-2xl mx-auto leading-relaxed">
-            Create, schedule, and analyze multi-channel campaigns across LinkedIn, X, Instagram, and YouTube powered by autonomous Mastra agents.
+            Create, schedule, and analyze multi-channel campaigns across LinkedIn, X, Instagram, and YouTube powered by autonomous AI agents.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-center mb-10 max-w-md mx-auto">

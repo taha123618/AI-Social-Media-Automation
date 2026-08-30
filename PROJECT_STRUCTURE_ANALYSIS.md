@@ -2,13 +2,14 @@
 
 ## Executive Summary
 
-This is an **AI-powered social media automation platform** built with Next.js, Mastra AI framework, and PostgreSQL. It provides businesses with automated content generation, social media posting, analytics, lead generation, and review management capabilities.
+This is an **AI-powered social media automation platform** built with Next.js 16, a custom multi-agent AI framework (`services/ai/*`), and PostgreSQL with pgvector. It provides businesses with automated content generation, social media posting, analytics, lead generation, and review management capabilities.
 
-**Tech Stack:**
-- Frontend: Next.js 16 (TypeScript, React, Server Components)
-- AI Framework: Mastra (for agents, workflows, tools)
-- Backend: Next.js API routes
-- Database: PostgreSQL with Prisma ORM
+**Core Tech Stack:**
+- Frontend: Next.js 16 App Router, React 19, Tailwind CSS
+- Backend: Next.js API Routes, Server Actions
+- Database: PostgreSQL (with pgvector)
+- ORM: Prisma 7
+- AI Framework: Custom TypeScript AI Engine (`services/ai/*`)
 - Authentication: Better Auth (email/password + Google OAuth)
 - Message Queue: Potential workers-based scheduling system
 
@@ -342,102 +343,46 @@ EntityType: For generic notification targeting
 
 ---
 
-## 2. MASTRA AI AGENTS & WORKFLOWS
+## 2. CUSTOM AI AGENTS & WORKFLOWS (`services/ai/`)
 
 ### Overview
-Mastra is an AI framework providing intelligent agents and workflows. Uses LibSQL and DuckDB for storage.
+A high-performance, pure TypeScript AI orchestration framework providing intelligent agents, Zod-validated tools, and multi-step workflows.
 
-### Registered Agents
+### Registered Agents (`services/ai/agents/`)
+- `analyticsAgent`: Growth analytics and performance recommendations
+- `blogWriterAgent` & `blogSeoAgent`: Long-form article ghostwriting and SEO engineering
+- `competitorAgent`: Local competitor scanner and positioning analysis
+- `engagementAgent`: Social comments and direct message interaction
+- `multiLocationAgent`: Franchise and multi-location coordinator
+- `postCreationAgent` & `postPublisherAgent`: Platform-specific copy synthesis and publishing
+- `reviewBoosterAgent`: Reputation, feedback, and 5-star review conversion
+- `templateAgent`: 90-day industry growth blueprints
+- `trendEventAgent`: Local calendar and holiday event scout
+- `weatherAgent`: Weather-driven promotional hooks
+- `youtubeAgent`: Video transcription and repurposing
 
-#### 1. Post Creation Agent
-- **ID:** `post-creation-agent`
-- **Model:** `openai/gpt-4-turbo`
-- **Purpose:** Generate platform-optimized social media content and visuals
-- **Capabilities:**
-  - Platform-specific content adaptation (Twitter, Instagram, Facebook, TikTok)
-  - Tone-based content generation (PROFESSIONAL, CASUAL, PLAYFUL, etc.)
-  - Emoji and hashtag optimization
-  - Call-to-action generation
-- **Tools:** `generateContentTool`, `imageGenerationTool`
-- **Memory:** Yes (stores conversation context)
-
-#### 2. Post Publisher Agent
-- **ID:** `post-publisher-agent`
-- **Model:** `openai/gpt-4-turbo`
-- **Purpose:** Publish posts to social media platforms reliably
-- **Capabilities:**
-  - Content validation before publishing
-  - Multi-platform publishing orchestration
-  - Schedule management
-  - Error handling and audit logging
-  - External URL tracking
-- **Tools:** `publishPostTool`
-- **Memory:** Yes
-
-#### 3. Analytics Agent
-- **ID:** `analytics-agent`
-- **Model:** `openai/gpt-4-turbo`
-- **Purpose:** Fetch and analyze post performance metrics
-- **Capabilities:**
-  - Real-time analytics retrieval from social platforms
-  - KPI calculation (engagement, reach, video metrics)
-  - Trend identification
-  - Performance pattern analysis
-  - Actionable recommendations
-- **Tools:** `fetchAnalyticsTool`
-- **Memory:** Yes
-
-#### 4. YouTube Agent
-- **ID:** `youtube-agent`
-- **Purpose:** YouTube-specific automation (likely video interactions)
-
-#### 5. Weather Agent
-- **ID:** `weather-agent`
-- **Model:** `openai/gpt-5-mini`
-- **Purpose:** Weather-based content recommendations
-- **Tools:** `weatherTool`
-- **Memory:** Yes
-- **Instructions:** Provides weather info for activity planning
-
-### Registered Workflows
-
-#### 1. Post Publishing Workflow
-- **ID:** `postPublishingWorkflow`
-- **Steps:**
-  1. `validate-content`: Verify ContentDraft exists and has content
-  2. `publish-to-facebook`: Publish to Facebook if selected
-  3. Additional platform steps (likely for Instagram, Twitter, etc.)
-- **Output:** Results array tracking success/failure per platform
-- **Storage:** Uses Prisma for draft/post persistence
-
-#### 2. Analytics Workflow
-- **ID:** `analyticsWorkflow`
-- **Purpose:** Fetch and aggregate post analytics
-
-#### 3. Scheduled Posting Workflow
-- **ID:** `scheduledPostingWorkflow`
-- **Purpose:** Execute scheduled posts at specified times
-
-#### 4. Weather Workflow
-- **ID:** `weatherWorkflow`
-- **Purpose:** Weather-based recommendations
-
-### Storage Configuration
-```typescript
-MastraCompositeStore with:
-- Default: LibSQLStore (file:./mastra.db)
-- Observability domain: DuckDBStore
-```
-
-### Observability
-- PinoLogger (info level)
-- DefaultExporter (persists to storage for Mastra Studio)
-- CloudExporter (if MASTRA_CLOUD_ACCESS_TOKEN set)
-- SensitiveDataFilter (redacts passwords, tokens, keys)
+### Registered Workflows (`services/ai/workflows/`)
+1. `blogGenerationWorkflow`: Outline -> Long-form Article -> SEO Optimization
+2. `weatherWorkflow`: Open-Meteo forecast -> Activity & Promotion Planning
+3. `postPublishingWorkflow`: Draft Validation -> Platform Formatting -> Dispatch -> Logs
+4. `scheduledPostingWorkflow`: Due Post Detection -> Multi-Platform Publishing
 
 ---
 
-## 3. MASTRA TOOLS
+## 3. CUSTOM AI TOOLS (`services/ai/tools/`)
+- `growthScoreTool`: Calculates comprehensive 0-100 business growth scores
+- `adBoosterTool`: Suggests organic posts for paid ad boosting
+- `analyticsTool`: Cross-platform engagement aggregation
+- `blogContentTool` & `seoAnalyzerTool`: Long-form generation and keyword density auditing
+- `searchCompetitorsTool` & `analyzeCompetitorTool`: Competitive landscape scanner
+- `crmIntegrationTool`: Lead sync with external CRMs
+- `industryTemplateTool`: 90-day growth plans for niche verticals
+- `localEventTool`: Municipal events and holiday discovery
+- `multiLocationTool`: Organization-wide branch synchronization
+- `generateContentTool`, `schedulePostTool`, `getPostAnalyticsTool`: Social publishing suite
+- `requestReviewTool`, `generateReviewReplyTool`, `reviewToSocialPostTool`: Review management
+- `weatherTool`: Open-Meteo current forecast integration
+- `youtubeTool`: YouTube Data API statistics and metadata
 
 ### Post Creation Tools
 
@@ -550,8 +495,7 @@ GET /dashboard                       - Dashboard metrics and data
 
 ### Other Routes
 ```
-/app/api/knowledge/                  - Knowledge base operations
-/app/api/chat/                       - Chat functionality
+/app/api/knowledge/                  - Knowledge base operation
 /app/api/settings/                   - User/business settings
 /app/api/team/                       - Team management
 /app/api/reviews/                    - Review management
@@ -810,21 +754,19 @@ worker:clear-logs       - Log cleanup
 - React Query (implied from file names)
 
 **Backend:**
-- Next.js API Routes
-- Mastra AI Framework
+- Next.js API Routes & Server Actions
+- Custom AI Engine (`services/ai/*`)
 - Better Auth
 
 **Database:**
 - PostgreSQL
 - Prisma ORM
 - Vector support (pgvector extension)
-- LibSQL (Mastra storage)
-- DuckDB (Observability)
 
 **AI/ML:**
-- OpenAI GPT-4, DALL-E 3
+- Dynamic AIService (OpenRouter dev / OpenAI prod)
 - LangChain integration
-- Mastra agents/workflows
+- 13 Custom autonomous agents & workflows
 
 **Deployment/Ops:**
 - Docker support
@@ -846,9 +788,8 @@ Draft → Pending Review → Approved/Rejected → Scheduled → Posted
 ### AI Agent Architecture
 Each agent:
 - Has specific instructions and expertise
-- Uses designated tools
-- Maintains conversation memory
-- Plugs into Mastra observability
+- Uses designated Zod-validated tools
+- Executes dynamically via `AIService`
 
 ### API-Driven Workflows
 Workflows trigger via:
@@ -882,7 +823,7 @@ Workflows trigger via:
 
 ```bash
 # Development
-npm run dev                          # Start Next.js dev server + Mastra Studio (localhost:4111)
+npm run dev                          # Start Next.js dev server (localhost:3000)
 
 # Database
 npm run setup                        # Generate Prisma client + deploy migrations

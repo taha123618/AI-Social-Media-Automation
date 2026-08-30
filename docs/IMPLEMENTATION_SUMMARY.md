@@ -89,16 +89,16 @@ All endpoints include:
 - ✅ Logging
 - ✅ Type-safe responses
 
-### 4. **Mastra Agents** ✅
-- **File**: `mastra/agents/post-creation-agent.ts`
+### 4. **Custom AI Agents** ✅
+- **File**: `services/ai/agents/post-creation.agent.ts`
 - **Includes**:
   - `postCreationAgent` - Content generation
   - `postPublisherAgent` - Publishing orchestration
   - `analyticsAgent` - Metrics fetching
 - **Tools**: Generate, publish, fetch analytics
 
-### 5. **Mastra Workflows** ✅
-- **File**: `mastra/workflows/post-publishing-workflow.ts`
+### 5. **Custom AI Workflows** ✅
+- **File**: `services/ai/workflows/post-publishing.workflow.ts`
 - **Includes**:
   - `postPublishingWorkflow` - Multi-platform publishing
   - `analyticsWorkflow` - Hourly metrics refresh
@@ -144,7 +144,7 @@ All endpoints include:
   - Post lifecycle
   - Database schema
   - API endpoints reference
-  - Mastra agents & workflows
+  - Custom AI agents & workflows (`services/ai/*`)
   - React components overview
 
 #### Meta API Permissions & Scopes
@@ -275,7 +275,7 @@ All endpoints include:
 - Business ID validation on every request
 
 ### Background Jobs
-- Mastra workflows for automation
+- Custom AI workflows for automation (`services/ai/workflows/*`)
 - Scheduled publishing (every 5 minutes)
 - Hourly analytics refresh
 - Cron-based execution
@@ -363,10 +363,10 @@ Before integration into your production codebase:
 2. Test token management
 3. Test publishing
 
-### Phase 4: Mastra Integration
-1. Add agents
-2. Add workflows
-3. Test automation
+### Phase 4: Custom AI Engine Integration
+1. Add agents in `services/ai/agents/`
+2. Add workflows in `services/ai/workflows/`
+3. Test automation pipelines
 
 ### Phase 5: UI Integration
 1. Add React components
@@ -404,8 +404,12 @@ Before integration into your production codebase:
 ├── components/user/social/
 │   ├── posts-page.tsx                         (400 lines)
 │   └── post-creation-editor.tsx               (400 lines)
-├── mastra/
-│   ├── agents/post-creation-agent.ts          (350 lines)
+├── services/
+│   └── ai/
+│       ├── agents/
+│       ├── tools/
+│       ├── workflows/
+│       └── index.ts
 │   └── workflows/post-publishing-workflow.ts  (400 lines)
 └── docs/
     ├── SOCIAL_MEDIA_POSTING_COMPLETE.md      (700 lines)
@@ -450,10 +454,11 @@ Total: ~5500+ lines of production-ready code
 ## 🔗 Dependencies
 
 ### Required Packages (Already Installed)
-- `@mastra/core`
 - `@prisma/client`
 - `next`
 - `react`
+- `@langchain/openai`
+- `zod`
 - `react-query` (or similar)
 - `zod`
 - `winston` (for logging)
@@ -497,7 +502,7 @@ Your implementation is successful when:
 - **Database Setup**: 1-2 hours
 - **API Implementation**: 2-3 hours
 - **Service Integration**: 2-3 hours
-- **Mastra Integration**: 1-2 hours
+- **Custom AI Engine Integration**: 1-2 hours
 - **UI Implementation**: 3-4 hours
 - **Testing**: 2-4 hours
 - **Debugging & Fixes**: 2-4 hours

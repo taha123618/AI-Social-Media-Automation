@@ -19,7 +19,7 @@ const steps = [
   {
     number: "02",
     title: "Autonomous Swarm Research",
-    description: "Mastra analytical agents monitor trends, keyword difficulty, and audience sentiment in real time.",
+    description: "Autonomous AI analytical agents monitor trends, keyword difficulty, and audience sentiment in real time.",
     icon: <Sparkles className="w-5 h-5 text-accent" />,
     badge: "INTEL LOOP",
   },

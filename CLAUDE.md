@@ -17,7 +17,7 @@ Multi-tenant SaaS platform for AI-powered social media automation: content gener
 | **Database** | PostgreSQL 16 + pgvector, Prisma ORM |
 | **Queues** | BullMQ + Redis |
 | **Storage** | AWS S3 v3 (presigned URLs, CDN via CloudFront) |
-| **AI/ML** | LangChain, OpenRouter (dev), OpenAI (prod), Mastra Framework |
+| **AI/ML** | Custom AI Engine (`services/ai/*`), OpenRouter (dev), OpenAI (prod), LangChain |
 | **Auth** | Better Auth (email/password + Google OAuth, cookie sessions) |
 | **Email** | Nodemailer with queue-based delivery |
 | **Workers** | Separate entry points in `features/*/workers/`, started via `npm run workers` |
@@ -114,8 +114,8 @@ app/
   api/               # All Route Handlers (auth, social, blog, cron, admin...)
 features/            # Feature modules (see §2.2)
 lib/                 # Shared utilities (auth, prisma, redis, s3, ai/providers)
-services/            # Cross-cutting services (ai, image-storage, video-thumbnail)
-mastra/              # Mastra framework agents, tools, workflows (root mastra/ directory)
+services/            # Core services (ai, image-storage, video-thumbnail)
+services/ai/         # Custom AI Engine (agents, tools, workflows, AIService)
 prisma/              # Schema, migrations, models
 components/          # Shared UI components
 hooks/               # Shared React hooks
@@ -267,7 +267,7 @@ Never log PII, tokens, or secrets.
 4. **Wire up API routes** (thin handlers that delegate to services)
 5. **Build UI components** (Server Components first, Client where needed)
 6. **Add workers** (if the operation is heavy/async)
-7. **Register new Mastra agents/tools/workflows** in `src/mastra/index.ts` (MUST — required to compile)
+7. **Register new AI agents/tools/workflows** in `services/ai/index.ts`
 8. **Write tests** (unit for services, integration for endpoints)
 
 ### 6.3 Feature Implementation Checklist
@@ -528,13 +528,13 @@ DO NOT:
 - [things to avoid]`;
 ```
 
-### 11.4 Mastra Agents
+### 11.4 Custom AI Agents & Tools (`services/ai/`)
 
-- Define agents in `mastra/agents/*.ts` (root directory, NOT `src/mastra`)
-- Create tools with Zod schemas in `mastra/tools/*.ts`
-- Multi-step workflows in `mastra/workflows/*.ts`
-- **MUST register** all new agents, tools, and workflows in `mastra/index.ts` — this is a hard requirement; unregistered components will not compile
-- Run `npm run build` to verify compilation
+- Define agents in `services/ai/agents/*.agent.ts`
+- Create tools with Zod schemas in `services/ai/tools/*.tool.ts`
+- Multi-step workflows in `services/ai/workflows/*.workflow.ts`
+- Export all components in `services/ai/index.ts`
+- Use `AIService.generateWithOpenRouter` for dynamic dev/prod model routing
 
 ---
 
@@ -777,7 +777,7 @@ For detailed implementation guidance on specific domains, refer to the correspon
 |--------|-----------|
 | Architecture & System Design | `.agents/skills/architecture-and-system-design/SKILL.md` |
 | API & Core Backend | `.agents/skills/api-and-core-backend/SKILL.md` |
-| AI Agent Development (Mastra) | `.agents/skills/ai-agent-development/SKILL.md` |
+| AI Agent Development | `.agents/skills/ai-agent-development/SKILL.md` |
 | AI Provider Integration | `.agents/skills/ai-provider-development/SKILL.md` |
 | Prompt Engineering | `.agents/skills/prompt-engineering/SKILL.md` |
 | Frontend UI Development | `.agents/skills/frontend-ui-development/SKILL.md` |

@@ -86,7 +86,7 @@ export function EnhancedDashboardHeader() {
           </h1>
 
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Mastra autonomous agent swarms and scheduled publication pipelines are operating at peak efficiency.
+            AI agent swarms and scheduled publication pipelines are operating at peak efficiency.
           </p>
         </div>
 

@@ -57,6 +57,24 @@ export class EngagementAutomationService {
   }
 
   /**
+   * AI-powered smart reply generator using custom Engagement Agent
+   */
+  static async generateSmartReply(text: string, businessContext?: Record<string, any>): Promise<string> {
+    try {
+      const { engagementAgent } = await import('@/services/ai/agents/engagement.agent');
+      const response = await engagementAgent.generateResponse?.(
+        `Draft a friendly, helpful, and concise social media customer reply to this inquiry: "${text}"`,
+        businessContext
+      );
+      if (response) return response;
+    } catch (err) {
+      console.warn('[EngagementAutomationService] Agent fallback to rule engine:', err);
+    }
+
+    return this.generateDirectReply(text) || "Thank you for reaching out! How can we assist you today?";
+  }
+
+  /**
    * Logic-based reply generator (The "Direct" way)
    */
   private static generateDirectReply(text: string): string | null {
@@ -86,17 +104,3 @@ export class EngagementAutomationService {
   }
 }
 
-/* 
-// MASTRA ALTERNATIVE (Commented out as requested)
-// This uses the Mastra Agent to handle complex, context-aware conversations
-
-import { engagementAgent } from '@/mastra/agents/engagement-agent';
-
-export async function runMastraEngagement(businessId: string) {
-  const result = await engagementAgent.execute({
-    input: "Analyze recent engagement and respond to customers professionally.",
-    context: { businessId }
-  });
-  return result;
-}
-*/

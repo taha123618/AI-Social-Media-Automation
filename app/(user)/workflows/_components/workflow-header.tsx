@@ -15,7 +15,7 @@ export function WorkflowHeader() {
         <div className="flex items-center gap-2 mb-2">
           <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
           <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-            Mastra Multi-Agent Orchestration
+            Autonomous Multi-Agent Orchestration
           </p>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">

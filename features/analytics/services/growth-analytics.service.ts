@@ -4,7 +4,7 @@ import { SystemLogger } from '@/features/system/services/logger.service';
 
 /**
  * Direct Implementation: Growth Analytics Service
- * Calculates key growth metrics using direct database queries
+ * Calculates key growth metrics and AI-driven growth recommendations
  */
 export class GrowthAnalyticsService {
   /**
@@ -20,28 +20,28 @@ export class GrowthAnalyticsService {
         where: { businessId, status: 'POSTED', postedAt: { gte: thirtyDaysAgo } },
       });
 
-      // 2. Engagement (Sum of likes/comments)
+      // 2. Engagement (Sum of likes/comments/shares)
       const engagement = await prisma.post.aggregate({
         where: { businessId, status: 'POSTED' },
         _sum: {
           likes: true,
           comments: true,
           shares: true,
-        }
+        },
       });
       const totalEngagement = (engagement._sum.likes || 0) + (engagement._sum.comments || 0) + (engagement._sum.shares || 0);
 
       // 3. Leads captured
-      const leadsCount = await prisma.lead?.count({
+      const leadsCount = (await prisma.lead?.count({
         where: { businessId, createdAt: { gte: thirtyDaysAgo } },
-      }) || 0;
+      })) || 0;
 
       // 4. Posting consistency score
       const consistencyResult = await calculateConsistencyScore(businessId, 30);
       const consistencyScore = consistencyResult.overall;
 
       // 5. Estimated Revenue Impact
-      const estimatedRevenue = leadsCount * 50; // Simple logic: $50 per lead
+      const estimatedRevenue = leadsCount * 50; // $50 per lead estimated value
 
       return {
         success: true,
@@ -59,19 +59,18 @@ export class GrowthAnalyticsService {
       return { success: false, error: String(error) };
     }
   }
+
+  /**
+   * Get AI-driven strategic insights using custom Analytics Agent
+   */
+  static async getAIInsights(businessId: string) {
+    try {
+      const { growthScoreTool } = await import('@/services/ai/tools/growth-score.tool');
+      const growthResult = await growthScoreTool.execute({ businessId, days: 30 });
+      return { success: true, ...growthResult };
+    } catch (error) {
+      SystemLogger.error('GrowthAnalyticsService.getAIInsights', error);
+      return { success: false, error: String(error) };
+    }
+  }
 }
-
-/* 
-// MASTRA ALTERNATIVE (Commented out as requested)
-// This uses the Mastra Analytics Agent to provide a deep, AI-driven analysis of growth trends
-
-import { analyticsAgent } from '@/mastra/agents/analytics-agent';
-
-export async function runMastraGrowthAnalysis(businessId: string) {
-  const result = await analyticsAgent.execute({
-    input: "Analyze my business growth for the last month. Give me a score and suggest how to improve leads.",
-    context: { businessId }
-  });
-  return result;
-}
-*/

@@ -1,26 +1,7 @@
 import { ChatOpenAI, DallEAPIWrapper } from "@langchain/openai";
 import { SystemLogger } from "@/features/system/services/logger.service";
-
-export interface AIMessage {
-  role: "system" | "user" | "assistant";
-  content: string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
-}
-
-export interface AIRequest {
-  model?: string;
-  messages: AIMessage[];
-  temperature?: number;
-  maxTokens?: number;
-}
-
-export interface AIResponse {
-  content: string;
-  usage?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
+import { AIMessage, AIRequest, AIResponse } from "./types";
+export type { AIMessage, AIRequest, AIResponse };
 
 /**
  * Dynamic AI Service that switches between OpenRouter (development) and OpenAI (production)
@@ -59,6 +40,25 @@ export class AIService {
       console.error('[AI-SERVICE] Error in generateWithOpenRouter:', error);
       throw error;
     }
+  }
+
+  /**
+   * Direct text generation using OpenAI
+   */
+  static async generateWithOpenAI(aiRequest: {
+    prompt: string;
+    model?: string;
+    maxTokens?: number;
+    temperature?: number;
+  }): Promise<string> {
+    const request: AIRequest = {
+      model: aiRequest.model,
+      messages: [{ role: "user", content: aiRequest.prompt }],
+      temperature: aiRequest.temperature || 0.7,
+      maxTokens: aiRequest.maxTokens || 1000,
+    };
+    const response = await this.callOpenAI(request);
+    return response.content;
   }
 
   /**
@@ -281,6 +281,13 @@ export class AIService {
       });
       throw error;
     }
+  }
+
+  /**
+   * Alias for generateCompletion
+   */
+  static async generateResponse(request: AIRequest): Promise<AIResponse> {
+    return this.generateCompletion(request);
   }
 
   /**

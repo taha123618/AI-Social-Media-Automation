@@ -17,13 +17,13 @@ This document provides a comprehensive overview of all features and modules impl
 | **Ad Campaign Manager** | `features/ad-campaigns/` | ✅ Implemented | Meta & Google Ad Creative Generation, Variant Testing, Campaign Launch Queue, Performance Metrics Sync Worker |
 | **Video Generation** | `features/video_generation/` | ✅ Implemented | HeyGen & Replicate Integration, Script-to-Video Generation, Async Status Polling Worker, Video Analytics Dashboard |
 | **Image Generation** | `features/image_generation/` | ✅ Implemented | Flux & Stable Diffusion API Workers, S3 Asset Storage, Image Storage Database Tracking, Prompt Upscaling |
-| **Review Booster** | `features/crm/`, `mastra/agents/review-booster-agent.ts` | ✅ Implemented | Review Request Automation (SMS/Email), Sentiment Analysis, Customer Feedback Pipeline, Multi-Channel Review Aggregation |
+| **Review Booster** | `features/crm/`, `services/ai/agents/review-booster.agent.ts` | ✅ Implemented | Review Request Automation (SMS/Email), Sentiment Analysis, Customer Feedback Pipeline, Multi-Channel Review Aggregation |
 | **CRM & Lead Management** | `features/crm/` | ✅ Implemented | Lead Capture, Demo Bookings, Pipeline Stages, Contact Interaction History, Lead Scoring |
 | **Multi-Location Management** | `features/multi-location/` | ✅ Implemented | Multi-Branch Franchise Management, Location-Specific Tone and Schedules, Centralized vs Local Content Overrides |
 | **Social & Business Analytics** | `features/analytics/` | ✅ Implemented | Cross-Platform Aggregation, Recharts Visualizations, Trend Detection, AI Growth Recommendations (Gated Growth Engine) |
 | **Compliance & Safety** | `features/compliance/` | ✅ Implemented | Forbidden Keyword Detection, Brand Safety Audits, Automated Draft Rejection/Flagging |
-| **Workflow Automation** | `features/workflow/`, `mastra/workflows/` | ✅ Implemented | Multi-Step Trigger-Action Pipelines, Weather-Driven Posting, Competitor Tracking, Scheduled Workflows |
-| **Mastra Multi-Agent Engine** | `mastra/` | ✅ Implemented | 13 Specialized Autonomous Agents, LibSQL + DuckDB Observability Store, Weather/YouTube/Competitor Tools |
+| **Workflow Automation** | `features/workflow/`, `services/ai/workflows/` | ✅ Implemented | Multi-Step Trigger-Action Pipelines, Weather-Driven Posting, Competitor Tracking, Scheduled Workflows |
+| **Custom AI Multi-Agent Engine** | `services/ai/` | ✅ Implemented | 13 Specialized Autonomous Agents, Zod-Validated Tool Definitions, Weather/YouTube/Competitor Tools, Dynamic Model Switching |
 | **Organization & Team RBAC** | `features/organization/` | ✅ Implemented | Multi-Tenancy (`businessId`), Team Member Roles (`OWNER`, `ADMIN`, `EDITOR`, `VIEWER`), Invitation Flow, Pro Tier Gating |
 | **System Operations & Logs** | `features/system/` | ✅ Implemented | Activity Logs, BullMQ Job Logs, Error Tracking, System Metrics, Maintenance Mode Toggle |
 | **AI Creative Studio** | `app/(user)/studio/`, `features/image_generation/`, `features/video_generation/` | ✅ Production-Ready | Multimodal Creative Workspace, Tabbed UI (Flux Pro Images, Runway/Luma AI Videos, Media Gallery), URL Query State Persistence (`?tab=...`), `AnimatePresence` Transitions |
@@ -114,7 +114,7 @@ This document provides a comprehensive overview of all features and modules impl
 
 ---
 
-### 8. Mastra Multi-Agent Engine (`mastra/`)
+### 8. Custom AI Multi-Agent & Tool Engine (`services/ai/`)
 - **13 Autonomous Agents**:
   - `weatherAgent`: Triggers localized posts based on weather forecasts.
   - `youtubeAgent`: Ingests YouTube URLs, extracts transcripts, and drafts derivative social posts.
@@ -123,7 +123,9 @@ This document provides a comprehensive overview of all features and modules impl
   - `reviewBoosterAgent`: Orchestrates feedback gathering and positive review generation.
   - `multiLocationAgent`: Coordinates franchise locations and localizes messaging.
   - `blogWriterAgent`: Orchestrates deep-dive long-form article synthesis.
-  - `socialMediaAgent`, `adCopyAgent`, `analyticsAgent`, `complianceAgent`, `audioVideoAgent`, `schedulingAgent`.
+  - `blogSeoAgent`, `postCreationAgent`, `postPublisherAgent`, `analyticsAgent`, `engagementAgent`, `templateAgent`.
+- **Dynamic AIService**: Transparent environment-aware switching between OpenRouter in development and OpenAI in production.
+- **Pure TypeScript Workflows**: Multi-step pipelines for blog generation, scheduled posting, and weather marketing.
 
 ---
 

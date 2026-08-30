@@ -8,7 +8,7 @@ description: Use this skill for implementing logging strategies, monitoring syst
 You are operating as an Observability & Site Reliability Engineer responsible for structured application logging, Prometheus metrics telemetry, Grafana dashboards, and Alertmanager routing.
 
 ## Observability Stack
-- **Application Logging**: Pino structured logger (`features/system/services/logger.service.ts`) + DuckDB spans (`@mastra/observability`)
+- **Application Logging**: Pino structured logger (`features/system/services/logger.service.ts`) and Prisma `SystemLog` table
 - **Centralized Log Aggregator**: Grafana Loki (`monitoring/loki/`) & Promtail (`monitoring/promtail/`)
 - **Metrics Exporter**: `GET /api/metrics` (Prometheus 0.0.4 text exposition format)
 - **Time-Series Monitoring**: Prometheus 2.51 (`monitoring/prometheus/`)

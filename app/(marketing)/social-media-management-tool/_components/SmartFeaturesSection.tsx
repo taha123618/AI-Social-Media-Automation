@@ -11,7 +11,7 @@ const smartFeatures = [
   },
   {
     icon: Bot,
-    title: "Mastra Swarm Generation",
+    title: "AI Swarm Generation",
     desc: "Generate high-resonance copy variants grounded in pgvector brand vectors. Select tones, inject hashtags, and calibrate engagement hooks.",
   },
   {

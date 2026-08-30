@@ -136,7 +136,7 @@ export function AnalyticsOverview({
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-              Mastra analytical agents project an upward conversion trajectory across all linked social channels. Historical velocity and engagement patterns confirm robust multi-platform growth.
+              Autonomous AI analytical agents project an upward conversion trajectory across all linked social channels. Historical velocity and engagement patterns confirm robust multi-platform growth.
             </p>
             <div className="flex items-center gap-4 text-xs font-medium">
               <div className="flex items-center gap-1.5 text-primary">

@@ -210,4 +210,30 @@ export class BlogGeneratorService {
       throw error;
     }
   }
+
+  /**
+   * Generates a complete blog post pipeline using the custom AI Blog Workflow DAG
+   */
+  static async generateWithWorkflow(params: {
+    topic: string;
+    businessId: string;
+    keywords?: string[];
+    tone?: string;
+    targetAudience?: string;
+  }) {
+    try {
+      const { blogWorkflow } = await import('@/services/ai/workflows/blog.workflow');
+      return await blogWorkflow.execute({
+        topic: params.topic,
+        keywords: params.keywords || [],
+        tone: params.tone || 'professional',
+        targetAudience: params.targetAudience,
+        businessId: params.businessId,
+      });
+    } catch (error) {
+      console.error('[BLOG-GENERATOR] Error executing blog workflow:', error);
+      throw error;
+    }
+  }
 }
+
