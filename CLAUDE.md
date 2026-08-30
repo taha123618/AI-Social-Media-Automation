@@ -115,7 +115,7 @@ app/
 features/            # Feature modules (see §2.2)
 lib/                 # Shared utilities (auth, prisma, redis, s3, ai/providers)
 services/            # Cross-cutting services (ai, image-storage, video-thumbnail)
-mastra/              # Mastra framework agents, tools, workflows (in src/mastra)
+mastra/              # Mastra framework agents, tools, workflows (root mastra/ directory)
 prisma/              # Schema, migrations, models
 components/          # Shared UI components
 hooks/               # Shared React hooks
@@ -530,9 +530,10 @@ DO NOT:
 
 ### 11.4 Mastra Agents
 
-- Define agents in `src/mastra/agents/*.ts`
-- Create tools with Zod schemas in `src/mastra/tools/*.ts`
-- **MUST register** all new agents, tools, and workflows in `src/mastra/index.ts` — this is a hard requirement; unregistered components will not compile
+- Define agents in `mastra/agents/*.ts` (root directory, NOT `src/mastra`)
+- Create tools with Zod schemas in `mastra/tools/*.ts`
+- Multi-step workflows in `mastra/workflows/*.ts`
+- **MUST register** all new agents, tools, and workflows in `mastra/index.ts` — this is a hard requirement; unregistered components will not compile
 - Run `npm run build` to verify compilation
 
 ---
@@ -751,14 +752,24 @@ steps:
 ## 18. Cloud Storage
 
 - All uploads use **presigned URLs** — never upload directly through the API
-- Path pattern: `organizations/{organizationId}/{feature}/{filename}`
+- Path pattern: `businesses/{businessId}/uploads/{filename}`
 - S3 Block Public Access enabled; CloudFront OAI for secure serving
 - Lifecycle policies for cost optimization
 - See `.agents/skills/cloud-storage/SKILL.md` for detailed patterns
 
 ---
 
-## 19. Skill Reference
+## 19. Billing, Subscriptions & Entitlements
+
+- **Plan Configuration**: `features/billing/config/plans.config.ts` (`Free`, `Starter`, `Pro`, `Enterprise`)
+- **Entitlement Checks**: `EntitlementService.canAccess(businessId, feature)` and `EntitlementGuard.requireFeature(...)`
+- **Transactional Usage Metering**: `UsageService.consume(businessId, feature, quantity)`
+- **Dynamic Client Gating**: `<FeatureGate feature="..." />` and `useEntitlements(feature)` hook
+- **Admin Billing Command Center**: `/admin/billing` with subscription directory, live MRR/ARR KPIs, and manual plan override modal with audit trail logging
+
+---
+
+## 20. Skill Reference
 
 For detailed implementation guidance on specific domains, refer to the corresponding skill:
 

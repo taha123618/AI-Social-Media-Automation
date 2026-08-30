@@ -60,9 +60,9 @@ graph TD
 
 ### 1) Presentation & Routing (`app/`)
 - `app/(marketing)`: High-conversion animated marketing pages (GSAP, Framer Motion, Lenis scroll).
-- `app/(auth)`: Auth.js / NextAuth login, registration, password recovery, verification.
-- `app/(user)`: Multi-tenant SaaS workspace for social scheduling, content drafting, campaign management, knowledge base RAG, and review booster.
-- `app/(admin)`: System health, real-time metrics, AI blog templates, and user administration.
+- `app/(auth)`: Better Auth login, registration with automatic organization/subscription provisioning, password recovery, verification.
+- `app/(user)`: Multi-tenant SaaS workspace for social scheduling, content drafting, campaign management, knowledge base RAG, review booster, and reactive `<FeatureGate />` component access.
+- `app/(admin)`: Dedicated Admin Command Center with Billing Operations (`/admin/billing`), user plan overrides with audit logging, system health, real-time metrics, AI blog templates, and queue telemetry.
 - `app/api`: Edge and Node.js REST API endpoints, webhook receivers (Stripe, Meta, LinkedIn, X, TikTok, YouTube).
 
 ### 2) Feature Domain Modules (`features/*`)
@@ -72,8 +72,8 @@ features/
   ad-campaigns/        # Ad generation, campaign launch, sync workers
   admin/               # Admin panel state and service layer
   ai-blog/             # AI blog writer, TipTap editor, serializers, workers
-  analytics/           # Social and business analytics aggregation
-  billing/             # Stripe checkout, subscription lifecycle
+  analytics/           # Social and business analytics aggregation & gated Growth Engine
+  billing/             # Stripe checkout, subscription lifecycle, EntitlementService, UsageService
   compliance/          # Content safety, prohibited term checks
   crm/                 # Lead pipeline, demo bookings
   generation/          # Core AI prompt synthesis

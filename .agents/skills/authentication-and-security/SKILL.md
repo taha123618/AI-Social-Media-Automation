@@ -57,6 +57,21 @@ if (!membership) {
 }
 ```
 
+### 1.4 Admin Panel Security & Audit Trails
+- Administrative routes (`/admin/*`) require dedicated session verification via `validateAdminSession()` (`lib/admin-auth.ts`).
+- All privileged actions (manual billing plan updates, user status toggles, webhook retries) must write an immutable audit trail entry to `AuditLog`:
+```typescript
+await prisma.auditLog.create({
+  data: {
+    userId: adminId,
+    action: 'ADMIN_OVERRIDE_PLAN',
+    entityType: 'SUBSCRIPTION',
+    entityId: subscriptionId,
+    metadata: { previousPlan, newPlan, reasonNote },
+  },
+});
+```
+
 ---
 
 ## 2. Testing Security Scenarios

@@ -29,6 +29,9 @@ You are operating as a Senior SQA Engineer responsible for test architecture, au
 | **Multi-Tenant Security** | `lib/__tests__/auth-security.test.ts` | RBAC permissions (`OWNER`/`ADMIN`/`EDITOR`/`VIEWER`), `businessId` query scoping, cross-tenant isolation |
 | **Image Generation** | `features/image_generation/services/__tests__/image.service.test.ts` | Model registry, aspect ratio dimension mapping, brand profile watermark & filter injection |
 | **Ad Accounts & Meta/Google** | `features/ad-campaigns/services/__tests__/*.test.ts` | Ad account creation, primary switching, token refresh lifecycles, API response parsing |
+| **Billing Entitlements & Overrides** | `features/billing/services/__tests__/entitlement.service.test.ts` | Capability checks (`canAccess`), plan tier resolution (`Free`, `Starter`, `Pro`, `Enterprise`), temporary database feature overrides |
+| **Transactional Usage Metering** | `features/billing/services/__tests__/usage.service.test.ts` | Atomic quota increments (`consume`), remaining credit calculations, exhaustion errors (`QuotaExceededError`) |
+| **Stripe Webhook Processing** | `features/billing/services/__tests__/webhook.service.test.ts` | Idempotent event handling (`checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_succeeded`) |
 
 ## Mocking Best Practices
 

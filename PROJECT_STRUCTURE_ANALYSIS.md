@@ -293,9 +293,12 @@ This is an **AI-powered social media automation platform** built with Next.js, M
 #### Settings Model
 - User and business-level settings
 
-#### Subscription/Billing Models
-- Subscription tracking
-- SubscriptionUsage (tracks feature usage per plan)
+#### Subscription & Billing Models
+- **Subscription**: Multi-tenant subscription tracking (`organizationId`, `planId: FREE | STARTER | PRO | ENTERPRISE`, `status: ACTIVE | TRIALING | PAST_DUE | CANCELED`, `currentPeriodEnd`, `stripeCustomerId`, `stripeSubscriptionId`)
+- **SubscriptionUsage**: Real-time quota meters per subscription period (`feature: AI_POSTS | AI_BLOG_ARTICLES | BRAND_VOICE_PROFILES`, `used`, `limit`, `period: MONTHLY`)
+- **FeatureOverride**: Database overrides for feature access overrides (`feature`, `enabled`, `expiresAt`)
+- **BillingInvoice**: Historical Stripe invoice records (`invoiceNumber`, `amount`, `currency`, `pdfUrl`, `status`)
+- **AuditLog**: Administrative action audit trail (`userId`, `action: ADMIN_OVERRIDE_PLAN`, `entityType: SUBSCRIPTION`, `metadata`)
 
 ---
 
