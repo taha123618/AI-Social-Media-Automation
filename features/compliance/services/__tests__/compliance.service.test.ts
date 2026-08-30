@@ -2,21 +2,39 @@ import { ComplianceService } from '../compliance.service';
 import prisma from '@/lib/prisma';
 import { SystemLogger } from '@/features/system/services/logger.service';
 
-jest.mock('@/lib/prisma', () => ({
-  __esModule: true,
-  default: {
+jest.mock('@/lib/prisma', () => {
+  const mockPrisma: any = {
     user: {
       findUnique: jest.fn(),
       delete: jest.fn(),
     },
-  },
-  prisma: {
-    user: {
-      findUnique: jest.fn(),
+    organization: {
+      findMany: jest.fn().mockResolvedValue([]),
       delete: jest.fn(),
     },
-  },
-}));
+    business: {
+      findMany: jest.fn().mockResolvedValue([]),
+      deleteMany: jest.fn(),
+    },
+    post: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    review: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    lead: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    businessMember: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    organizationMember: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    subscription: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    notification: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    activityLog: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    auditLog: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    session: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    account: { deleteMany: jest.fn().mockResolvedValue({ count: 0 }) },
+    $transaction: jest.fn(),
+  };
+  return {
+    __esModule: true,
+    default: mockPrisma,
+    prisma: mockPrisma,
+  };
+});
 
 jest.mock('@/features/system/services/logger.service', () => ({
   SystemLogger: {
@@ -27,6 +45,10 @@ jest.mock('@/features/system/services/logger.service', () => ({
 describe('ComplianceService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+      return await callback(prisma);
+    });
+    (prisma.organization.findMany as jest.Mock).mockResolvedValue([]);
   });
 
   describe('handeMetaDataDeletion', () => {

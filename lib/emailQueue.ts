@@ -1,6 +1,16 @@
 import { QueueManager, QUEUE_NAMES } from '../features/scheduler/config/queue.config';
 
-export type EmailType = 'forgot-password' | 'registration' | 'team-invitation' | 'review-request' | 'review-follow-up' | 'review-response' | 'admin-invitation' | 'workflow-notification' | 'talk-to-sales-notification';
+export type EmailType =
+  | 'forgot-password'
+  | 'registration'
+  | 'register-otp'
+  | 'team-invitation'
+  | 'review-request'
+  | 'review-follow-up'
+  | 'review-response'
+  | 'admin-invitation'
+  | 'workflow-notification'
+  | 'talk-to-sales-notification';
 
 export interface EmailData {
   to: string;

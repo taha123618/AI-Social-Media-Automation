@@ -682,7 +682,47 @@ export async function deleteUser(id: string) {
   const session = await getAdminSession();
   if (!session || session.role !== "super_admin") throw new Error("Unauthorized");
 
-  await prisma.user.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    // 1. Find organizations owned by this user
+    const ownedOrgs = await tx.organization.findMany({
+      where: { ownerId: id },
+      select: { id: true },
+    });
+
+    for (const org of ownedOrgs) {
+      // Find businesses under the organization
+      const businesses = await tx.business.findMany({
+        where: { organizationId: org.id },
+        select: { id: true },
+      });
+      const bizIds = businesses.map((b) => b.id);
+
+      if (bizIds.length > 0) {
+        await tx.post.deleteMany({ where: { businessId: { in: bizIds } } });
+        await tx.review.deleteMany({ where: { businessId: { in: bizIds } } });
+        await tx.lead.deleteMany({ where: { businessId: { in: bizIds } } });
+        await tx.businessMember.deleteMany({ where: { businessId: { in: bizIds } } });
+        await tx.business.deleteMany({ where: { id: { in: bizIds } } });
+      }
+
+      await tx.subscription.deleteMany({ where: { organizationId: org.id } });
+      await tx.organizationMember.deleteMany({ where: { organizationId: org.id } });
+      await tx.organization.delete({ where: { id: org.id } });
+    }
+
+    // 2. Clean up user memberships and direct relations
+    await tx.businessMember.deleteMany({ where: { userId: id } });
+    await tx.organizationMember.deleteMany({ where: { userId: id } });
+    await tx.notification.deleteMany({ where: { userId: id } });
+    await tx.activityLog.deleteMany({ where: { userId: id } });
+    await tx.auditLog.deleteMany({ where: { userId: id } });
+    await tx.session.deleteMany({ where: { userId: id } });
+    await tx.account.deleteMany({ where: { userId: id } });
+
+    // 3. Delete the user
+    await tx.user.delete({ where: { id } });
+  });
+
   revalidatePath("/admin/users");
   return { success: true };
 }
