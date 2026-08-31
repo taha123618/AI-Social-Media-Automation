@@ -76,13 +76,34 @@ export class SettingsService {
       forbiddenWords: profile?.forbiddenWords || [],
       usp: profile?.usp || null,
       watermark: profile?.watermark || null,
-      location: business.location as string | null,
-      city: business.location ? (typeof business.location === 'string' ? 
-        (JSON.parse(business.location).city || JSON.parse(business.location).address || JSON.parse(business.location).fullAddress || null) : 
-        ((business.location as any)?.city || (business.location as any)?.address || (business.location as any)?.fullAddress || null)) : null,
+      location: typeof business.location === 'string' ? business.location : (business.location ? JSON.stringify(business.location) : null),
+      city: SettingsService.extractCity(business.location),
       createdAt: business.createdAt,
       updatedAt: business.updatedAt
     };
+  }
+
+  /**
+   * Safely extract city/location from string or JSON object
+   */
+  static extractCity(location: any): string | null {
+    if (!location) return null;
+    if (typeof location === 'string') {
+      try {
+        const parsed = JSON.parse(location);
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed.city || parsed.address || parsed.fullAddress || parsed.name || location;
+        }
+        return location;
+      } catch {
+        // Plain string location (e.g. "Karachi")
+        return location;
+      }
+    }
+    if (typeof location === 'object' && location !== null) {
+      return location.city || location.address || location.fullAddress || location.name || null;
+    }
+    return String(location);
   }
 
   static async updateBusinessSettings(businessId: string, data: BusinessSettingsUpdate) {

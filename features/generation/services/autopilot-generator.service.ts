@@ -260,10 +260,23 @@ function generateCaptionData(
   offers: any[],
   postType: string
 ): Record<string, string> {
-  const profile = business.profile || {};
+  let locStr = 'our area';
+  if (business.location) {
+    if (typeof business.location === 'string') {
+      try {
+        const parsed = JSON.parse(business.location);
+        locStr = (typeof parsed === 'object' && parsed !== null) ? (parsed.city || parsed.address || business.location) : business.location;
+      } catch {
+        locStr = business.location;
+      }
+    } else if (typeof business.location === 'object') {
+      locStr = business.location.city || business.location.address || 'our area';
+    }
+  }
+
   const data: Record<string, string> = {
     business_name: business.name || 'Our Business',
-    location: business.location ? JSON.parse(business.location).city || 'our area' : 'our area',
+    location: locStr,
     phone: '(555) 123-4567', // Would come from business profile
     website: business.website || 'our website',
     cta: getGenericCTA(postType)
