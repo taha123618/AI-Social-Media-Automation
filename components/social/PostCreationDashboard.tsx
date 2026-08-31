@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { PostEditor } from './PostEditor';
 import { AIImageModal } from './AIImageModal';
 import { SocialPlatformPreview } from './SocialPlatformPreview';
+import { BrandGuardianWidget } from '@/components/brand-guardian/BrandGuardianWidget';
 import { getConnectedSocialAccounts, createContentWithSchedule } from '@/app/(user)/posts/actions/post-creation';
 import { Platform } from '@/app/generated/prisma/enums';
 
@@ -259,6 +260,16 @@ export function PostCreationDashboard({
               onFirstCommentChange={setFirstComment}
               platforms={selectedAccounts}
             />
+
+            {/* Brand Voice & Style Guardian Real-Time Linter */}
+            {content.length > 5 && (
+              <BrandGuardianWidget
+                text={content}
+                platform={(selectedAccounts[0]?.platform as any) || "LINKEDIN"}
+                businessId="active-workspace"
+                onApplyFix={(polished: string) => setContent(polished)}
+              />
+            )}
 
             {/* Media Area */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">

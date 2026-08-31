@@ -29,6 +29,9 @@ import {
   postPublishingWorkflow,
   scheduledPostingWorkflow,
   analyticsWorkflow,
+  carouselPublishingWorkflow,
+  socialListeningWorkflow,
+  voiceNarrationWorkflow,
 } from '../index';
 
 describe('Custom AI Workflows', () => {
@@ -55,10 +58,28 @@ describe('Custom AI Workflows', () => {
       expect(postPublishingWorkflow.steps[1].id).toBe('publish-platforms');
     });
 
+    it('carouselPublishingWorkflow defines slide synthesis and brand audit steps', () => {
+      expect(carouselPublishingWorkflow.id).toBe('carousel-publishing-workflow');
+      expect(carouselPublishingWorkflow.steps.length).toBe(2);
+      expect(carouselPublishingWorkflow.steps[0].id).toBe('synthesize-slides');
+      expect(carouselPublishingWorkflow.steps[1].id).toBe('audit-brand-compliance');
+    });
+
+    it('socialListeningWorkflow defines radar scanning and threat assessment steps', () => {
+      expect(socialListeningWorkflow.id).toBe('social-listening-workflow');
+      expect(socialListeningWorkflow.steps.length).toBe(3);
+      expect(socialListeningWorkflow.steps[0].id).toBe('scan-mentions-and-radar');
+    });
+
+    it('voiceNarrationWorkflow defines script linting and voice synthesis steps', () => {
+      expect(voiceNarrationWorkflow.id).toBe('voice-narration-workflow');
+      expect(voiceNarrationWorkflow.steps.length).toBe(2);
+      expect(voiceNarrationWorkflow.steps[0].id).toBe('audit-spoken-narrative');
+    });
+
     it('scheduledPostingWorkflow and analyticsWorkflow are valid', () => {
       expect(scheduledPostingWorkflow.id).toBe('scheduled-posting-workflow');
       expect(scheduledPostingWorkflow.steps.length).toBeGreaterThan(0);
-
       expect(analyticsWorkflow.id).toBe('analytics-sync-workflow');
       expect(analyticsWorkflow.steps.length).toBeGreaterThan(0);
     });

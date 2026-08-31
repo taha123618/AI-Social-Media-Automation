@@ -1,6 +1,6 @@
 # Features & Capabilities Matrix
 
-This document provides a comprehensive overview of all features and modules implemented across the **AI Social Media & Content Automation Platform**, their current implementation status, underlying architecture, and integration points.
+This document provides a comprehensive overview of all features and modules implemented across the **AI Social Media & Content Automation Platform**, their current implementation status, underlying architecture, integration points, and enterprise capabilities.
 
 ---
 
@@ -8,35 +8,54 @@ This document provides a comprehensive overview of all features and modules impl
 
 | Domain Module | Primary Location | Status | Key Technologies & Capabilities |
 | :--- | :--- | :--- | :--- |
+| **Two-Factor Auth (2FA) & Security** | `app/api/auth/register/`, `components/auth/register-form.tsx` | ✅ Production-Ready | 6-digit cryptographic numeric OTP, 2-minute expiry, 60s resend cooldown, immediate Nodemailer delivery + BullMQ queue fallback, real-time password strength meter, 6 segmented auto-advancing OTP inputs with paste support |
 | **Subscription & Billing Engine** | `features/billing/`, `app/api/billing/`, `app/(admin)/admin/(dashboard)/billing/` | ✅ Production-Ready | Stripe Checkout & Customer Portal, Centralized Plan Entitlements (`free`, `starter`, `pro`, `enterprise`), Transactional Metering, Idempotent Webhooks, Admin Billing Command Center, Manual Plan Overrides with Audit Logging, Dynamic Client & Server Feature Gating |
+| **AI Visual Carousel Studio** | `app/(user)/carousels/`, `features/carousel_builder/` | ✅ Production-Ready | Multi-Slide LinkedIn PDF Carousels and Instagram Swipe Post generation (`TITLE`, `CONTENT`, `STATISTIC`, `QUOTE`, `STEPS`, `CTA`), 6 color themes, slide editor, saved decks library, JSON export, and hard-refresh draft recovery |
+| **Voice Cloning & Narration Studio** | `app/(user)/voice/`, `features/voice_studio/` | ✅ Production-Ready | Studio-grade narration playback speaking the exact user script, Web Speech API synthesis + OpenAI TTS binary streaming, pitch/timbre mapping for 10 personas (`nova`, `shimmer`, `alloy`, `echo`, `onyx`, `fable`, etc.), reactive waveform animations, and persistent storage |
+| **Brand Voice Guardian** | `app/(user)/guardian/`, `features/brand_guardian/` | ✅ Production-Ready | Real-time copy linter, Flesch-Kincaid reading ease analysis, brand persona tone compliance, forbidden jargon detection from PostgreSQL profiles, character limits, and 1-click AI copy polishing |
+| **Autonomous DM Sales Bot** | `app/(user)/dm-automation/`, `features/dm_automation/` | ✅ Production-Ready | Inbound DM automation across Instagram, Facebook, LinkedIn, X; custom keyword rules stored in PostgreSQL, contextual AI replies, and automated lead capture into `prisma.lead` database |
+| **AI Multi-Model Arena** | `app/(user)/arena/`, `features/ai_arena/` | ✅ Production-Ready | Side-by-side parallel model execution (Claude 3.5 Sonnet, GPT-4o, DeepSeek-R1, Gemini 2.0 Flash), token calculation, cost estimation in USD, lexical entropy quality scoring, and hard-refresh state recovery |
+| **Social Listening & Radar** | `app/(user)/listening/`, `features/social_listening/` | ✅ Production-Ready | Real-time omnichannel brand monitoring across X, Reddit, LinkedIn; dynamic sentiment breakdown, competitor share-of-voice benchmarks, market trending keywords, and AI executive briefings |
+| **Enterprise Webhook Gateway** | `app/(user)/settings/webhooks/`, `features/webhooks/` | ✅ Production-Ready | Outbound event dispatcher, HMAC SHA-256 signatures, replay protection, endpoint management, test ping simulation with live delivery logs |
+| **Dedicated Settings Sub-Pages** | `app/(user)/settings/*` | ✅ Production-Ready | Dedicated URLs for `/settings/profile`, `/settings/organization`, `/settings/api-keys`, `/settings/webhooks`, `/settings/notifications`, `/settings/credentials`, `/settings/schedule`, `/settings/crm` with unified sub-tab navigation and clean main sidebar |
 | **Route Protection & Security Middleware** | `proxy.ts`, `lib/security.ts` | ✅ Production-Ready | Multi-Path Protection, Session Extraction, Safe Open-Redirect Defense, Magic Byte File Upload Validation, HSTS & Security Headers |
-| **AI Blog Writer** | `features/ai-blog/` | ✅ Implemented | TipTap Rich Text Editor, Real-time SEO Scoring, Unsplash Image Injection, Multi-Platform Serializers (WordPress, Webflow, Medium, Shopify, Notion), PDF & DOCX Export, Version History |
-| **Social Media Scheduler** | `features/scheduler/`, `features/social/` | ✅ Implemented | BullMQ Queues, Cron Job Recurrence, Multi-Account Timezone Slots, Multi-Platform Publishing (Meta, LinkedIn, X, TikTok, YouTube) |
-| **Post Composer** | `features/post-creation/` | ✅ Implemented | Multi-Platform Character Limit Checks, Platform Preview, AI Caption Synthesis, Hashtag Optimization, Media Attachments, Safe Date Scheduling Popover |
-| **Business Knowledge Base (RAG)** | `features/knowledge/` | ✅ Implemented | PostgreSQL + `pgvector` Embeddings, Document Ingestion (PDF/TXT), Semantic Similarity Search, Context Injection into Prompts |
-| **Ad Campaign Manager** | `features/ad-campaigns/` | ✅ Implemented | Meta & Google Ad Creative Generation, Variant Testing, Campaign Launch Queue, Performance Metrics Sync Worker |
-| **Video Generation** | `features/video_generation/` | ✅ Implemented | HeyGen & Replicate Integration, Script-to-Video Generation, Async Status Polling Worker, Video Analytics Dashboard |
-| **Image Generation** | `features/image_generation/` | ✅ Implemented | Flux & Stable Diffusion API Workers, S3 Asset Storage, Image Storage Database Tracking, Prompt Upscaling |
-| **Review Booster** | `features/crm/`, `services/ai/agents/review-booster.agent.ts` | ✅ Implemented | Review Request Automation (SMS/Email), Sentiment Analysis, Customer Feedback Pipeline, Multi-Channel Review Aggregation |
-| **CRM & Lead Management** | `features/crm/` | ✅ Implemented | Lead Capture, Demo Bookings, Pipeline Stages, Contact Interaction History, Lead Scoring |
-| **Multi-Location Management** | `features/multi-location/` | ✅ Implemented | Multi-Branch Franchise Management, Location-Specific Tone and Schedules, Centralized vs Local Content Overrides |
-| **Social & Business Analytics** | `features/analytics/` | ✅ Implemented | Cross-Platform Aggregation, Recharts Visualizations, Trend Detection, AI Growth Recommendations (Gated Growth Engine) |
-| **Compliance & Safety** | `features/compliance/` | ✅ Implemented | Forbidden Keyword Detection, Brand Safety Audits, Automated Draft Rejection/Flagging |
-| **Workflow Automation** | `features/workflow/`, `services/ai/workflows/` | ✅ Implemented | Multi-Step Trigger-Action Pipelines, Weather-Driven Posting, Competitor Tracking, Scheduled Workflows |
-| **Custom AI Multi-Agent Engine** | `services/ai/` | ✅ Implemented | 13 Specialized Autonomous Agents, Zod-Validated Tool Definitions, Weather/YouTube/Competitor Tools, Dynamic Model Switching |
-| **Organization & Team RBAC** | `features/organization/` | ✅ Implemented | Multi-Tenancy (`businessId`), Team Member Roles (`OWNER`, `ADMIN`, `EDITOR`, `VIEWER`), Invitation Flow, Pro Tier Gating |
-| **System Operations & Logs** | `features/system/` | ✅ Implemented | Activity Logs, BullMQ Job Logs, Error Tracking, System Metrics, Maintenance Mode Toggle |
-| **AI Creative Studio** | `app/(user)/studio/`, `features/image_generation/`, `features/video_generation/` | ✅ Production-Ready | Multimodal Creative Workspace, Tabbed UI (Flux Pro Images, Runway/Luma AI Videos, Media Gallery), URL Query State Persistence (`?tab=...`), `AnimatePresence` Transitions |
-| **Workspace & Multi-Tenancy Hub** | `components/common/WorkspaceSwitcher.tsx`, `components/user/layout/` | ✅ Production-Ready | Instant Tenant Switching, Query Invalidation, Fullscreen Sync Overlay, Dynamic User & Admin Layout Shell (`w-64`, `h-16`, `p-6 bg-muted/40`) |
-| **Resource Quota Telemetry** | `components/billing/UsageLimitIndicator.tsx`, `app/(user)/dashboard/` | ✅ Production-Ready | Visual Progress Gauges (`ai_posts`, `ai_articles`, `brand_voice_profiles`), Dynamic Warning Thresholds (80% Amber, 100% Destructive), 1-Click Upgrade Links |
-| **Marketing Landing Suite** | `app/(marketing)/` | ✅ Implemented | 10 Animated Sections (GSAP + Framer Motion + Lenis), Interactive Comparison, Pricing Calculator with 1-Click Checkout, FAQ Accordion |
-| **Admin Operations Panel** | `app/(admin)/` | ✅ Production-Ready | Dedicated Billing Command Center (`/admin/billing`), User Directory with Plan Overrides, System Resource Dashboard, Error Logs, Stripe Webhook Monitor |
+| **AI Blog Writer** | `features/ai-blog/` | ✅ Production-Ready | TipTap Rich Text Editor, Real-time SEO Scoring, Unsplash Image Injection, Multi-Platform Serializers (WordPress, Webflow, Medium, Shopify, Notion), PDF & DOCX Export, Version History |
+| **Social Media Scheduler** | `features/scheduler/`, `features/social/` | ✅ Production-Ready | BullMQ Queues, Cron Job Recurrence, Multi-Account Timezone Slots, Multi-Platform Publishing (Meta, LinkedIn, X, TikTok, YouTube) |
+| **Post Composer** | `features/post-creation/` | ✅ Production-Ready | Multi-Platform Character Limit Checks, Platform Preview, AI Caption Synthesis, Hashtag Optimization, Media Attachments, Safe Date Scheduling Popover |
+| **Business Knowledge Base (RAG)** | `features/knowledge/` | ✅ Production-Ready | PostgreSQL + `pgvector` Embeddings, Document Ingestion (PDF/TXT), Semantic Similarity Search, Context Injection into Prompts |
+| **Ad Campaign Manager** | `features/ad-campaigns/` | ✅ Production-Ready | Meta & Google Ad Creative Generation, Variant Testing, Campaign Launch Queue, Performance Metrics Sync Worker |
+| **Video Generation** | `features/video_generation/` | ✅ Production-Ready | HeyGen & Replicate Integration, Script-to-Video Generation, Async Status Polling Worker, Video Analytics Dashboard |
+| **Image Generation** | `features/image_generation/` | ✅ Production-Ready | Flux & Stable Diffusion API Workers, S3 Asset Storage, Image Storage Database Tracking, Prompt Upscaling |
+| **Review Booster** | `features/crm/`, `services/ai/agents/review-booster.agent.ts` | ✅ Production-Ready | Review Request Automation (SMS/Email), Sentiment Analysis, Customer Feedback Pipeline, Multi-Channel Review Aggregation |
+| **CRM & Lead Management** | `features/crm/` | ✅ Production-Ready | Lead Capture, Demo Bookings, Pipeline Stages, Contact Interaction History, Lead Scoring |
+| **Multi-Location Management** | `features/multi-location/` | ✅ Production-Ready | Multi-Branch Franchise Management, Location-Specific Tone and Schedules, Centralized vs Local Content Overrides, Resilient Location String/JSON Parsing |
+| **Social & Business Analytics** | `features/analytics/` | ✅ Production-Ready | Cross-Platform Aggregation, Recharts Visualizations, Trend Detection, AI Growth Recommendations (Gated Growth Engine) |
+| **Compliance & Safety** | `features/compliance/` | ✅ Production-Ready | Forbidden Keyword Detection, Brand Safety Audits, Automated Draft Rejection/Flagging, GDPR Data Export & Atomic Cascade Deletion |
+| **Workflow Automation & AI Orchestrator** | `features/workflow/`, `services/ai/workflows/` | ✅ Production-Ready | Multi-Step Pipelines: `blogGenerationWorkflow`, `postPublishingWorkflow`, `weatherWorkflow`, `socialListeningWorkflow`, `carouselPublishingWorkflow`, `voiceNarrationWorkflow` |
+| **Custom AI Multi-Agent Engine** | `services/ai/` | ✅ Production-Ready | 14 Specialized Autonomous Agents, Zod-Validated Tool Definitions, Dynamic Model Switching (OpenRouter in dev / OpenAI in prod) |
+| **Organization & Team RBAC** | `features/organization/` | ✅ Production-Ready | Multi-Tenancy (`businessId`), Team Member Roles (`OWNER`, `ADMIN`, `EDITOR`, `VIEWER`), Invitation Flow, Pro Tier Gating |
+| **System Operations & Observability** | `features/system/`, `app/api/metrics/`, `app/api/system/alerts/` | ✅ Production-Ready | Activity Logs, BullMQ Job Logs, Error Tracking, Prometheus `/api/metrics` Exporter, Alertmanager Webhook Dispatcher, Health & Readiness Probes (`/api/health`, `/api/health/ready`) |
+| **Admin Operations Panel** | `app/(admin)/` | ✅ Production-Ready | Dedicated Billing Command Center (`/admin/billing`), User Directory with Plan Overrides & Atomic Cascading Deletion, System Resource Dashboard, Error Logs, Stripe Webhook Monitor |
 
 ---
 
 ## Detailed Module Breakdown
 
-### 1. Subscription, Plan Entitlements & Billing System (`features/billing/`)
+### 1. Two-Factor Authentication (2FA) & Security (`app/api/auth/register/`, `components/auth/register-form.tsx`)
+- **6-Digit Cryptographic OTP Engine**:
+  - `POST /api/auth/register/send-otp`: Generates a cryptographically secure 6-digit numeric OTP (`crypto.randomInt`), persists in `prisma.verification` with a 2-minute expiry (`register-otp:<email>`), and validates password strength.
+  - `POST /api/auth/register/verify-otp`: Validates user input against active verification records, cleans up OTP records on match, initializes tenant workspace via Better Auth `signUpEmail`, and marks `emailVerified: true`.
+  - `POST /api/auth/register/resend-otp`: Rate-limited 60-second cooldown per email address with fresh OTP generation.
+- **Immediate Nodemailer Delivery & BullMQ Queue Fallback**:
+  - Direct immediate SMTP dispatch via `sendEmailImmediate` with automatic queue fallback to `emailQueue` if external SMTP is busy.
+  - Dark-mode HTML email template featuring styled 6-digit OTP code container, security tips, and expiry warning.
+- **Interactive Multi-Step Frontend**:
+  - Step 1: Real-time password strength meter (progress bar + criteria badges for length, numbers, symbols, uppercase), toggle password visibility, Google OAuth.
+  - Step 2: 6 segmented auto-advancing input boxes, full clipboard paste support (auto-populates and triggers instant verification), live 2-minute countdown timer (`MM:SS`), 60s cooldown resend button, error shake animation, and seamless auto-login on verification.
+
+---
+
+### 2. Subscription, Plan Entitlements & Billing System (`features/billing/`)
 - **Centralized Plan Hierarchy (`features/billing/config/plans.config.ts`)**:
   - `Free` ($0): 5 AI social posts/mo, 20 blog articles/mo, 3,000 max words/article, 1 Brand Voice profile, manual CMS export.
   - `Starter` ($29/mo or $24/mo annual): 50 AI social posts/mo, 100 blog articles/mo, 8,000 max words/article, 5 Brand Voices, automated post & article scheduling, topical cluster mapping, AI detection bypass.
@@ -52,91 +71,49 @@ This document provides a comprehensive overview of all features and modules impl
 - **Admin Operations & Manual Subscription Override**:
   - **Command Center (`/admin/billing`)**: Executive MRR/ARR KPI metrics, full subscription directory with search & plan/status filters, granular usage meter inspectors, Stripe webhook log viewer, and manual plan override modal with audit note logging.
   - **User Plan Override (`/admin/users/edit/[id]`)**: Real-time plan switcher (`FREE`, `STARTER`, `PRO`, `ENTERPRISE`) and status control (`ACTIVE`, `TRIALING`, `PAST_DUE`, `CANCELED`) with period extension, usage limit reset, and audit trail record creation.
-- **Dynamic Feature Gating & Quotas (`<FeatureGate />`, `useEntitlements()`)**:
-  - **Dynamic Client Resolution**: `useEntitlements(feature)` automatically fetches the active workspace's live subscription and overrides.
-  - **Feature Access**: Unlocks the Growth Engine tab (`/analytics`), Omni-Scheduler (`/schedule`), Team collaboration (`/team`), and Developer API keys (`/settings`).
-  - **Quota Telemetry**: Displays visual progress indicators for `ai_posts`, `ai_articles`, and `brand_voice_profiles` with warning states and 1-click upgrade modals.
-- **Auto-Activation on Registration**: Seeding of Organization, default workspace, active Free subscription, and initial usage limits on user signup.
-- **Interactive Marketing Checkout (`components/home/PricingCard.tsx`)**: 1-click checkout for logged-in workspaces and registration pre-fill for new visitors.
-- **Dashboard Quota Banners (`app/(user)/dashboard/page.tsx`)**: Prominent upgrade triggers when free quotas are exhausted.
-- **Billing Settings Dashboard (`app/(user)/settings/billing/page.tsx`)**: Real-time quota breakdown, subscription status, invoice PDF download links, and plan tier switcher.
 
 ---
 
-### 2. Route Protection & Security Architecture (`proxy.ts`, `lib/security.ts`)
-- **Middleware Proxy (`proxy.ts`)**: Base path prefix route protection for user dashboards, APIs, content libraries, schedules, settings, and workflows with automatic redirect to `/login?redirect=...`.
-- **Direct Header Session Verification**: `auth.api.getSession({ headers: request.headers })` ensuring session tokens are accurately parsed on every request.
-- **Public Route & Webhook Whitelisting**: Clean bypass for auth endpoints, Stripe webhooks, Prometheus metrics, and public marketing pages.
-- **Security Defenses (`lib/security.ts`)**: Magic byte binary header validation for media uploads, HTML sanitization, HSTS, and XSS filtering.
+### 3. AI Visual Carousel Studio (`features/carousel_builder/`, `app/(user)/carousels/`)
+- **AI Slide Generation**: Uses `carouselTool` and `AIService` to generate 5–10 structured slides with varied visual layouts (`TITLE`, `CONTENT`, `STATISTIC`, `QUOTE`, `STEPS`, `CTA`).
+- **Visual Design Themes**: 6 modern themes (`MODERN_DARK`, `GRADIENT_PURPLE`, `MINIMAL_LIGHT`, `SUNSET_ORANGE`, `CYBERPUNK_NEON`, `FOREST_EMERALD`) with live aspect ratio switching (1:1 Square, 4:5 Portrait).
+- **Hard-Refresh Draft Recovery & Deck Storage**: Instant `localStorage` write-through with saved deck libraries and JSON export.
 
 ---
 
-### 3. AI Blog Writer (`features/ai-blog/`)
-- **Interactive Rich Text Editor**: Powered by TipTap (`@tiptap/react`) with live formatting, undo/redo, heading hierarchy enforcement, and blockquotes.
-- **Real-Time Preview Synchronization**: Immediate bidirectional reflection between editor updates and preview renderers.
-- **Context-Aware Visuals**: `BlogImageService` analyzes headings and category keywords to automatically inject contextual Unsplash images.
-- **Real-Time SEO Auditor**: Scans keyword density, readability, title/meta tag lengths, and heading structures in real time.
-- **Platform-Specific Export Serializers**:
-  - **WordPress**: Generates standard Gutenberg block comments (`<!-- wp:paragraph -->`).
-  - **Medium**: Semantic, clean HTML.
-  - **Webflow & Shopify**: Clean styled HTML for direct CMS pasting.
-  - **Notion**: Formatted block-compatible HTML.
-- **Multi-Format Downloads**: PDF (via `jsPDF` + `html2canvas`), Word `.docx` (HTML Blob), Markdown, and Rich HTML clipboard.
+### 4. AI Voice Cloning & Narration Studio (`features/voice_studio/`, `app/(user)/voice/`)
+- **Exact Script Playback**: Speaks the exact script narrative via Web Speech API (`SpeechSynthesisUtterance`) or OpenAI TTS HD streaming.
+- **Vocal Timbre Personas**: 10 voice profiles (`Nova`, `Shimmer`, `Alloy`, `Echo`, `Onyx`, `Fable`, etc.) with customizable speaking speeds ($0.75\times$–$1.5\times$).
+- **Waveform Reactive Visualizer**: Real-time audio waveform animations that pulse synchronously with the voiceover and stop cleanly on pause.
 
 ---
 
-### 4. Social Media Scheduler & Publisher (`features/scheduler/`, `features/social/`)
-- **Queue Architecture**: Powered by BullMQ on Redis (`social-posting-queue`).
-- **Recurrence Engine**: Supports daily, weekly, and custom cron-based posting schedules with automated time slot optimization.
-- **Platform Adapters**: Meta (Facebook & Instagram), LinkedIn, X (Twitter API v2), TikTok for Business, YouTube Community & Shorts.
-- **Failover & Retries**: Automated retry logic with exponential backoff for network or rate-limit issues.
+### 5. Brand Voice Guardian (`features/brand_guardian/`, `app/(user)/guardian/`)
+- **Multi-Tenant Linter**: Audits copy against forbidden words configured in PostgreSQL brand profiles.
+- **Readability & Character Limit Guards**: Computes Flesch-Kincaid reading ease and checks social network length constraints (e.g. 280 chars on X).
+- **1-Click AI Copy Polisher**: Cleans up formatting and aligns copy with corporate tone guidelines.
 
 ---
 
-### 5. Business Knowledge Base & RAG Pipeline (`features/knowledge/`)
-- **Vector Storage**: Integrated PostgreSQL `pgvector` (`vector` extension).
-- **Document Ingestion**: Supports PDF and plain-text file uploads.
-- **Chunking & Embeddings**: Automated document parsing, semantic chunking, and embedding generation via OpenAI `text-embedding-3-small`.
-- **RAG Querying**: Cosine distance similarity search (`<=>`) dynamically injects brand knowledge, mission statements, and tone preferences into generation prompts.
+### 6. Autonomous DM Bot (`features/dm_automation/`, `app/(user)/dm-automation/`)
+- **Custom Rule Engine**: Persisted in PostgreSQL `business.preferences.dmRules`.
+- **Contextual Inbound DM Simulation**: Intelligent intent classification (`PRICING`, `MEETING_REQUEST`, `SUPPORT_QUESTION`, `LEAD_INQUIRY`).
+- **Automatic Lead Capture**: Automatically logs qualified leads into `prisma.lead` database.
 
 ---
 
-### 6. Ad Campaign Engine (`features/ad-campaigns/`)
-- **Ad Creative Synthesis**: Generates high-converting headlines, primary texts, descriptions, and CTAs tailored to Meta and Google Ads specifications.
-- **A/B Variant Testing**: Generates and tracks multiple ad copy and visual variations simultaneously.
-- **Launch Queue & Performance Sync**: Asynchronous campaign deployment and scheduled metrics synchronization from ad accounts.
+### 7. AI Multi-Model Arena (`features/ai_arena/`, `app/(user)/arena/`)
+- **Parallel Inference Engine**: Simultaneously benchmarks Claude 3.5 Sonnet, GPT-4o, DeepSeek-R1, and Gemini 2.0 Flash.
+- **Telemetry & Scoring**: Live latency (ms), token volume calculation, estimated cost in USD, and algorithmic lexical quality scoring.
 
 ---
 
-### 7. Video & Image Generation Pipelines (`features/video_generation/`, `features/image_generation/`)
-- **Video Generation**: Script-to-video processing via HeyGen and Replicate integrations with background status polling workers.
-- **Image Generation**: Generates high-resolution social imagery via Flux and Stable Diffusion models, automatically persisted to AWS S3 / Cloudflare R2 with database tracking.
+### 8. Social Listening & Threat Radar (`features/social_listening/`, `app/(user)/listening/`)
+- **Omnichannel Radar**: Dynamic brand mention monitoring, sentiment breakdown, and competitor share-of-voice tracking.
+- **AI Executive Briefings**: Autonomous strategic directives and tactical growth recommendations.
 
 ---
 
-### 8. Custom AI Multi-Agent & Tool Engine (`services/ai/`)
-- **13 Autonomous Agents**:
-  - `weatherAgent`: Triggers localized posts based on weather forecasts.
-  - `youtubeAgent`: Ingests YouTube URLs, extracts transcripts, and drafts derivative social posts.
-  - `competitorAgent`: Analyzes competitor strategies and identifies content gaps.
-  - `trendEventAgent`: Detects viral topics and holiday hooks.
-  - `reviewBoosterAgent`: Orchestrates feedback gathering and positive review generation.
-  - `multiLocationAgent`: Coordinates franchise locations and localizes messaging.
-  - `blogWriterAgent`: Orchestrates deep-dive long-form article synthesis.
-  - `blogSeoAgent`, `postCreationAgent`, `postPublisherAgent`, `analyticsAgent`, `engagementAgent`, `templateAgent`.
-- **Dynamic AIService**: Transparent environment-aware switching between OpenRouter in development and OpenAI in production.
-- **Pure TypeScript Workflows**: Multi-step pipelines for blog generation, scheduled posting, and weather marketing.
-
----
-
-### 9. Modernized UI Suite & Theme Transition Engine (`components/`, `app/(user)/`)
-- **Animated Theme Switcher (`components/common/ThemeToggleAnimated.tsx`)**: View Transitions API radial circle-blur expanding toggle synchronized with `next-themes` and `localStorage`.
-- **Central Global Modals (`components/common/GlobalModals.tsx`)**: Unified dialog orchestrator mounted in `app/(user)/layout.tsx` managing content creation, workflow builder, member invitations, and content scheduling.
-- **Contents Library (`app/(user)/contents/`)**: Multi-platform asset management with floating batch selection toolbar and instant media inspector.
-- **Post Management (`app/(user)/posts/`)**: Tabbed status filtering (`All`, `Draft`, `Scheduled`, `Published`, `Trash`) with real-time sync telemetry.
-- **Workflow Engine (`app/(user)/workflows/`)**: Node step pipeline badges, execution status toggles, and drag-and-drop media ingestion dropzone.
-- **Omni Schedule (`app/(user)/schedule/`)**: Interactive calendar with AI peak times drawer and hourly intensity heatmap.
-- **Posting Schedule (`app/(user)/post-schedule/`)**: Queue timeline cards with BullMQ and Cron engine status pills.
-- **Multi-Location Hub (`app/(user)/multi-location/`)**: AI Regional Strategist dialog, GPS branch geocoding, and 1-click regional copy adaptation.
-- **Social Engagement Unified Inbox (`app/(user)/engagement/`)**: 2-pane direct message stream with unified channel filter buttons (Instagram, Facebook, LinkedIn, X, YouTube) and instant reply dispatcher.
-- **Review & Reputation Manager (`app/(user)/reviews/`)**: Autopilot requests switch, 4 stat cards with monospace telemetry, sentiment indicators, and AI auto-response generation.
+### 9. Dedicated Settings Sub-Pages (`app/(user)/settings/*`)
+- **Clean Sub-Routing**: `/settings/profile`, `/settings/organization`, `/settings/api-keys`, `/settings/webhooks`, `/settings/notifications`, `/settings/credentials`, `/settings/schedule`, `/settings/crm`.
+- **Unified Sub-Navigation**: Horizontal tab bar linking all setting panels while keeping the left sidebar uncluttered.

@@ -7,8 +7,6 @@ import {
   LayoutDashboard,
   BarChart3,
   FileText,
-  Image as ImageIcon,
-  Video,
   Layers,
   FolderOpen,
   Send,
@@ -27,10 +25,12 @@ import {
   Settings,
   LogOut,
   Sparkles,
+  Mic,
+  Radar,
+  Swords,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -79,7 +79,6 @@ const userNavSections: NavSection[] = [
   {
     label: "AI Generation & Media",
     items: [
-
       {
         title: "AI Blog Writer",
         url: "/blog",
@@ -93,20 +92,50 @@ const userNavSections: NavSection[] = [
         badge: "Hub",
       },
       {
-        title: "Contents Library",
-        url: "/contents",
-        icon: FolderOpen,
-      },
-      {
         title: "Posts Feed",
         url: "/posts",
         icon: Send,
       },
+      {
+        title: "AI Carousel Studio",
+        url: "/carousels",
+        icon: Layers,
+        badge: "New",
+      },
+      {
+        title: "Voice Studio",
+        url: "/voice",
+        icon: Mic,
+        badge: "New",
+      },
+      {
+        title: "Contents Library",
+        url: "/contents",
+        icon: FolderOpen,
+      }
     ],
   },
   {
     label: "Autonomous Strategy",
     items: [
+      {
+        title: "Social Listening Radar",
+        url: "/listening",
+        icon: Radar,
+        badge: "New",
+      },
+      {
+        title: "Autonomous DM Bot",
+        url: "/dm-automation",
+        icon: Bot,
+        badge: "New",
+      },
+      {
+        title: "AI Multi-Model Arena",
+        url: "/arena",
+        icon: Swords,
+        badge: "New",
+      },
       {
         title: "Workflows",
         url: "/workflows",
@@ -193,7 +222,6 @@ const userNavSections: NavSection[] = [
   },
 ];
 
-
 interface UserSidebarProps {
   user?: {
     name?: string | null;
@@ -219,15 +247,6 @@ export function UserSidebar({ user }: UserSidebarProps) {
       setIsLoggingOut(false);
     }
   };
-
-  const userInitials = user?.name
-    ? user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-    : "U";
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border w-64">
@@ -259,7 +278,7 @@ export function UserSidebar({ user }: UserSidebarProps) {
                     (item.url !== "/dashboard" && pathname.startsWith(item.url));
                   const Icon = item.icon;
                   return (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem key={`${section.label}-${item.url}-${item.title}`}>
                       <SidebarMenuButton
                         asChild
                         isActive={isActive}

@@ -1,51 +1,75 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bot, Zap, MessageSquare, BarChart3, Globe, Shield, ArrowUpRight } from "lucide-react";
+import {
+  Layers,
+  Mic,
+  Bot,
+  Radar,
+  Swords,
+  ShieldCheck,
+  Webhook,
+  Sparkles,
+  BarChart3,
+} from "lucide-react";
 import React from "react";
 
 const features = [
   {
-    title: "AI Blog Writer & Gutenberg CMS",
-    description: "Compose SEO-optimized long-form articles that rank. Multi-agent research, heading structures, and 1-click CMS exports.",
-    icon: <Bot className="w-5 h-5 text-primary" />,
-    badge: "AGENTIC CMS",
-    accentColor: "primary",
+    title: "AI Visual Carousel Studio",
+    description: "Transform articles and concepts into high-converting multi-slide LinkedIn PDF carousels and Instagram swipe decks with 6 modern design themes.",
+    icon: <Layers className="w-5 h-5 text-primary" />,
+    badge: "CAROUSEL STUDIO",
   },
   {
-    title: "Multi-Channel Social Fleet",
-    description: "Autonomous scheduling for Twitter, LinkedIn, Instagram, and TikTok with optimal timing algorithms.",
-    icon: <MessageSquare className="w-5 h-5 text-accent" />,
-    badge: "AUTO-DISPATCH",
-    accentColor: "accent",
+    title: "AI Voice Cloning & Narration",
+    description: "Instant studio-grade audio narration and voiceovers in 6 distinct timbres. Perfect for Reels, TikToks, Shorts, and Audio Ads.",
+    icon: <Mic className="w-5 h-5 text-purple-400" />,
+    badge: "VOICE STUDIO",
+
+
   },
   {
-    title: "Conversion Ad Copy Engine",
-    description: "Synthesize high-converting ad copy variants for Meta, Google, and TikTok built on tested copywriting frameworks.",
-    icon: <Zap className="w-5 h-5 text-purple-400" />,
-    badge: "AD OPTIMIZER",
-    accentColor: "purple",
+    title: "Brand Voice & Style Guardian",
+    description: "Real-time copy linter analyzing readability, platform character guidelines, forbidden terms, and tone adherence with 1-click polishing.",
+    icon: <ShieldCheck className="w-5 h-5 text-emerald-400" />,
+    badge: "REAL-TIME LINTER",
+  },
+  {
+    title: "Autonomous DM & Lead Bot",
+    description: "Conversational AI responder for Instagram, LinkedIn, and Facebook DMs. Qualifies sales leads and books meetings directly on your calendar.",
+    icon: <Bot className="w-5 h-5 text-blue-400" />,
+    badge: "24/7 LEAD BOT",
+  },
+  {
+    title: "Social Listening & Sentiment Radar",
+    description: "Real-time tracking of brand mentions, sentiment shifts, competitor share of voice, and trending topics across X, Reddit, and LinkedIn.",
+    icon: <Radar className="w-5 h-5 text-amber-400" />,
+    badge: "SENTIMENT RADAR",
+  },
+  {
+    title: "AI Multi-Model Arena",
+    description: "Side-by-side benchmarking across Claude 3.5 Sonnet, GPT-4o, DeepSeek-R1, and Gemini 2.0 with live latency and token cost telemetry.",
+    icon: <Swords className="w-5 h-5 text-primary" />,
+    badge: "MODEL ARENA",
+  },
+  {
+    title: "Enterprise Webhooks Gateway",
+    description: "Seamless HMAC SHA-256 signed event dispatching to Zapier, Make.com, or custom APIs with automated retry policies.",
+    icon: <Webhook className="w-5 h-5 text-purple-400" />,
+    badge: "API GATEWAY",
+  },
+  {
+    title: "Autonomous Multi-Agent Workflows",
+    description: "Weather-triggered campaigns, competitor counter-campaigns, and trend-jack pipelines running 100% autonomously via BullMQ.",
+    icon: <Sparkles className="w-5 h-5 text-accent" />,
+    badge: "SWARM AGENTS",
   },
   {
     title: "Predictive Analytics & Attribution",
-    description: "Analyze performance trajectory, engagement resonance, and revenue ROI attribution across every published vector.",
-    icon: <BarChart3 className="w-5 h-5 text-primary" />,
+    description: "Track organic engagement velocity, conversion ROI, and revenue attribution across every published asset.",
+    icon: <BarChart3 className="w-5 h-5 text-emerald-400" />,
     badge: "ATTRIBUTION",
-    accentColor: "primary",
-  },
-  {
-    title: "Brand Voice RAG Vector Store",
-    description: "Isolated pgvector context layers ensure deterministic tone adherence and zero hallucinations across brand content.",
-    icon: <Shield className="w-5 h-5 text-accent" />,
-    badge: "PGVECTOR RAG",
-    accentColor: "accent",
-  },
-  {
-    title: "Global Multi-Region Localization",
-    description: "Automatically adapt content for 40+ locales with cultural nuance, localized hashtags, and multilingual SEO metadata.",
-    icon: <Globe className="w-5 h-5 text-purple-400" />,
-    badge: "40+ LOCALES",
-    accentColor: "purple",
   },
 ];
 
@@ -64,16 +88,16 @@ export default function Features() {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4">
-              INTELLIGENT CAPABILITIES
+              NEXT-GEN SOCIAL AUTOMATION
             </div>
             <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
-              Autonomous Engine. <br className="hidden sm:block" />
+              Autonomous AI Engine. <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Compounding Organic Reach.
+                Compounding Organic Dominance.
               </span>
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-              Eliminate repetitive marketing workflows with enterprise-grade multi-agent orchestration.
+              From visual carousel decks and voice narration to 24/7 conversational DM bots and competitor sentiment radars.
             </p>
           </motion.div>
         </div>
@@ -85,29 +109,26 @@ export default function Features() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: idx * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: idx * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4 }}
-              className="group p-6 rounded-xl border border-border/80 bg-card hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-200 flex flex-col justify-between cursor-default"
+              className="group p-6 rounded-2xl border border-border/80 bg-card hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-200 flex flex-col justify-between cursor-default"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/15 group-hover:border-primary/30 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/15 group-hover:border-primary/30 transition-colors">
                     {feature.icon}
                   </div>
-                  <span className="text-[10px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                  <span className="text-[10px] font-mono font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
                     {feature.badge}
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors leading-snug">
+
+                <h3 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   {feature.description}
                 </p>
-              </div>
-              <div className="mt-5 pt-4 border-t border-border/60 flex items-center text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200">
-                <span>Explore Capability</span>
-                <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
               </div>
             </motion.div>
           ))}

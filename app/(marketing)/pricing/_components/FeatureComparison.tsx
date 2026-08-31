@@ -5,43 +5,44 @@ import React from "react";
 
 const comparisonSections = [
   {
-    category: "AI Content Generation",
+    category: "AI Content & Media Studios",
     items: [
-      { name: "AI Social Posts", free: "5 / mo", starter: "50 / mo", pro: "Unlimited" },
-      { name: "AI Blog Articles", free: "20 / mo", starter: "100 / mo", pro: "Unlimited" },
+      { name: "AI Social Posts & Captions", free: "5 / mo", starter: "50 / mo", pro: "Unlimited" },
+      { name: "AI Visual Carousel Builder", free: "3 decks / mo", starter: "25 decks / mo", pro: "Unlimited" },
+      { name: "AI Voice Cloning & Narration", free: "5 mins / mo", starter: "60 mins / mo", pro: "Unlimited" },
+      { name: "Brand Voice & Style Guardian Linter", free: "Basic Check", starter: "Advanced Linter", pro: "Real-Time 1-Click Polisher" },
+      { name: "AI Blog Articles (Gutenberg)", free: "3 / mo", starter: "50 / mo", pro: "Unlimited" },
       { name: "Article Word Limit", free: "3,000 words", starter: "8,000 words", pro: "Unlimited" },
-      { name: "Brand Voice Profiles", free: "1 profile", starter: "5 profiles", pro: "Unlimited" },
-      { name: "AI Voice Fine-Tuning", free: false, starter: false, pro: true },
-      { name: "AI Detection Bypass", free: false, starter: true, pro: true },
+      { name: "Brand Voice Personas", free: "1 persona", starter: "5 personas", pro: "Unlimited" },
     ]
   },
   {
-    category: "SEO & Growth Engine",
+    category: "Autonomous Agents & Growth Radar",
     items: [
-      { name: "Real-time SEO Scoring", free: true, starter: true, pro: true },
-      { name: "Topical Cluster Mapping", free: false, starter: true, pro: true },
-      { name: "Topical Cluster Strategy", free: false, starter: false, pro: true },
-      { name: "Auto Internal Linking", free: false, starter: true, pro: true },
-      { name: "Google Search Console Sync", free: false, starter: true, pro: true },
+      { name: "Autonomous DM & Lead Bot", free: false, starter: "100 replies / mo", pro: "Unlimited Auto-Replies" },
+      { name: "Social Listening & Sentiment Radar", free: false, starter: "1 Brand Tracker", pro: "Omnichannel Radar + Alerts" },
+      { name: "Competitor Share of Voice Radar", free: false, starter: "2 Competitors", pro: "Unlimited Competitors" },
+      { name: "AI Multi-Model Comparison Arena", free: "Basic", starter: "Standard (4 Models)", pro: "Full Telemetry + Custom Models" },
+      { name: "Autonomous Swarm Workflows", free: false, starter: true, pro: true },
     ]
   },
   {
     category: "Publishing, Social & CMS",
     items: [
-      { name: "Social Post Scheduling", free: false, starter: true, pro: true },
-      { name: "WordPress & Ghost Export", free: true, starter: true, pro: true },
-      { name: "1-Click CMS Publishing (Webflow, Shopify)", free: false, starter: true, pro: true },
-      { name: "Analytics Dashboard", free: "Basic", starter: "Advanced", pro: "Advanced + Attribution" },
+      { name: "Social Post Scheduling (X, LinkedIn, IG, TikTok)", free: false, starter: true, pro: true },
+      { name: "WordPress, Webflow & Ghost CMS Export", free: true, starter: true, pro: true },
+      { name: "Real-time Predictive SEO Scorer", free: true, starter: true, pro: true },
+      { name: "Revenue Attribution Analytics", free: "Basic", starter: "Advanced", pro: "Full Multi-Touch Attribution" },
     ]
   },
   {
-    category: "Collaboration, API & Support",
+    category: "Enterprise, Ecosystem & Support",
     items: [
-      { name: "Team Collaboration & Seats", free: false, starter: false, pro: true },
-      { name: "White-Label Reports & Exports", free: false, starter: false, pro: true },
-      { name: "Developer REST API Access", free: false, starter: false, pro: true },
-      { name: "Dedicated Swarm Compute", free: false, starter: false, pro: true },
-      { name: "Support SLA", free: "Community", starter: "Priority", pro: "Dedicated CSM + 99.9% SLA" },
+      { name: "Enterprise Webhooks Gateway (HMAC SHA-256)", free: false, starter: "3 Endpoints", pro: "Unlimited Endpoints" },
+      { name: "Zapier & Make.com No-Code Triggers", free: false, starter: true, pro: true },
+      { name: "Team Collaboration & Role RBAC", free: false, starter: false, pro: "Unlimited Seats" },
+      { name: "White-Label Reports & Custom Branding", free: false, starter: false, pro: true },
+      { name: "Support SLA", free: "Community", starter: "Priority Email", pro: "Dedicated CSM + 99.9% SLA" },
     ]
   }
 ];
@@ -58,15 +59,15 @@ export const FeatureComparison = () => {
         </h2>
       </div>
 
-      <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
+      <div className="rounded-2xl border border-border/80 bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-muted/40 border-b border-border/70">
                 <th className="py-3.5 px-5 font-bold text-foreground">Capability</th>
                 <th className="py-3.5 px-4 font-bold text-foreground text-center w-28">Free</th>
-                <th className="py-3.5 px-4 font-bold text-primary text-center w-32 bg-primary/5">Starter</th>
-                <th className="py-3.5 px-4 font-bold text-foreground text-center w-36">Pro</th>
+                <th className="py-3.5 px-4 font-bold text-primary text-center w-36 bg-primary/5">Starter</th>
+                <th className="py-3.5 px-4 font-bold text-foreground text-center w-40">Pro</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">

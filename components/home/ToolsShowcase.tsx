@@ -5,54 +5,60 @@ import { staggerContainer } from "@/lib/animations/motion";
 import { FaInstagram, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import {
+  Layers,
+  Mic,
+  Bot,
+  Radar,
+  Swords,
+  ShieldCheck,
+  Webhook,
   PenTool,
   Hash,
-  Image as ImageIcon,
-  Video,
-  MessageSquare,
-  FileText,
-  BarChart,
-  Calendar,
-  Share2,
+  Sparkles,
   Zap,
   Target,
   Globe,
-  ArrowRight,
+  Share2,
+  Calendar,
+  BarChart,
+  FileText,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import React from "react";
 
 const tools = [
-  { name: "Instagram Bio Gen", icon: <FaInstagram className="w-4 h-4 text-primary" />, category: "Social" },
+  { name: "AI Visual Carousel Builder", icon: <Layers className="w-4 h-4 text-primary" />, category: "Visual" },
+  { name: "AI Voice Cloning Studio", icon: <Mic className="w-4 h-4 text-purple-400" />, category: "Audio" },
+  { name: "Brand Voice Guardian Linter", icon: <ShieldCheck className="w-4 h-4 text-emerald-500" />, category: "Compliance" },
+  { name: "24/7 DM Lead Qualifier Bot", icon: <Bot className="w-4 h-4 text-blue-400" />, category: "Automation" },
+  { name: "Competitor Sentiment Radar", icon: <Radar className="w-4 h-4 text-amber-500" />, category: "Intelligence" },
+  { name: "Multi-Model Comparison Arena", icon: <Swords className="w-4 h-4 text-primary" />, category: "AI Models" },
+  { name: "Enterprise Webhooks Gateway", icon: <Webhook className="w-4 h-4 text-purple-400" />, category: "Integration" },
   { name: "Viral X Thread Engine", icon: <FaXTwitter className="w-4 h-4 text-foreground" />, category: "Social" },
-  { name: "LinkedIn Post Writer", icon: <FaLinkedin className="w-4 h-4 text-accent" />, category: "Professional" },
-  { name: "YouTube Script Pro", icon: <FaYoutube className="w-4 h-4 text-red-500" />, category: "Video" },
+  { name: "LinkedIn Post Formatter", icon: <FaLinkedin className="w-4 h-4 text-accent" />, category: "Professional" },
+  { name: "YouTube Script Generator", icon: <FaYoutube className="w-4 h-4 text-red-500" />, category: "Video" },
   { name: "Hashtag Semantic Miner", icon: <Hash className="w-4 h-4 text-primary" />, category: "Growth" },
-  { name: "Midjourney Visual Prompts", icon: <ImageIcon className="w-4 h-4 text-purple-400" />, category: "Creative" },
-  { name: "Shorts & Reels Hook Studio", icon: <Zap className="w-4 h-4 text-amber-500" />, category: "Video" },
-  { name: "Bio Link Conversion Tuner", icon: <Share2 className="w-4 h-4 text-accent" />, category: "Conversion" },
+  { name: "Shorts & Reels Hook Crafter", icon: <Zap className="w-4 h-4 text-amber-500" />, category: "Video" },
   { name: "Topical Content Multiplier", icon: <Target className="w-4 h-4 text-primary" />, category: "Efficiency" },
-  { name: "SEO Metadata & Schema", icon: <Globe className="w-4 h-4 text-emerald-500" />, category: "SEO" },
+  { name: "SEO Metadata & Schema Tuner", icon: <Globe className="w-4 h-4 text-emerald-500" />, category: "SEO" },
   { name: "High-CTR Ad Copy Variants", icon: <PenTool className="w-4 h-4 text-purple-400" />, category: "Marketing" },
-  { name: "Brand Voice Harmonizer", icon: <MessageSquare className="w-4 h-4 text-primary" />, category: "Creative" },
-  { name: "Gutenberg Long-Form Writer", icon: <FileText className="w-4 h-4 text-accent" />, category: "Growth" },
-  { name: "Predictive Resonance Scorer", icon: <BarChart className="w-4 h-4 text-primary" />, category: "Analytics" },
-  { name: "Peak-Cadence Dispatcher", icon: <Calendar className="w-4 h-4 text-purple-400" />, category: "Strategy" },
-  { name: "Video SEO Description Generator", icon: <Video className="w-4 h-4 text-red-500" />, category: "Video" },
+  { name: "Gutenberg Long-Form Blog Writer", icon: <FileText className="w-4 h-4 text-accent" />, category: "Growth" },
 ];
 
 const categoryColors: Record<string, string> = {
+  Visual: "text-primary bg-primary/8 border-primary/20",
+  Audio: "text-purple-400 bg-purple-500/8 border-purple-500/20",
+  Compliance: "text-emerald-500 bg-emerald-500/8 border-emerald-500/20",
+  Automation: "text-blue-400 bg-blue-500/8 border-blue-500/20",
+  Intelligence: "text-amber-400 bg-amber-500/8 border-amber-500/20",
+  "AI Models": "text-primary bg-primary/8 border-primary/20",
+  Integration: "text-purple-400 bg-purple-500/8 border-purple-500/20",
   Social: "text-primary bg-primary/8 border-primary/20",
   Professional: "text-accent bg-accent/8 border-accent/20",
   Video: "text-red-400 bg-red-500/8 border-red-500/20",
   Growth: "text-emerald-500 bg-emerald-500/8 border-emerald-500/20",
-  Creative: "text-purple-400 bg-purple-500/8 border-purple-500/20",
-  Conversion: "text-accent bg-accent/8 border-accent/20",
   Efficiency: "text-primary bg-primary/8 border-primary/20",
   SEO: "text-emerald-500 bg-emerald-500/8 border-emerald-500/20",
   Marketing: "text-purple-400 bg-purple-500/8 border-purple-500/20",
-  Analytics: "text-primary bg-primary/8 border-primary/20",
-  Strategy: "text-purple-400 bg-purple-500/8 border-purple-500/20",
 };
 
 export default function ToolsShowcase() {
@@ -70,16 +76,16 @@ export default function ToolsShowcase() {
           className="max-w-2xl mx-auto mb-14"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
-            SPECIALIZED SKILL TOOLKIT
+            SPECIALIZED AGENTIC TOOLKIT
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
-            80+ AI Micro-Tools to <br />
+            Next-Gen Suite to <br />
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Supercharge Production
             </span>
           </h2>
           <p className="text-muted-foreground text-sm md:text-base">
-            From viral hooks to deep technical data, we&apos;ve automated every step of your multi-channel growth pipeline.
+            From viral visual carousels and speech synthesis to 24/7 DM lead bots and competitor sentiment radars.
           </p>
         </motion.div>
 
@@ -97,41 +103,26 @@ export default function ToolsShowcase() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               whileHover={{ y: -3 }}
-              transition={{ duration: 0.2, delay: index * 0.025, ease: [0.16, 1, 0.3, 1] }}
-              className="p-3.5 rounded-xl border border-border/70 bg-card hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 flex items-center gap-3 group cursor-pointer"
+              transition={{ duration: 0.2, delay: index * 0.02, ease: [0.16, 1, 0.3, 1] }}
+              className="p-3.5 rounded-xl border border-border/80 bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-150 flex items-center justify-between"
             >
-              <div className="p-2 rounded-lg bg-secondary/80 shrink-0 group-hover:scale-110 transition-transform duration-200">
-                {tool.icon}
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-background border border-border/60">
+                  {tool.icon}
+                </div>
+                <span className="font-semibold text-xs text-foreground tracking-tight">
                   {tool.name}
-                </div>
-                <div className={`text-[10px] font-mono font-semibold mt-0.5 px-1.5 py-0.5 rounded-full border w-fit ${categoryColors[tool.category] ?? "text-muted-foreground bg-muted border-border/50"}`}>
-                  {tool.category}
-                </div>
+                </span>
               </div>
+              <span
+                className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+                  categoryColors[tool.category] || "text-muted-foreground bg-muted border-border"
+                }`}
+              >
+                {tool.category}
+              </span>
             </motion.div>
           ))}
-        </motion.div>
-
-        {/* CTA row */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3"
-        >
-          <Link href="/register">
-            <Button size="lg" className="h-11 px-7 rounded-lg text-sm font-semibold shadow-md shadow-primary/20">
-              <span>Explore All 80+ Tools</span>
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-          <p className="text-xs text-muted-foreground">
-            No credit card required · 14-day free trial
-          </p>
         </motion.div>
       </div>
     </section>

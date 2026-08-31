@@ -3,16 +3,16 @@ import { SystemLogger } from '@/features/system/services/logger.service';
 
 export interface BusinessSettingsUpdate {
   name?: string;
-  website?: string;
-  logo?: string;
-  location?: string;
-  description?: string;
-  industry?: string;
-  size?: string;
+  website?: string | null;
+  logo?: string | null;
+  location?: string | null;
+  description?: string | null;
+  industry?: string | null;
+  size?: string | null;
   timezone?: string;
   autoApproveContent?: boolean;
   requireApprovalForPosts?: boolean;
-  contentGuidelines?: string;
+  contentGuidelines?: string | null;
 }
 
 export interface BusinessProfileUpdate {
@@ -54,6 +54,8 @@ export class SettingsService {
       return null;
     }
 
+    const preferences = (business.preferences as Record<string, any>) || {};
+
     return {
       id: business.id,
       name: business.name,
@@ -62,11 +64,11 @@ export class SettingsService {
       logo: business.logo,
       description: profile?.mission || null,
       industry: profile?.industry || null,
-      size: null, // Not in current schema
-      timezone: 'UTC', // Default since not in current schema
+      size: preferences.size || null,
+      timezone: preferences.timezone || 'UTC',
       defaultPlatforms: socialAccounts.map(account => account.platform),
-      autoApproveContent: false, // Default since not in current schema
-      requireApprovalForPosts: true, // Default since not in current schema
+      autoApproveContent: preferences.autoApproveContent ?? false,
+      requireApprovalForPosts: preferences.requireApprovalForPosts ?? true,
       contentGuidelines: profile?.tone || null,
       mission: profile?.mission || null,
       vision: profile?.vision || null,
@@ -107,13 +109,30 @@ export class SettingsService {
   }
 
   static async updateBusinessSettings(businessId: string, data: BusinessSettingsUpdate) {
+    const existingBusiness = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { preferences: true }
+    });
+
+    const currentPreferences = (existingBusiness?.preferences as Record<string, any>) || {};
+    const updatedPreferences = {
+      ...currentPreferences,
+      ...(data.size !== undefined ? { size: data.size } : {}),
+      ...(data.timezone !== undefined ? { timezone: data.timezone } : {}),
+      ...(data.autoApproveContent !== undefined ? { autoApproveContent: data.autoApproveContent } : {}),
+      ...(data.requireApprovalForPosts !== undefined ? { requireApprovalForPosts: data.requireApprovalForPosts } : {}),
+    };
+
     // Update business record
     const businessData: Partial<{
       name: string;
       website: string;
       logo: string;
       location: string;
-    }> = {};
+      preferences: any;
+    }> = {
+      preferences: updatedPreferences
+    };
     if (data.name !== undefined) businessData.name = data.name;
     if (data.website !== undefined) businessData.website = data.website || '';
     if (data.logo !== undefined) businessData.logo = data.logo || '';
@@ -124,21 +143,15 @@ export class SettingsService {
       data: businessData
     });
 
-    // Update or create business profile
+    // Update or create business profile with only valid schema fields
     const profileData: Partial<{
       mission: string;
       industry: string;
-      timezone: string;
-      autoApproveContent: boolean;
-      requireApprovalForPosts: boolean;
       tone: string;
     }> = {};
-    if (data.description !== undefined) profileData.mission = data.description;
-    if (data.industry !== undefined) profileData.industry = data.industry;
-    if (data.timezone !== undefined) profileData.timezone = data.timezone;
-    if (data.autoApproveContent !== undefined) profileData.autoApproveContent = data.autoApproveContent;
-    if (data.requireApprovalForPosts !== undefined) profileData.requireApprovalForPosts = data.requireApprovalForPosts;
-    if (data.contentGuidelines !== undefined) profileData.tone = data.contentGuidelines;
+    if (data.description !== undefined) profileData.mission = data.description || undefined;
+    if (data.industry !== undefined) profileData.industry = data.industry || undefined;
+    if (data.contentGuidelines !== undefined) profileData.tone = data.contentGuidelines || undefined;
 
     const profile = await prisma.businessProfile.upsert({
       where: { businessId },

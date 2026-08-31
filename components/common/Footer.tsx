@@ -12,6 +12,8 @@ const socialLinks = [
 const footerLinks = {
   Product: [
     { label: "AI Blog Writer", href: "/ai-blog-writer" },
+    { label: "AI Carousels", href: "/carousels" },
+    { label: "Voice Studio", href: "/voice" },
     { label: "Social Scheduler", href: "/social-media-management-tool" },
     { label: "Pricing & Plans", href: "/pricing" },
     { label: "Talk to Sales", href: "/talk-to-sales" },

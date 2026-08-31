@@ -81,16 +81,36 @@ export class AIService {
    */
   private static getModel(model?: string): string {
     if (model) {
-      // if (this.isDevelopment) {
-      //   // If we are using OpenRouter and the model ID is missing a provider prefix
-      //   if (!model.includes('/')) {
-      //     if (model.startsWith("dall-e")) return `openai/${model}`;
-      //     if (model.startsWith("gpt-")) return `openai/${model}`;
-      //     if (model.startsWith("claude-")) return `anthropic/${model}`;
-      //     if (model.startsWith("gemini-")) return `google/${model}`;
-      //     if (model.startsWith("llama-")) return `meta-llama/${model}`;
-      //   }
-      // }
+      if (this.isDevelopment) {
+        // Map common aliases and arena model identifiers to exact OpenRouter model paths
+        const modelMap: Record<string, string> = {
+          'gpt-4o': 'openai/gpt-4o',
+          'gpt-4o-mini': 'openai/gpt-4o-mini',
+          'gpt-4': 'openai/gpt-4',
+          'gpt-3.5-turbo': 'openai/gpt-3.5-turbo',
+          'claude-3-5-sonnet': 'anthropic/claude-3.5-sonnet',
+          'claude-3.5-sonnet': 'anthropic/claude-3.5-sonnet',
+          'claude-3-haiku': 'anthropic/claude-3-haiku',
+          'deepseek-r1': 'deepseek/deepseek-r1',
+          'deepseek-chat': 'deepseek/deepseek-chat',
+          'gemini-2-0-flash': 'google/gemini-2.5-flash-lite',
+          'gemini-2.0-flash': 'google/gemini-2.5-flash-lite',
+          'gemini-2.5-flash-lite': 'google/gemini-2.5-flash-lite',
+          'gemini-flash': 'google/gemini-2.5-flash-lite',
+        };
+
+        if (modelMap[model]) {
+          return modelMap[model];
+        }
+
+        if (!model.includes('/')) {
+          if (model.startsWith('gpt-')) return `openai/${model}`;
+          if (model.startsWith('claude-')) return `anthropic/${model}`;
+          if (model.startsWith('gemini-')) return `google/${model}`;
+          if (model.startsWith('deepseek-')) return `deepseek/${model}`;
+          if (model.startsWith('llama-')) return `meta-llama/${model}`;
+        }
+      }
       return model;
     }
 
