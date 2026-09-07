@@ -89,3 +89,39 @@ bun test
 # Run TypeScript static analysis with 8GB heap allocation
 node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
 ```
+
+---
+
+## 🐳 Docker & Operations
+
+### Production Docker Stack
+Launch the full production stack (Next.js standalone web runner, BullMQ background processor, PostgreSQL 16 with pgvector, and Redis 7 with automated database migration initialization):
+```bash
+# Build multi-stage images
+docker build --target runner -t social-automation-app:latest .
+docker build --target worker -t social-automation-worker:latest .
+
+# Run full stack with container healthchecks
+docker compose up -d
+```
+
+### Local Dev Services (PostgreSQL + Redis)
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
+
+### Observability & Telemetry
+Launch Prometheus, Grafana, Alertmanager, Loki, and Node Exporter:
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+
+# - Prometheus:   http://localhost:9090
+# - Grafana:      http://localhost:3001 (User: admin / Pass: admin)
+# - App Metrics:  http://localhost:3000/api/metrics
+```
+
+### Operations & Runbooks
+- 📖 [DevOps Operations Runbook](docs/ops/DEVOPS_RUNBOOK.md)
+- 🛡️ [Disaster Recovery Plan](docs/ops/DISASTER_RECOVERY.md)
+- 🚨 [Alerting Runbook](docs/ops/ALERTING_RUNBOOK.md)
+

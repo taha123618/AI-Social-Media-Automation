@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, Shield, Mail, Lock, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, Shield, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
@@ -21,8 +22,9 @@ export default function AdminLoginPage() {
         toast.error(result.error);
         setIsLoading(false);
       }
-    } catch (error: any) {
-      if (error.message === "NEXT_REDIRECT" || error.digest?.includes("NEXT_REDIRECT")) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; digest?: string };
+      if (err?.message === "NEXT_REDIRECT" || err?.digest?.includes("NEXT_REDIRECT")) {
         return;
       }
       toast.error("Authentication failed. Please try again.");
@@ -90,45 +92,46 @@ export default function AdminLoginPage() {
                   <Input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     required
-                    className="h-10 rounded-lg border-slate-800 bg-slate-950/50 pl-10 text-xs text-white placeholder:text-slate-600 focus:border-primary focus:ring-primary/20"
+                    className="h-10 rounded-lg border-slate-800 bg-slate-950/50 pl-10 pr-10 text-xs text-white placeholder:text-slate-600 focus:border-primary focus:ring-primary/20"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute top-3 right-3 text-slate-500 hover:text-slate-300 transition-colors p-0.5 rounded focus:outline-none cursor-pointer"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               <div className="pt-2">
                 <Button
                   type="submit"
-                  className="h-10 w-full rounded-lg bg-primary font-semibold text-xs text-primary-foreground transition-all hover:bg-primary/90 shadow-sm cursor-pointer"
+                  className="h-10 w-full rounded-lg bg-primary font-semibold text-xs text-primary-foreground transition-all hover:bg-primary/90 shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
-                  <AnimatePresence mode="wait">
-                    {isLoading ? (
-                      <motion.div
-                        key="loading"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center"
-                      >
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Authenticating...
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="login"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center justify-center"
-                      >
-                        Access Control
-                        <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isLoading ? (
+
+                    <span className="flex items-center justify-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Authenticating...</span>
+
+                  ) : (
+                    <span
+                      className="flex items-center justify-center"
+                    >
+                      Access Control
+                      <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    </span>
+                  )}
                 </Button>
               </div>
             </form>

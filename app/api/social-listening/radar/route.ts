@@ -17,15 +17,27 @@ export async function GET(request: NextRequest) {
     let businessId = searchParams.get('businessId');
 
     if (!businessId || businessId === 'active-workspace' || businessId === 'default') {
-      const membership = await prisma.businessMember.findFirst({
+      const defaultMember = await prisma.businessMember.findFirst({
         where: { userId: session.user.id },
       });
-      if (membership) {
-        businessId = membership.businessId;
+      if (defaultMember) {
+        businessId = defaultMember.businessId;
       }
     }
 
-    const report = await SocialListeningService.getRadarReport(businessId || 'default');
+    if (!businessId) {
+      return NextResponse.json({ error: 'Business ID required' }, { status: 400 });
+    }
+
+    const membership = await prisma.businessMember.findFirst({
+      where: { businessId, userId: session.user.id },
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden: Access denied to this business' }, { status: 403 });
+    }
+
+    const report = await SocialListeningService.getRadarReport(businessId);
     return NextResponse.json({ success: true, report }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

@@ -33,8 +33,25 @@ fi
 BACKUP_SIZE=$(du -h "${BACKUP_FILE}" | cut -f1)
 echo "✅ Backup successfully created at: ${BACKUP_FILE} (${BACKUP_SIZE})"
 
+# Verify backup integrity
+echo "🔍 Verifying gzip archive integrity..."
+if gzip -t "${BACKUP_FILE}"; then
+  echo "✅ Archive integrity test passed."
+else
+  echo "❌ Error: Backup archive corrupted!"
+  exit 1
+fi
+
+# Optional offsite cloud sync to AWS S3 / Cloudflare R2
+if [ -n "${AWS_BUCKET_NAME:-}" ] && command -v aws &> /dev/null; then
+  echo "☁️ Uploading backup to S3 bucket: ${AWS_BUCKET_NAME}..."
+  aws s3 cp "${BACKUP_FILE}" "s3://${AWS_BUCKET_NAME}/backups/postgres/$(basename "${BACKUP_FILE}")" || \
+    echo "⚠️ S3 upload failed (continuing with local copy)"
+fi
+
 # Retention cleanup (remove backups older than RETENTION_DAYS)
 echo "🧹 Purging backups older than ${RETENTION_DAYS} days..."
 find "${BACKUP_DIR}" -name "social_automation_backup_*.sql.gz" -mtime +${RETENTION_DAYS} -exec rm -f {} \;
 
 echo "🏁 Backup cycle completed."
+

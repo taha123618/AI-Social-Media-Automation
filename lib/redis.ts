@@ -21,6 +21,11 @@ const redis: RedisClientType = createClient({
 redis.on('error', (err: Error) => console.error('Redis Client Error', err));
 redis.on('connect', () => console.log('Redis Client Connected'));
 
-await redis.connect();
+// Safely connect without unhandled rejection if Redis is unavailable during boot/build
+if (!redis.isOpen) {
+  redis.connect().catch((err: Error) => {
+    console.warn('[Redis] Initial connection deferred or failed:', err.message);
+  });
+}
 
 export default redis;

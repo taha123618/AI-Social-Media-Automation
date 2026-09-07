@@ -47,12 +47,17 @@ jobs:
             echo "📦 Installing dependencies..."
             npm ci --production=false
 
-            # 3. Run database migrations safely
+            # 3. Create automated pre-migration database snapshot
+            echo "💾 Creating pre-migration database backup snapshot..."
+            chmod +x ./scripts/backup-db.sh
+            ./scripts/backup-db.sh /var/backups/postgres || echo "⚠️ Pre-migration backup non-blocking warning"
+
+            # 4. Run database migrations safely
             echo "🗄️ Running Prisma migrations..."
             npx prisma generate
             npx prisma migrate deploy
 
-            # 4. Build Next.js 16 standalone bundle
+            # 5. Build Next.js 16 standalone bundle
             echo "🏗️ Building Next.js application..."
             NODE_OPTIONS="--max-old-space-size=8192" npm run build
 

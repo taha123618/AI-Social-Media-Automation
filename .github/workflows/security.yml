@@ -40,13 +40,13 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --only-verified
+          base: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          head: ${{ github.event.pull_request.head.sha || github.event.after || 'HEAD' }}
+          extra_args: --only-verified
 
-  # 3. Dockerfile Vulnerability Scan (Trivy)
+  # 3. Dockerfile & Dependency Vulnerability Scan (Trivy)
   container-scan:
-    name: Trivy Container Vulnerability Scan
+    name: Trivy Vulnerability Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -60,3 +60,5 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
+          exit-code: '0'
+

@@ -26,7 +26,28 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const businessId = searchParams.get('businessId') || 'active-workspace';
+    let businessId = searchParams.get('businessId');
+
+    if (!businessId || businessId === 'active-workspace' || businessId === 'default') {
+      const defaultMember = await prisma.businessMember.findFirst({
+        where: { userId: session.user.id },
+      });
+      if (defaultMember) {
+        businessId = defaultMember.businessId;
+      }
+    }
+
+    if (!businessId) {
+      return NextResponse.json({ error: 'Business ID required' }, { status: 400 });
+    }
+
+    const membership = await prisma.businessMember.findFirst({
+      where: { businessId, userId: session.user.id },
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden: Access denied to this business' }, { status: 403 });
+    }
 
     const rules = await DMAutomationService.getRules(businessId);
     return NextResponse.json({ success: true, rules }, { status: 200 });
@@ -47,6 +68,14 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const validatedData = createRuleSchema.parse(body);
+
+    const membership = await prisma.businessMember.findFirst({
+      where: { businessId: validatedData.businessId, userId: session.user.id },
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden: Access denied to this business' }, { status: 403 });
+    }
 
     const rule = await DMAutomationService.saveRule(validatedData.businessId, validatedData);
     return NextResponse.json({ success: true, rule }, { status: 201 });

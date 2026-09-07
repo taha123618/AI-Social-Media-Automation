@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { QueueManager } from '@/features/scheduler/config/queue.config';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Standard Prometheus Metrics Exporter Endpoint
- * Exposes system memory, process uptime, database latency, and custom SaaS metrics.
+ * Exposes system memory, process uptime, database latency, BullMQ queue depths, and SaaS metrics.
  */
 export async function GET() {
   const memory = process.memoryUsage();
@@ -23,7 +24,7 @@ export async function GET() {
   }
 
   // Format Prometheus text exposition format
-  const metrics = [
+  const metricLines: string[] = [
     '# HELP process_uptime_seconds Total uptime of the Next.js process in seconds.',
     '# TYPE process_uptime_seconds gauge',
     `process_uptime_seconds ${uptime.toFixed(2)}`,
@@ -51,10 +52,43 @@ export async function GET() {
     '# HELP app_http_requests_total Total number of HTTP requests processed.',
     '# TYPE app_http_requests_total counter',
     'app_http_requests_total{status="200"} 1',
-    '',
-  ].join('\n');
+  ];
 
-  return new NextResponse(metrics, {
+  // Try retrieving BullMQ queue counts with a short timeout to prevent slow metrics responses
+  try {
+    const queueStatsPromise = QueueManager.getAllQueueStats();
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+    const queueStats = await Promise.race([queueStatsPromise, timeoutPromise]);
+
+    if (queueStats && typeof queueStats === 'object') {
+      metricLines.push('');
+      metricLines.push('# HELP bullmq_jobs_waiting Number of waiting jobs in the BullMQ queue.');
+      metricLines.push('# TYPE bullmq_jobs_waiting gauge');
+      for (const [qName, counts] of Object.entries(queueStats as Record<string, any>)) {
+        metricLines.push(`bullmq_jobs_waiting{queue="${qName}"} ${counts.waiting ?? 0}`);
+      }
+
+      metricLines.push('');
+      metricLines.push('# HELP bullmq_jobs_active Number of active jobs currently processing.');
+      metricLines.push('# TYPE bullmq_jobs_active gauge');
+      for (const [qName, counts] of Object.entries(queueStats as Record<string, any>)) {
+        metricLines.push(`bullmq_jobs_active{queue="${qName}"} ${counts.active ?? 0}`);
+      }
+
+      metricLines.push('');
+      metricLines.push('# HELP bullmq_jobs_failed Number of failed jobs in the queue.');
+      metricLines.push('# TYPE bullmq_jobs_failed gauge');
+      for (const [qName, counts] of Object.entries(queueStats as Record<string, any>)) {
+        metricLines.push(`bullmq_jobs_failed{queue="${qName}"} ${counts.failed ?? 0}`);
+      }
+    }
+  } catch {
+    // Queue metrics collection error handled gracefully without blocking Prometheus
+  }
+
+  metricLines.push('');
+
+  return new NextResponse(metricLines.join('\n'), {
     status: 200,
     headers: {
       'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',

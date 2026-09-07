@@ -50,3 +50,24 @@ groups:
         annotations:
           summary: "Host CPU utilization above 85%"
           description: "Host instance {{ $labels.instance }} has CPU load above 85% for 5 minutes."
+
+      # 6. BullMQ Queue Backlog Alert
+      - alert: BullMQQueueBacklog
+        expr: sum(bullmq_jobs_waiting) > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BullMQ queue backlog high (>50 waiting jobs)"
+          description: "There are {{ $value }} jobs waiting in BullMQ queues for more than 5 minutes."
+
+      # 7. BullMQ High Failure Rate Alert
+      - alert: BullMQHighFailureRate
+        expr: sum(bullmq_jobs_failed) > 20
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High number of failed background jobs in BullMQ (>20)"
+          description: "There are {{ $value }} failed jobs across BullMQ queues. Worker investigation required."
+

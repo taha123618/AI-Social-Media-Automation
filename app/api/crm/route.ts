@@ -2,13 +2,28 @@ import { NextResponse } from 'next/server';
 import { CrmService, CrmType } from '@/features/crm/services/crm.service';
 import { getActiveWorkspaceIdSafe } from '@/app/(user)/actions/workspace';
 import prisma from '@/lib/prisma';
+import { auth } from '@/lib/auth';
+
 export async function GET(request: Request) {
   try {
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const businessId = searchParams.get('businessId') || await getActiveWorkspaceIdSafe().catch(() => undefined);
 
     if (!businessId) {
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });
+    }
+
+    const membership = await prisma.businessMember.findFirst({
+      where: { businessId, userId: session.user.id },
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden: Access denied to this business' }, { status: 403 });
     }
 
     const status = await CrmService.getStatus(businessId);
@@ -25,11 +40,24 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { action, businessId, crmType, data } = body;
 
     if (!businessId) {
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });
+    }
+
+    const membership = await prisma.businessMember.findFirst({
+      where: { businessId, userId: session.user.id },
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: 'Forbidden: Access denied to this business' }, { status: 403 });
     }
 
     switch (action) {
