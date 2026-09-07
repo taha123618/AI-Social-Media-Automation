@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/ui/ModeToggle";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,8 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
-import { Bell, Search, Command } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Bell, ExternalLink, LayoutDashboard } from "lucide-react";
 import { motion } from "framer-motion";
 import { AdminSearch } from "./admin-search";
 
@@ -60,10 +61,28 @@ export function AdminNavbar() {
         </Breadcrumb>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <div className="hidden lg:block">
           <AdminSearch />
         </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="inline-flex items-center gap-1.5 text-xs font-medium border-border bg-background/60 hover:bg-muted text-foreground transition-all shadow-2xs"
+        >
+          <Link
+            href="/dashboard"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open /dashboard in a new tab"
+          >
+            <LayoutDashboard className="h-3.5 w-3.5 text-primary" />
+            <span className="hidden sm:inline">Workspace</span>
+            <ExternalLink className="h-3 w-3 text-muted-foreground" />
+          </Link>
+        </Button>
 
         <Separator orientation="vertical" className="h-6 bg-border" />
 
