@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { User, LogOut, Settings, ChevronDown } from "lucide-react";
-import Logout from "../user/common/logout";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useHasHydrated } from "@/hooks/use-has-hydrated";

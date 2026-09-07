@@ -10,20 +10,13 @@ import { GoogleAuthButton } from "./google-auth-button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
-  ShieldCheck,
-  Mail,
-  Lock,
-  User,
-  ArrowRight,
   RefreshCw,
   ArrowLeft,
   Eye,
   EyeOff,
   CheckCircle2,
-  Sparkles,
   KeyRound,
 } from "lucide-react";
-import Link from "next/link";
 
 type RegisterStep = "CREDENTIALS" | "OTP_VERIFY";
 
@@ -32,7 +25,9 @@ export function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // OTP State (6 digits)
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
@@ -100,6 +95,13 @@ export function RegisterForm() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match. Please ensure both passwords match.");
+      toast.error("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/register/send-otp", {
         method: "POST",
@@ -120,7 +122,7 @@ export function RegisterForm() {
       setResendCooldown(60);
       setExpiresInSeconds(120);
       setOtp(["", "", "", "", "", ""]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error sending OTP:", err);
       setError("Network error. Please try again.");
       toast.error("Network error. Please try again.");
@@ -232,12 +234,13 @@ export function RegisterForm() {
         if (loginRes.error) {
           router.push("/login?verified=true");
         } else {
+          toast.success("Account successfully verified!");
           router.push("/dashboard");
         }
       } catch {
         router.push("/login?verified=true");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error verifying OTP:", err);
       setError("Failed to verify code. Please try again.");
       toast.error("Failed to verify code. Please try again.");
@@ -273,7 +276,7 @@ export function RegisterForm() {
       setExpiresInSeconds(120);
       setOtp(["", "", "", "", "", ""]);
       otpInputsRef.current[0]?.focus();
-    } catch (err) {
+    } catch {
       toast.error("Failed to resend verification code");
     } finally {
       setIsResending(false);
@@ -298,11 +301,21 @@ export function RegisterForm() {
             exit={{ opacity: 0, x: 15 }}
             transition={{ duration: 0.25 }}
           >
+            {/* Google OAuth Button First */}
+            <GoogleAuthButton text="Sign up with Google" />
+
+            {/* Separator */}
+            <div className="relative my-6">
+              <div className="border-t border-border" />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-sm text-muted-foreground">
+                or
+              </span>
+            </div>
+
             <form onSubmit={handleSendOtp} className="space-y-4">
               {/* Full Name */}
-              <div className="space-y-1.5">
-                <label htmlFor="name" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-primary" />
+              <div className="space-y-2 text-left">
+                <label htmlFor="name" className="text-sm font-medium text-foreground">
                   Full Name
                 </label>
                 <Input
@@ -311,15 +324,14 @@ export function RegisterForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  placeholder="Sarah Connor"
-                  className="h-10 bg-background/50 border-border/80 focus:border-primary"
+                  placeholder="Jane Doe"
+                  className="h-11 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                 />
               </div>
 
               {/* Work Email */}
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-primary" />
+              <div className="space-y-2 text-left">
+                <label htmlFor="email" className="text-sm font-medium text-foreground">
                   Work Email
                 </label>
                 <Input
@@ -328,17 +340,16 @@ export function RegisterForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="sarah@company.io"
-                  className="h-10 bg-background/50 border-border/80 focus:border-primary"
+                  placeholder="jane@company.com"
+                  className="h-11 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                 />
               </div>
 
               {/* Password */}
-              <div className="space-y-1.5">
+              <div className="space-y-2 text-left">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-primary" />
-                    Create Password
+                  <label htmlFor="password" className="text-sm font-medium text-foreground">
+                    Password
                   </label>
                   {password && (
                     <span className="text-[11px] font-medium text-muted-foreground">
@@ -356,13 +367,14 @@ export function RegisterForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    placeholder="••••••••"
-                    className="h-10 pr-10 bg-background/50 border-border/80 focus:border-primary"
+                    placeholder="Create a password"
+                    className="h-11 pr-10 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded focus:outline-none cursor-pointer"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -401,6 +413,51 @@ export function RegisterForm() {
                 )}
               </div>
 
+              {/* Confirm Password */}
+              <div className="space-y-2 text-left">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
+                    Confirm Password
+                  </label>
+                  {confirmPassword && (
+                    <span className={`text-[11px] font-medium transition-colors ${
+                      password === confirmPassword
+                        ? "text-emerald-500 font-semibold"
+                        : "text-destructive"
+                    }`}>
+                      {password === confirmPassword ? "✓ Passwords match" : "✗ Passwords do not match"}
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className={`h-11 pr-10 focus:ring-2 transition-all duration-200 ${
+                      confirmPassword && password !== confirmPassword
+                        ? "border-destructive focus:ring-destructive/20 focus:border-destructive"
+                        : "focus:ring-primary/20 focus:border-primary"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded focus:outline-none cursor-pointer"
+                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
               {/* Error Message */}
               {error && (
                 <motion.div
@@ -416,35 +473,26 @@ export function RegisterForm() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-10 rounded-lg text-sm font-semibold mt-2"
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm rounded-lg mt-2 transition-colors duration-200 cursor-pointer shadow-xs"
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Creating workspace...</span>
+                  </div>
                 ) : (
-                  "Create Organization Workspace"
+                  "Create workspace account"
                 )}
               </Button>
+
+              <p className="text-[11px] text-muted-foreground text-center mt-3 leading-normal">
+                By creating an account, you agree to SocialAI&apos;s{" "}
+                <a href="/privacy" className="underline hover:text-foreground">
+                  Privacy Policy
+                </a>{" "}
+                and Terms.
+              </p>
             </form>
-
-            <div className="relative my-5">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/70" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground font-medium">
-                  Or register with
-                </span>
-              </div>
-            </div>
-
-            <GoogleAuthButton />
-
-            <p className="mt-6 text-center text-xs text-muted-foreground">
-              Already have a workspace?{" "}
-              <Link href="/login" className="font-semibold text-primary hover:underline">
-                Sign In
-              </Link>
-            </p>
           </motion.div>
         ) : (
           <motion.div
@@ -471,8 +519,9 @@ export function RegisterForm() {
 
             {/* 6-Digit OTP Segmented Boxes */}
             <div
-              className={`flex justify-center items-center gap-2 sm:gap-2.5 my-4 transition-transform ${shakeError ? "animate-shake" : ""
-                }`}
+              className={`flex justify-center items-center gap-1.5 sm:gap-2.5 my-4 transition-transform ${
+                shakeError ? "animate-shake" : ""
+              }`}
               onPaste={(e) => {
                 e.preventDefault();
                 handleOtpPaste(e.clipboardData.getData("text"));
@@ -492,10 +541,11 @@ export function RegisterForm() {
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
                   disabled={isLoading}
-                  className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold font-mono rounded-xl border bg-background/70 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary ${digit
-                    ? "border-primary/80 bg-primary/5 text-foreground shadow-primary/10"
-                    : "border-border/80 text-foreground"
-                    }`}
+                  className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-lg sm:rounded-xl border bg-background/70 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary ${
+                    digit
+                      ? "border-primary/80 bg-primary/5 text-foreground shadow-primary/10"
+                      : "border-border/80 text-foreground"
+                  }`}
                 />
               ))}
             </div>

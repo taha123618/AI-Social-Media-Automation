@@ -8,6 +8,8 @@ import Link from "next/link";
 import { GoogleAuthButton } from "./google-auth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
@@ -15,6 +17,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -52,34 +55,37 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
+      {/* Google OAuth Button First */}
+      <GoogleAuthButton text="Sign in with Google" />
+
+      {/* Separator */}
+      <div className="relative my-6">
+        <div className="border-t border-border" />
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-sm text-muted-foreground">
+          or
+        </span>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="text-xs font-semibold text-foreground">
-            Email Address
-          </label>
+        <div className="space-y-2 text-left">
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">
+            Email
+          </Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="operator@system.io"
-            className="h-10"
+            placeholder="you@company.com"
+            className="h-11 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
           />
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-xs font-semibold text-foreground">
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-xs font-medium text-primary hover:underline transition-colors"
-            >
-              Forgot password?
-            </Link>
-          </div>
+        <div className="space-y-2 text-left">
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            Password
+          </Label>
           <div className="relative">
             <Input
               id="password"
@@ -88,12 +94,12 @@ export function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
-              className="h-10 pr-10"
+              className="h-11 pr-10 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded focus:outline-none cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded focus:outline-none cursor-pointer"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -103,6 +109,25 @@ export function LoginForm() {
               )}
             </button>
           </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="remember"
+              checked={remember}
+              onCheckedChange={(checked) => setRemember(Boolean(checked))}
+            />
+            <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground cursor-pointer select-none">
+              Remember for 30 days
+            </Label>
+          </div>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-primary hover:underline transition-colors duration-200"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         {error && (
@@ -118,38 +143,18 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full h-10 rounded-lg text-sm font-semibold mt-2 cursor-pointer"
+          className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200 font-medium text-sm rounded-lg cursor-pointer shadow-xs"
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Signing In...</span>
+              <span>Signing in...</span>
             </div>
           ) : (
-            "Sign In to Console"
+            "Sign in to workspace"
           )}
         </Button>
       </form>
-
-      <div className="relative my-5">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border/70" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground font-medium">
-            Or continue with
-          </span>
-        </div>
-      </div>
-
-      <GoogleAuthButton />
-
-      <p className="mt-6 text-center text-xs text-muted-foreground">
-        Don&apos;t have a workspace?{" "}
-        <Link href="/register" className="font-semibold text-primary hover:underline">
-          Create Account
-        </Link>
-      </p>
     </div>
   );
 }

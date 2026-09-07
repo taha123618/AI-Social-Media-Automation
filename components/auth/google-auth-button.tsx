@@ -6,7 +6,11 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export function GoogleAuthButton() {
+interface GoogleAuthButtonProps {
+  text?: string;
+}
+
+export function GoogleAuthButton({ text = "Sign in with Google" }: GoogleAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -27,7 +31,7 @@ export function GoogleAuthButton() {
     <Button
       variant="outline"
       type="button"
-      className="w-full h-10 rounded-lg border border-border bg-card text-foreground hover:bg-muted font-medium text-xs flex items-center justify-center gap-2.5 transition-all"
+      className="w-full h-11 rounded-lg border border-border bg-card hover:bg-muted/60 text-foreground font-medium text-sm flex items-center justify-center gap-2.5 transition-colors duration-200 shadow-2xs"
       onClick={handleSignIn}
       disabled={isLoading}
     >
@@ -53,7 +57,7 @@ export function GoogleAuthButton() {
               fill="#EA4335"
             />
           </svg>
-          <span>Continue with Google</span>
+          <span>{text}</span>
         </>
       )}
     </Button>

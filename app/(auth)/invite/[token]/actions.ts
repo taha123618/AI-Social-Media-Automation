@@ -4,7 +4,6 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 export async function acceptTeamInvitation(token: string) {
   const session = await auth.api.getSession({ headers: await headers() });
