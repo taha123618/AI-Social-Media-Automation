@@ -1,24 +1,37 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
 
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || "default_admin_secret_key_change_me"
-);
+const DEFAULT_PLACEHOLDER = "default_admin_secret_key_change_me";
+
+/**
+ * Resolve the Admin JWT secret key.
+ * Enforces strong secret requirements and strictly forbids default/empty secrets in production.
+ */
+export function getAdminJwtSecret(): Uint8Array {
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (process.env.NODE_ENV === "production" && (!secret || secret === DEFAULT_PLACEHOLDER || secret.length < 32)) {
+    throw new Error(
+      "[CRITICAL SECURITY ERROR] ADMIN_JWT_SECRET is missing, insecure, or shorter than 32 characters in production."
+    );
+  }
+  return new TextEncoder().encode(secret || DEFAULT_PLACEHOLDER);
+}
 
 export async function signAdminToken(payload: { id: string; email: string; role: string }) {
+  const secretKey = getAdminJwtSecret();
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("24h")
-    .sign(SECRET_KEY);
+    .sign(secretKey);
 }
 
 export async function verifyAdminToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const secretKey = getAdminJwtSecret();
+    const { payload } = await jwtVerify(token, secretKey);
     return payload as { id: string; email: string; role: string };
-  } catch (error) {
+  } catch {
     return null;
   }
 }

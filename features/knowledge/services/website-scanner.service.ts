@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { SystemLogger } from '@/features/system/services/logger.service';
+import { SecurityService } from '@/lib/security';
 
 export interface ScrapedBusinessInfo {
   name?: string;
@@ -29,7 +30,13 @@ export async function scrapeWebsite(url: string): Promise<ScrapedBusinessInfo> {
   };
 
   try {
-    // Validate URL
+    // Validate URL safety against SSRF and restricted internal networks
+    const urlValidation = SecurityService.validateSafeUrl(url);
+    if (!urlValidation.safe) {
+      throw new Error(`SSRF blocked: ${urlValidation.reason || 'Restricted target address'}`);
+    }
+
+    // Validate URL scheme
     if (!url.match(/^https?:\/\//)) {
       url = 'https://' + url;
     }

@@ -70,7 +70,7 @@ export default function UserManagementPage() {
                   </div>
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm">User Registry</h1>
                </div>
-               <p className="text-muted-foreground text-lg font-medium ml-15">Manage platform identities, permissions, and service access.</p>
+               <p className="text-muted-foreground text-lg font-medium ml-15">Manage application subscriber accounts and customer identities (administrators are managed in Admin Registry).</p>
             </div>
             <div className="flex items-center gap-3">
                <Button variant="outline" onClick={fetchUsers} className="glass-card hover:bg-muted font-semibold px-6 border-border" disabled={isLoading}>

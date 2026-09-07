@@ -181,6 +181,9 @@ export async function globalSearch(query: string) {
 
   if (!query || query.length < 2) return { admins: [], users: [], organizations: [] };
 
+  const allAdmins = await prisma.admin.findMany({ select: { email: true } });
+  const adminEmails = allAdmins.map((a) => a.email.toLowerCase().trim()).filter(Boolean);
+
   const [admins, users, organizations] = await Promise.all([
     prisma.admin.findMany({
       where: {
@@ -194,9 +197,22 @@ export async function globalSearch(query: string) {
     }),
     prisma.user.findMany({
       where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { email: { contains: query, mode: 'insensitive' } },
+        AND: [
+          adminEmails.length > 0
+            ? { email: { notIn: adminEmails, mode: 'insensitive' } }
+            : {},
+          {
+            NOT: [
+              { name: { equals: "Super Admin", mode: "insensitive" } },
+              { name: { equals: "Admin User", mode: "insensitive" } },
+            ],
+          },
+          {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { email: { contains: query, mode: 'insensitive' } },
+            ],
+          },
         ],
       },
       take: 10,
@@ -234,7 +250,33 @@ export async function getUsers() {
   const session = await getAdminSession();
   if (!session) throw new Error("Unauthorized");
 
+  // Fetch all admin and super admin emails to exclude them from the application users registry
+  const admins = await prisma.admin.findMany({
+    select: { email: true },
+  });
+  const adminEmails = admins
+    .map((a) => a.email.toLowerCase().trim())
+    .filter(Boolean);
+
   const users = await prisma.user.findMany({
+    where: {
+      AND: [
+        adminEmails.length > 0
+          ? {
+              email: {
+                notIn: adminEmails,
+                mode: "insensitive",
+              },
+            }
+          : {},
+        {
+          NOT: [
+            { name: { equals: "Super Admin", mode: "insensitive" } },
+            { name: { equals: "Admin User", mode: "insensitive" } },
+          ],
+        },
+      ],
+    },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -278,19 +320,30 @@ export async function getUsers() {
     },
   });
 
-  return users.map((u) => {
-    const org = u.ownedOrganizations[0] || u.organizationMemberships[0]?.organization;
-    const sub = org?.subscriptions;
-    return {
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      createdAt: u.createdAt,
-      plan: sub?.planId?.toLowerCase() || "free",
-      billingStatus: sub?.status || "ACTIVE",
-      _count: u._count,
-    };
-  });
+  const adminEmailSet = new Set(adminEmails);
+
+  return users
+    .filter((u) => {
+      const emailLower = u.email.toLowerCase().trim();
+      return (
+        !adminEmailSet.has(emailLower) &&
+        u.name !== "Super Admin" &&
+        u.name !== "Admin User"
+      );
+    })
+    .map((u) => {
+      const org = u.ownedOrganizations[0] || u.organizationMemberships[0]?.organization;
+      const sub = org?.subscriptions;
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        createdAt: u.createdAt,
+        plan: sub?.planId?.toLowerCase() || "free",
+        billingStatus: sub?.status || "ACTIVE",
+        _count: u._count,
+      };
+    });
 }
 
 export async function getUserBillingDetails(userId: string) {
@@ -340,6 +393,13 @@ export async function getUserBillingDetails(userId: string) {
 
   if (!user) {
     throw new Error("User not found");
+  }
+
+  const isAdmin = await prisma.admin.findFirst({
+    where: { email: { equals: user.email, mode: "insensitive" } },
+  });
+  if (isAdmin || user.name === "Super Admin" || user.name === "Admin User") {
+    throw new Error("Target identity is an administrator account. Manage via Admin Registry.");
   }
 
   const organization = user.ownedOrganizations[0] || user.organizationMemberships[0]?.organization;
@@ -681,6 +741,21 @@ export async function updateUser(id: string, data: z.infer<typeof userSchema>) {
 export async function deleteUser(id: string) {
   const session = await getAdminSession();
   if (!session || session.role !== "super_admin") throw new Error("Unauthorized");
+
+  // Safeguard: Do not allow deleting an administrator account via the application user endpoint
+  const targetUser = await prisma.user.findUnique({
+    where: { id },
+    select: { email: true },
+  });
+
+  if (targetUser) {
+    const isAdmin = await prisma.admin.findFirst({
+      where: { email: { equals: targetUser.email, mode: "insensitive" } },
+    });
+    if (isAdmin) {
+      throw new Error("Cannot delete an administrator account via application user registry.");
+    }
+  }
 
   await prisma.$transaction(async (tx) => {
     // 1. Find organizations owned by this user

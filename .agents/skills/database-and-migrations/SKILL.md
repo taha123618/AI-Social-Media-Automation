@@ -89,3 +89,11 @@ bun run prisma:studio
 2. Ensure extensions like `vector` do not require non-standard superuser privileges during standard migrations.
 3. Always index foreign keys and query filters (`@@index([businessId])`, `@@index([createdAt])`).
 4. Avoid destructive column removals (`DROP COLUMN`) without a deprecation phase.
+
+---
+
+## SQL Injection Prevention & Data Layer Security
+1. **Never concatenate raw strings or untrusted user input into raw SQL queries**: Always use tagged template literals with `prisma.$queryRaw` or `prisma.$executeRaw` which produce safe parameterized queries with bind variables.
+2. **Strictly disallow `prisma.$queryRawUnsafe`**: If dynamic sorting or column clauses are required, use strict allowlists and validate against permitted column enumerations.
+3. **Multi-Tenant Scoping Mandatory**: Every single database read, update, or delete on tenant-scoped tables must explicitly include `where: { businessId }` filtering. Unscoped queries are treated as critical data exposure vulnerabilities.
+4. **Least Privilege**: The database user should only possess schema-level DDL/DML privileges required for application execution; never run the production application using `postgres` superuser credentials.

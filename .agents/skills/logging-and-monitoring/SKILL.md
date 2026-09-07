@@ -58,3 +58,14 @@ docker compose -f docker-compose.monitoring.yml up -d
   - `BullMQHighFailureRate`: More than 20 failed jobs across BullMQ queues.
 - Follow the operational runbooks in [`docs/ops/ALERTING_RUNBOOK.md`](file:///Users/taha/projects/ai_social_media_automation/docs/ops/ALERTING_RUNBOOK.md).
 
+---
+
+## 4. SOC, Detection Engineering & Security Telemetry
+1. **Security Event Logging**:
+   - Record all high-risk events (authentication failures, permission denials, rate-limit triggers, SSRF blocks, and admin overrides) using structured telemetry.
+   - Administrative mutations must write immutable entries to `prisma.auditLog` with `userId`, `action`, `entityType`, `entityId`, and sanitized `metadata`.
+2. **Strict Sanitization (Never Log Secrets)**:
+   - **NEVER** log raw passwords, Bearer tokens, session cookies, database credentials, API keys, or raw `Authorization` request headers.
+3. **Forensic Traceability**:
+   - Propagate `x-user-id`, `x-request-id`, and IP metadata across services to support incident reconstruction and post-mortem analysis.
+

@@ -41,18 +41,35 @@ bun run build           # Build production bundle with 8GB heap memory allocatio
 | `prisma/schema.prisma` | Datasource, pgvector extension, and client generator config. |
 | `prisma/models/*.prisma` | Modular domain schema models (Ad, Auth, Billing, Blog, Business, CRM, Knowledge, Social, System, Video, Workflow). |
 
-## Boundaries
+## Boundaries & Cybersecurity Guardrails
 
 ### Always do
+- Inspect architecture and threat boundaries before modifying security-sensitive code
 - Register new agents, tools, and workflows in `services/ai/index.ts`
 - Use Zod schemas for all tool inputs and outputs
 - Enforce `businessId` multi-tenancy filtering across all Prisma queries
+- Validate all external URLs against SSRF using `SecurityService.validateSafeUrl()` before executing `fetch()`
+- Enforce **Deny by Default** for any new `/api/*` endpoints via `proxy.ts` unless explicitly public
+- Sanitize filenames with `SecurityService.sanitizeFilename()` and validate magic bytes on uploads
+- Verify permissions and resource ownership server-side; never trust client-supplied roles or tenant IDs
+- Add regression tests (`lib/__tests__/cybersecurity-regression.test.ts`) for any security fixes
 - Run `node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit` to verify type integrity
+- Run `npm test` (Jest) to ensure all 58+ test suites pass without regression
 
 ### Never do
 - Never hardcode secrets, passwords, or API keys
-- Never commit `.env` files
+- Never commit `.env` files or exposed credentials
 - Never perform unscoped queries on tenant data models
+- Never disable or weaken security controls, CSP, or CORS to make tests pass
+- Never trust client-side authorization or role fields passed from the frontend
+- Never concatenate untrusted user input into raw SQL queries or OS commands
+- Never bypass input validation or sanitize logic
+- Never disable TLS certificate verification as a permanent fix
+- Never add unrestricted or unauthenticated admin endpoints
+- Never upload files directly into executable directories or bypass magic byte validation
+- Never log credentials, session tokens, passwords, or raw authentication headers
+- Never introduce unnecessary dependencies with known CVEs
+- Never silently weaken or alter authentication or password-length semantics
 
 ## Resources
 - [Project Features Matrix](file:///Users/taha/projects/ai_social_media_automation/FEATURES.md)

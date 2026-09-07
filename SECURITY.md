@@ -39,7 +39,10 @@ Please include in your report:
 ## 🛡️ Core Security Architecture & Standards
 
 1. **Multi-Tenant Scoping**: All Prisma database queries must enforce `businessId` filtering to guarantee tenant isolation.
-2. **Authentication & Password Hashing**: Powered by Better-Auth with bcrypt (12 rounds) and generic error responses to prevent account enumeration.
-3. **File Upload Hardening**: S3 uploads require binary magic byte verification (`SecurityService.validateMagicBytes`) and path traversal sanitization (`SecurityService.sanitizeFilename`).
-4. **Transport & HTTP Headers**: `HSTS` (1 year), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy`.
-5. **Continuous DevSecOps**: Automated Trivy container/filesystem scanning and TruffleHog secrets detection on every pull request.
+2. **Authentication & Password Hashing**: Powered by Better-Auth with bcrypt (12 rounds), minimum 8-character password enforcement, and generic error responses to prevent account enumeration.
+3. **Perimeter Gateway Defense**: Next.js edge proxy (`proxy.ts`) enforces **Deny by Default** on all `/api/*` endpoints. Any unlisted API route requires a verified user session or dedicated admin token.
+4. **SSRF Defense**: External resource fetching requires `SecurityService.validateSafeUrl` validation to block private IP CIDRs, IPv6 loopback, internal cluster hostnames, and Cloud Metadata (IMDS `169.254.169.254`).
+5. **File Upload Hardening**: S3 uploads require binary magic byte verification (`SecurityService.validateMagicBytes`) and path traversal sanitization (`SecurityService.sanitizeFilename`).
+6. **Admin Cryptography**: Production environments strictly disallow fallback secrets for `ADMIN_JWT_SECRET` (minimum 32-character requirement enforced by `getAdminJwtSecret()`).
+7. **Transport & HTTP Headers**: `HSTS` (1 year), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy`.
+8. **Continuous DevSecOps**: Automated Trivy container/filesystem scanning and TruffleHog secrets detection on every pull request.

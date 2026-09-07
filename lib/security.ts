@@ -41,7 +41,7 @@ export class SecurityService {
     }
 
     // 1. Remove null bytes and path traversal patterns
-    let clean = filename.replace(/\0/g, '').replace(/(\.\.(\/|\\|$))+/g, '');
+    const clean = filename.replace(/\0/g, '').replace(/(\.\.(\/|\\|$))+/g, '');
 
     // 2. Extract extension safely
     const parts = clean.split('.');
@@ -144,5 +144,138 @@ export class SecurityService {
     }
 
     return { valid: true };
+  }
+
+  /**
+   * Validate a URL to prevent Server-Side Request Forgery (SSRF).
+   * Blocks non-HTTP(S) protocols, credentials in URLs, private RFC 1918 CIDRs,
+   * loopback (127.0.0.0/8, ::1, localhost), link-local / cloud metadata (169.254.0.0/16),
+   * internal network top-level domains, and single-label container hostnames.
+   */
+  static validateSafeUrl(urlString: string): { safe: boolean; reason?: string } {
+    if (!urlString || typeof urlString !== 'string') {
+      return { safe: false, reason: 'URL is required' };
+    }
+
+    let parsed: URL;
+    try {
+      // Auto-prefix if protocol is missing for user convenience
+      const normalized = urlString.startsWith('http://') || urlString.startsWith('https://')
+        ? urlString
+        : `https://${urlString}`;
+      parsed = new URL(normalized);
+    } catch {
+      return { safe: false, reason: 'Invalid URL format' };
+    }
+
+    // 1. Enforce strict protocol allowlist
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return { safe: false, reason: `Disallowed protocol: ${parsed.protocol}. Only http: and https: are permitted.` };
+    }
+
+    // 2. Disallow embedded credentials
+    if (parsed.username || parsed.password) {
+      return { safe: false, reason: 'URLs with embedded authentication credentials are not permitted.' };
+    }
+
+    const rawHostname = parsed.hostname.toLowerCase().trim();
+
+    // 3. Reject empty hostname
+    if (!rawHostname) {
+      return { safe: false, reason: 'URL hostname is missing.' };
+    }
+
+    // 4. Strip IPv6 brackets if present
+    const cleanHostname = rawHostname.startsWith('[') && rawHostname.endsWith(']')
+      ? rawHostname.slice(1, -1)
+      : rawHostname;
+
+    // 5. Block known loopback and internal domain names
+    if (
+      cleanHostname === 'localhost' ||
+      cleanHostname.endsWith('.localhost') ||
+      cleanHostname.endsWith('.internal') ||
+      cleanHostname.endsWith('.local') ||
+      cleanHostname.endsWith('.cluster.local') ||
+      cleanHostname.endsWith('.arpa')
+    ) {
+      return { safe: false, reason: `Access to internal or local hostname '${cleanHostname}' is forbidden.` };
+    }
+
+    // 6. Block single-label hostnames (e.g. 'redis', 'postgres', 'worker', 'kubernetes')
+    if (!cleanHostname.includes('.') && !cleanHostname.includes(':')) {
+      return { safe: false, reason: `Single-label hostnames ('${cleanHostname}') are restricted internal names.` };
+    }
+
+    // 7. Check IPv4 address against private and restricted ranges
+    const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+    const ipv4Match = cleanHostname.match(ipv4Regex);
+    if (ipv4Match) {
+      const octets = [
+        parseInt(ipv4Match[1], 10),
+        parseInt(ipv4Match[2], 10),
+        parseInt(ipv4Match[3], 10),
+        parseInt(ipv4Match[4], 10),
+      ];
+
+      // Validate each octet <= 255
+      if (octets.some((o) => o > 255)) {
+        return { safe: false, reason: 'Invalid IPv4 address format.' };
+      }
+
+      const [o1, o2] = octets;
+
+      // 0.0.0.0/8 (Current network)
+      if (o1 === 0) {
+        return { safe: false, reason: 'Access to 0.0.0.0/8 range is forbidden.' };
+      }
+      // 127.0.0.0/8 (Loopback)
+      if (o1 === 127) {
+        return { safe: false, reason: 'Access to loopback address (127.0.0.0/8) is forbidden.' };
+      }
+      // 10.0.0.0/8 (Private RFC 1918)
+      if (o1 === 10) {
+        return { safe: false, reason: 'Access to private address (10.0.0.0/8) is forbidden.' };
+      }
+      // 172.16.0.0/12 (Private RFC 1918: 172.16.0.0 - 172.31.255.255)
+      if (o1 === 172 && o2 >= 16 && o2 <= 31) {
+        return { safe: false, reason: 'Access to private address (172.16.0.0/12) is forbidden.' };
+      }
+      // 192.168.0.0/16 (Private RFC 1918)
+      if (o1 === 192 && o2 === 168) {
+        return { safe: false, reason: 'Access to private address (192.168.0.0/16) is forbidden.' };
+      }
+      // 169.254.0.0/16 (Link-Local & Cloud Metadata e.g. AWS/GCP 169.254.169.254)
+      if (o1 === 169 && o2 === 254) {
+        return { safe: false, reason: 'Access to link-local and cloud metadata addresses (169.254.0.0/16) is strictly forbidden.' };
+      }
+      // 100.64.0.0/10 (Carrier-Grade NAT: 100.64.0.0 - 100.127.255.255)
+      if (o1 === 100 && o2 >= 64 && o2 <= 127) {
+        return { safe: false, reason: 'Access to carrier-grade NAT address (100.64.0.0/10) is forbidden.' };
+      }
+      // 224.0.0.0/4 (Multicast) & 240.0.0.0/4 (Reserved)
+      if (o1 >= 224) {
+        return { safe: false, reason: 'Access to multicast or reserved IP address is forbidden.' };
+      }
+    }
+
+    // 8. Check IPv6 address
+    if (cleanHostname.includes(':')) {
+      const lower = cleanHostname.toLowerCase();
+      // ::1 (Loopback) or :: (Unspecified)
+      if (lower === '::1' || lower === '::' || lower.startsWith('::ffff:127.') || lower.startsWith('0:0:0:0:0:0:0:1')) {
+        return { safe: false, reason: 'Access to IPv6 loopback address is forbidden.' };
+      }
+      // fc00::/7 (Unique local address)
+      if (lower.startsWith('fc') || lower.startsWith('fd')) {
+        return { safe: false, reason: 'Access to IPv6 unique local address (fc00::/7) is forbidden.' };
+      }
+      // fe80::/10 (Link-local address)
+      if (lower.startsWith('fe8') || lower.startsWith('fe9') || lower.startsWith('fea') || lower.startsWith('feb')) {
+        return { safe: false, reason: 'Access to IPv6 link-local address (fe80::/10) is forbidden.' };
+      }
+    }
+
+    return { safe: true };
   }
 }

@@ -101,36 +101,51 @@ export async function proxy(request: NextRequest) {
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // 2. Admin Route Protection
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  // 2. Admin Route Protection (Web & API)
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
+  const isAdminLogin = pathname === "/admin/login" || pathname === "/api/admin/login";
+
+  if (isAdminRoute && !isAdminLogin) {
     const adminToken = request.cookies.get("admin_token")?.value;
     const adminSession = adminToken ? await verifyAdminToken(adminToken) : null;
 
     if (!adminSession) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Unauthorized: Admin session required" }, { status: 401 });
+      }
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
     if (pathname.startsWith("/admin/admins") && adminSession.role !== "super_admin") {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Forbidden: Super admin privilege required" }, { status: 403 });
+      }
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
 
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // 3. Exempt Public Routes & Webhooks
+  // 3. Exempt Public Routes, Webhooks & Health Probes
   const PUBLIC_PREFIXES = [
     "/api/auth",
+    "/api/admin/login",
     "/api/billing/webhooks",
     "/api/system/alerts",
     "/api/maintenance/status",
     "/api/cron",
+    "/api/health",
+    "/api/metrics",
+    "/api/reviews/submit",
+    "/api/talk-to-sales/leads",
     "/login",
     "/register",
     "/forgot-password",
     "/reset-password",
     "/terms",
     "/privacy",
+    "/review",
   ];
 
   const isPublic =
@@ -141,8 +156,33 @@ export async function proxy(request: NextRequest) {
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // 4. Protected User Routes check
-  const PROTECTED_PREFIXES = [
+  // 4. API Routes Security — Deny by Default
+  // Any API route not explicitly declared public in PUBLIC_PREFIXES MUST require an authenticated session
+  if (pathname.startsWith("/api/")) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    // Forward authenticated user identity to downstream route handlers
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-user-id", session.user.id);
+    requestHeaders.set("x-user-email", session.user.email);
+
+    const protectedRes = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+    return withNoCacheHeaders(protectedRes);
+  }
+
+  // 5. Protected User Web Pages
+  const PROTECTED_PAGE_PREFIXES = [
     "/dashboard",
     "/contents",
     "/schedule",
@@ -164,44 +204,18 @@ export async function proxy(request: NextRequest) {
     "/competitors",
     "/trends",
     "/activity",
-    "/api/dashboard",
-    "/api/user",
-    "/api/contents",
-    "/api/schedule",
-    "/api/settings",
-    "/api/team",
-    "/api/workflow",
-    "/api/videos",
-    "/api/image",
-    "/api/gallery",
-    "/api/blog",
-    "/api/generation",
-    "/api/billing",
-    "/api/analytics",
-    "/api/social",
-    "/api/knowledge",
-    "/api/reviews",
-    "/api/competitors",
-    "/api/trends",
   ];
 
-  const isProtected = PROTECTED_PREFIXES.some(
+  const isProtectedPage = PROTECTED_PAGE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 
-  if (isProtected) {
+  if (isProtectedPage) {
     const session = await auth.api.getSession({
       headers: request.headers,
     });
 
     if (!session?.user) {
-      if (pathname.startsWith("/api/")) {
-        return NextResponse.json(
-          { error: "Authentication required" },
-          { status: 401 }
-        );
-      }
-
       const loginUrl = new URL("/login", request.url);
       const safeRedirect =
         pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/dashboard";
@@ -209,7 +223,6 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // Add user info to request headers for downstream use
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-user-id", session.user.id);
     requestHeaders.set("x-user-email", session.user.email);
@@ -220,7 +233,7 @@ export async function proxy(request: NextRequest) {
     return withNoCacheHeaders(protectedRes);
   }
 
-  // Default pass-through — still prevent browser caching for all HTML pages
+  // Default pass-through for unlisted static/marketing pages — no-store cache control
   return withNoCacheHeaders(NextResponse.next());
 }
 

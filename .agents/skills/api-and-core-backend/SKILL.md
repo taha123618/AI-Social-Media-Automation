@@ -57,17 +57,34 @@ await UsageService.consume(businessId, 'ai_posts', 1);
 
 ---
 
-## 2. Route Protection & Middleware (`proxy.ts`)
-- Enforces session validation on protected routes (`/dashboard`, `/contents`, `/schedule`, `/settings`, `/team`, `/workflow`, `/videos`, `/analytics`, `/knowledge`, `/posts`, `/api/*`).
-- Redirects unauthenticated requests to `/login?redirect=...`.
-- Whitelists `/api/auth`, `/api/billing/webhooks`, `/api/system/alerts`, `/login`, `/register`, `/pricing`, `/terms`, `/privacy`.
+## 2. Route Protection & Perimeter Gateway (`proxy.ts`)
+- Edge proxy enforces **Deny by Default** for all `/api/*` endpoints.
+- Any API route not explicitly enumerated in `PUBLIC_PREFIXES` automatically requires a valid session or admin token.
+- Downstream route handlers receive pre-verified user identity headers (`x-user-id`, `x-user-email`).
+- Public exemptions are strictly minimal: `/api/auth/*`, `/api/billing/webhooks`, `/api/system/alerts`, `/api/maintenance/status`, `/api/cron/*`, `/api/health`, `/api/metrics`, `/api/reviews/submit`, `/api/talk-to-sales/leads`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/terms`, `/privacy`.
 
 ---
 
-## 3. Multi-Tenant Scoping Rule
-Every Prisma query on tenant models must enforce `businessId` filtering:
+## 3. Multi-Tenant Ownership Verification & API Defense
+1. **Never trust client-provided IDs**: Do not trust `businessId` or `userId` supplied in query strings or JSON request bodies without server-side verification.
+2. **Mandatory Tenant Membership Check**:
 ```typescript
-const drafts = await prisma.contentDraft.findMany({
-  where: { businessId },
+import { auth } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+
+// 1. Session check
+const session = await auth.api.getSession({ headers: request.headers });
+if (!session?.user?.id) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+
+// 2. Tenant membership check
+const membership = await prisma.businessMember.findFirst({
+  where: { businessId, userId: session.user.id },
 });
+if (!membership) {
+  return NextResponse.json({ error: 'Forbidden: Access denied to this business' }, { status: 403 });
+}
 ```
+3. **SSRF Pre-Validation**: Any endpoint accepting external URLs (e.g. scrapers, webhooks, RSS feeds) must validate destination addresses with `SecurityService.validateSafeUrl()` before issuing `fetch()`.
+4. **Input Validation**: Use Zod schemas on all request bodies and query parameters. Fail early with HTTP 400 Bad Request on schema mismatch.
