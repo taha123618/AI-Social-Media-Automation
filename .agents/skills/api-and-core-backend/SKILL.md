@@ -48,12 +48,11 @@ await UsageService.consume(businessId, 'ai_posts', 1);
 - `POST /api/billing/webhooks`: Idempotent Stripe webhook listener.
 - `GET /api/cron/billing-reconciliation`: Periodic reconciliation and monthly usage reset cron.
 
-### 1.3 Admin Billing Command Center & Overrides (`admin.actions.ts`)
-- `getAdminBillingOverview()`: Aggregates real-time MRR, ARR, active subscriptions, organizations, webhooks, and audit logs.
-- `adminUpdateSubscription(subscriptionId, { planId, status, currentPeriodEnd, reasonNote })`: Atomically updates plan tier, syncs usage quotas, and writes an audit log.
-- `adminResetUsage(subscriptionId, feature)`: Resets metered counters back to 0.
-- `adminRetryWebhook(webhookId)`: Re-processes failed gateway webhooks.
-- `updateUserBillingPlan(userId, planId, status)`: Overrides a specific user's subscription and logs admin action.
+### 1.3 Key Application API Endpoints
+- **Mobile & Authentication**: `/api/auth/*` (Better Auth), `/api/auth/register/send-otp`, `/api/auth/register/verify-otp`.
+- **Content & Scheduling**: `/api/posts`, `/api/posting-schedule`, `/api/contents`.
+- **Autonomous Features**: `/api/dm-automation`, `/api/brand-guardian`, `/api/social-listening`, `/api/carousels`, `/api/voice`.
+- **System & Observability**: `/api/health`, `/api/health/ready`, `/api/metrics`, `/api/system/alerts`.
 
 ---
 

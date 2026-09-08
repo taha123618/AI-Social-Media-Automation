@@ -11,11 +11,12 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 <p align="center">
-  <b>Deploy an autonomous fleet of 13 AI marketing agents that research trends, synthesize multi-platform campaigns, generate high-converting creative media, and automate publishing across Meta, X, LinkedIn, TikTok, and YouTube.</b>
+  <b>Deploy an autonomous fleet of 16 AI marketing agents that research trends, synthesize multi-platform campaigns, generate high-converting creative media, and automate publishing across Meta, X, LinkedIn, TikTok, and YouTube.</b>
 </p>
 
 [Key Features](#-key-capabilities--features) •
 [Architecture](#-system-architecture) •
+[Mobile App](#-mobile-companion-app) •
 [Quick Start](#-quick-start-guide) •
 [AI Engine](#-custom-ai-multi-agent-engine) •
 [Verification](#-testing--code-quality) •
@@ -31,7 +32,7 @@
 Modern social media marketing across 5+ networks requires constant content ideation, copywriting adaptations, video/image generation, optimal queue timing, engagement monitoring, and analytics reporting. For businesses and agencies, managing this manually is time-consuming and fragmented.
 
 **SocialAI** solves this by providing a unified, production-grade enterprise SaaS platform powered by:
-- **13 Specialized Autonomous AI Agents**: Working in coordination to research, write, audit, and schedule content.
+- **16 Specialized Autonomous AI Agents**: Working in coordination to research, write, audit, and schedule content.
 - **RAG Semantic Memory**: Grounding copy in the business's actual products, voice, tone, and customer reviews using PostgreSQL + `pgvector`.
 - **Fault-Tolerant Async Workers**: Dispatched via BullMQ and Redis with automatic jitter and retry mechanisms.
 - **Enterprise Multi-Tenancy & Billing**: Organization and business-scoped tenancy, Better Auth authentication, and automated Stripe billing entitlements.
@@ -41,7 +42,7 @@ Modern social media marketing across 5+ networks requires constant content ideat
 ## 🌟 Key Capabilities & Features
 
 ### 🤖 Autonomous Multi-Agent Swarm
-- **13 Autonomous Agents**: Coordinated in `services/ai/agents/` (Weather Hook Agent, YouTube Transcription Agent, Trend Research Agent, Competitor Spy, Review Synthesizer, etc.).
+- **16 Autonomous Agents**: Coordinated in `services/ai/agents/` (Analytics, Blog Writer, Brand Guardian, Carousel Studio, Competitor Radar, DM Sales Bot, Engagement, Multi-Location, Post Creation, Review Booster, Social Listening, Template Blueprints, Trend Scout, Voice Studio, Weather Hook, YouTube Transcriber).
 - **Dynamic AI Provider Switching**: Automatically switches between cost-effective OpenRouter in development and direct OpenAI/Anthropic/Gemini in production.
 - **Semantic RAG Grounding**: Chunks brand documents and customer reviews into 1536-dimension embeddings stored in `pgvector` for zero-hallucination copy generation.
 
@@ -64,13 +65,19 @@ Modern social media marketing across 5+ networks requires constant content ideat
 - **Stripe Subscription Billing**: Pre-configured plans (Free, Starter, Pro, Enterprise) with automated checkout, webhook synchronization, and live quota telemetry.
 - **Admin Control Center (`/admin`)**: Real-time infrastructure telemetry, BullMQ worker queue monitoring, user impersonation, and audit trails.
 
+### 📱 Mobile Companion App (`mobile-app/`)
+- **Native Cross-Platform Experience**: Built with **Expo SDK 57**, **React Native 0.86**, and **React 19**.
+- **On-the-Go Publishing & Discovery**: Review scheduled posts, inspect feeds, and discover AI content ideas directly from your iOS or Android device.
+- **Fast Virtualized Lists**: Powered by `@shopify/flash-list` for smooth 60/120fps scrolling.
+- **Resilient Offline Mode**: Includes graceful offline mock dataset fallbacks for local and testing workflows.
+
 ---
 
 ## 🏗️ System Architecture
 
 ```
                                   [ EXTERNAL CLIENTS ]
-                             (Browser / Mobile Web / API)
+                    (Web Browser / Mobile Companion / REST API)
                                           │
                                           ▼ (HTTPS / TLS 1.3)
                         ┌───────────────────────────────────┐
@@ -85,9 +92,9 @@ Modern social media marketing across 5+ networks requires constant content ideat
      ┌────────────────────────┐                      ┌────────────────────────┐
      │  App Router (app/*)    │                      │  Custom AI Engine      │
      │  - Next.js 16 (React 19)│                      │  (services/ai/*)       │
-     │  - Tailwind CSS v4     │                      │  - 13 Autonomous Agents│
-     │  - Better Auth + RBAC  │                      │  - Zod Tool Schemas    │
-     │  - Feature Modules     │                      │  - Dynamic LLM Routing │
+     │  - Tailwind CSS v4     │                      │  - 16 Autonomous Agents│
+     │  - Better Auth + RBAC  │                      │  - 19 Zod Tool Schemas │
+     │  - 29 Feature Modules  │                      │  - 6 Async Workflows   │
      └────────────┬───────────┘                      └───────────┬────────────┘
                   │                                               │
                   ├───────────────────────────────┬───────────────┘
@@ -237,9 +244,9 @@ The autonomous agent infrastructure lives under `services/ai/`:
 | Directory | Purpose |
 | :--- | :--- |
 | `services/ai/index.ts` | Central exported orchestrator unifying `AIService`, tools, agents, and workflows. |
-| `services/ai/agents/` | 13 autonomous marketing and analytical agents (`weatherAgent`, `youtubeAgent`, `blogWriterAgent`, `analyticsAgent`, etc.). |
-| `services/ai/tools/` | Reusable Zod-validated tools invoked by agents (weather, YouTube, analytics, engagement, post creation). |
-| `services/ai/workflows/` | Multi-step asynchronous orchestration pipelines (`weatherWorkflow`, `postPublishingWorkflow`, `blogGenerationWorkflow`). |
+| `services/ai/agents/` | **16 autonomous marketing and analytical agents** (`weatherAgent`, `youtubeAgent`, `blogWriterAgent`, `analyticsAgent`, `brandGuardianAgent`, `carouselAgent`, `competitorAgent`, `dmAutomationAgent`, `engagementAgent`, `multiLocationAgent`, `postCreationAgent`, `reviewBoosterAgent`, `socialListeningAgent`, `templateAgent`, `trendEventAgent`, `voiceAgent`). |
+| `services/ai/tools/` | **19 reusable Zod-validated tools** invoked by agents (weather, YouTube, analytics, engagement, post creation, voice, carousels, brand guardian, DM automation, etc.). |
+| `services/ai/workflows/` | **6 multi-step asynchronous orchestration pipelines** (`blogWorkflow`, `carouselPublishingWorkflow`, `postPublishingWorkflow`, `socialListeningWorkflow`, `voiceNarrationWorkflow`, `weatherWorkflow`). |
 | `services/ai/ai.service.ts` | Dynamic LLM text generation switching between OpenRouter (dev) and OpenAI/Anthropic (prod). |
 | `services/ai/embedding.service.ts`| `pgvector` document embedding and semantic RAG retrieval. |
 | `services/ai/types.ts` | Core TypeScript interfaces for `ToolDefinition`, `AgentDefinition`, and `WorkflowDefinition`. |
@@ -274,16 +281,16 @@ npm run build
 ```text
 ai_social_media_automation/
 ├── .agents/                    # AI Agent skills and development rules
-│   └── skills/                 # 53 modular agent skill instructions
+│   └── skills/                 # 54 modular agent skill instructions
 ├── .github/                    # GitHub configuration & workflows
 │   ├── ISSUE_TEMPLATE/         # Form-based bug & feature templates
 │   ├── workflows/              # CI, Security, VPS & K8s deployment pipelines
 │   ├── CODEOWNERS              # Domain ownership mapping
 │   └── PULL_REQUEST_TEMPLATE.md# Pull request verification checklist
 ├── app/                        # Next.js 16 App Router pages & layouts
-│   ├── (admin)/                # Administrative control center & telemetry
-│   ├── (auth)/                 # Split-screen authentication & onboarding
-│   ├── (dashboard)/            # Primary customer SaaS dashboard & tools
+│   ├── (admin)/                # Administrative control center & billing hub
+│   ├── (auth)/                 # Split-screen authentication & 2FA OTP onboarding
+│   ├── (user)/                 # Primary customer SaaS dashboard (29 domain modules)
 │   ├── (marketing)/            # Public landing pages & feature highlights
 │   └── api/                    # Route Handlers protected by proxy.ts
 ├── components/                 # Shared UI components (Radix, shadcn, motion)
@@ -294,14 +301,23 @@ ai_social_media_automation/
 ├── features/                   # Self-contained domain modules
 │   ├── ad-campaigns/           # Ad creation, A/B testing & sync workers
 │   ├── ai-blog/                # TipTap editor, SEO analyzer & serializers
+│   ├── ai_arena/               # Multi-model benchmarking (Claude, GPT, Gemini, DeepSeek)
 │   ├── analytics/              # Social growth dashboards & metrics
 │   ├── billing/                # Stripe checkout, webhooks & plan limits
+│   ├── brand_guardian/         # Real-time brand voice linter & Flesch-Kincaid scoring
+│   ├── carousel_builder/       # Multi-slide visual carousel studio
+│   ├── dm_automation/          # Inbound DM automation & lead capture
 │   ├── image_generation/       # Flux Pro image generation workers
 │   ├── knowledge/              # RAG ingestion & pgvector search
 │   ├── scheduler/              # BullMQ queue definitions & processors
 │   ├── social/                 # Social channel OAuth & publishers
-│   └── video_generation/       # Video synthesis & status workers
+│   ├── social_listening/       # Omnichannel brand mention radar
+│   ├── video_generation/       # Video synthesis & status workers
+│   └── voice_studio/           # Narration playback & OpenAI TTS streaming
 ├── lib/                        # Core utilities, Better Auth, Prisma & security
+├── mobile-app/                 # React Native / Expo SDK 57 mobile companion app
+│   ├── src/app/                # Expo Router file-based screens & layouts
+│   └── src/components/         # Mobile UI components & themed views
 ├── prisma/                     # Database schema & modular domain models
 │   ├── schema.prisma           # Datasource & pgvector config
 │   └── models/                 # Domain-specific Prisma model definitions
@@ -337,11 +353,12 @@ To report a vulnerability, please read our [Security Policy](SECURITY.md) and re
 ## 🗺️ Roadmap
 
 - [x] Next.js 16 App Router & Tailwind CSS v4 migration
-- [x] Custom AI Engine with 13 Autonomous Marketing Agents
+- [x] Custom AI Engine with 16 Autonomous Marketing Agents
 - [x] PostgreSQL + `pgvector` RAG Knowledge Retrieval
 - [x] BullMQ Background Worker Queues & Schedulers
 - [x] Stripe Multi-Tenant Billing & Entitlements
 - [x] Split-Screen Authentication & Admin Control Center
+- [x] Cross-Platform Mobile Companion App (Expo SDK 57 / React Native 0.86)
 - [x] Open-Source Repository Modernization & Community Infrastructure
 - [ ] Direct TikTok & Instagram Stories Video Auto-Publishing API
 - [ ] Self-Hosted Local LLM Runner Support (Ollama / vLLM integration)

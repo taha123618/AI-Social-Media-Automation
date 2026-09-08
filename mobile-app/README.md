@@ -1,56 +1,148 @@
-# Welcome to your Expo app 👋
+# SocialAI Mobile Companion App 📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The official cross-platform mobile companion for the **SocialAI** enterprise social media automation and AI content management platform. Built on **Expo SDK 57**, **React Native 0.86**, and **React 19**, it provides on-the-go workspace access, publishing queues, content discovery, and real-time social performance telemetry.
 
-## Get started
+---
 
-1. Install dependencies
+## Architecture & Technology Stack
 
-   ```bash
-   npm install
-   ```
+| Layer | Technology | Version | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Runtime & Core** | Expo SDK | `~57.0.21` | Modern universal mobile runtime |
+| **Framework** | React Native | `0.86.3` | Native cross-platform rendering engine |
+| **Language & Engine** | React / TypeScript | `19.2.3` / `~6.0.3` | React 19 concurrent features & strict types |
+| **Routing** | Expo Router | `~57.0.20` | File-based navigation inside `src/app/` |
+| **Data Fetching** | TanStack React Query | `^5.102.8` | Declarative server-state caching & sync |
+| **Client State** | Zustand | `^5.0.15` | Lightweight client and session state store |
+| **High-Performance Lists** | `@shopify/flash-list` | `^2.3.2` | 60/120fps virtualized feed rendering |
+| **Motion & Gestures** | Reanimated / Gesture Handler | `4.5.1` / `~2.32.0` | Physics-based 60fps animations & gestures |
+| **Persistence** | Async Storage | `^3.1.1` | Local token and workspace preference storage |
+| **UI Components** | Expo Symbols & Glass Effect | `~57.0.2` | Native SF Symbols & modern glassmorphic styling |
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## Directory Structure
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+mobile-app/
+├── src/
+│   ├── app/                         # Expo Router file-based screens & layouts
+│   │   ├── _layout.tsx              # Root stack navigator & theme provider
+│   │   ├── index.tsx                # Dashboard feed & scheduled post preview
+│   │   └── explore.tsx              # AI content explorer & discovery screen
+│   ├── components/                  # Reusable UI & themed components
+│   │   ├── themed-text.tsx          # Dynamic light/dark typography
+│   │   ├── themed-view.tsx          # Adaptive background container
+│   │   ├── animated-icon.tsx        # Motion-enhanced tab icons
+│   │   ├── app-tabs.tsx             # Native bottom navigation tabs
+│   │   ├── app-tabs.web.tsx         # Responsive web navigation bar
+│   │   └── ui/                      # Collapsible cards, badges, modal dialogs
+│   ├── constants/
+│   │   └── theme.ts                 # Design tokens (Electric Violet palette, tints)
+│   ├── hooks/
+│   │   ├── use-theme.ts             # Theme context & color scheme resolution
+│   │   ├── use-color-scheme.ts      # Native color scheme observer
+│   │   └── use-color-scheme.web.ts  # Web-safe color scheme observer
+│   └── global.css                   # Global styles & resets
+├── assets/                          # App icons, splash screens, favicon
+├── scripts/                         # Reset project & maintenance scripts
+├── .env                             # Local environment variables
+├── .env.example                     # Environment template
+├── app.json                         # Expo configuration (CNG plugins, bundle IDs)
+└── package.json                     # Mobile dependencies and run scripts
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Quick Start & Local Development
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 1. Prerequisites
+- **Node.js**: `>=22.18.0` or **Bun**: `>=1.0.0`
+- **Expo Go** app on your physical device, or:
+  - **Xcode** (iOS Simulator) on macOS
+  - **Android Studio** (Android Emulator)
 
-## Learn more
+### 2. Installation
+```bash
+cd mobile-app
+bun install
+# or: npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### 3. Environment Configuration
+Copy the environment template and verify your backend endpoint:
+```bash
+cp .env.example .env
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```env
+# mobile-app/.env
+EXPO_PUBLIC_APP_ENV=development
+EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_WS_URL=ws://localhost:3000/ws
+EXPO_PUBLIC_ENABLE_OFFLINE_MOCK=true
+```
 
-## Join the community
+> [!TIP]
+> **Emulator vs Physical Device Connectivity:**
+> - **iOS Simulator**: `http://localhost:3000`
+> - **Android Emulator**: `http://10.0.2.2:3000` (maps to your host machine's `localhost`)
+> - **Physical Device (Expo Go)**: Set `EXPO_PUBLIC_API_URL` to your computer's local Wi-Fi IP (e.g. `http://192.168.1.150:3000`).
 
-Join our community of developers creating universal apps.
+### 4. Running the Development Server
+```bash
+# Start the Metro bundler
+bunx expo start
+# Or with npm
+npx expo start
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Direct platform shortcuts:
+bunx expo start --ios        # Opens in iOS Simulator
+bunx expo start --android    # Opens in Android Emulator
+bunx expo start --web        # Opens in Web Browser
+```
+
+---
+
+## Quality Gates & Verification
+
+Run these checks prior to submitting changes:
+
+```bash
+# 1. Typecheck with TypeScript
+npx tsc --noEmit
+
+# 2. Lint code
+bunx expo lint
+
+# 3. Diagnose Expo dependencies and configurations
+bunx expo-doctor
+```
+
+---
+
+## Building & Releasing with EAS (Expo Application Services)
+
+The mobile companion leverages **Continuous Native Generation (CNG)**. Native folders (`ios/`, `android/`) are generated automatically by EAS or Expo Prebuild.
+
+```bash
+# Install EAS CLI globally or run via bunx / npx
+bunx eas-cli login
+
+# Build a development build for native debugging
+bunx eas-cli build --profile development --platform all
+
+# Build production binaries for App Store and Google Play
+bunx eas-cli build --profile production --platform all
+
+# Publish over-the-air (OTA) updates without app store re-submission
+bunx eas-cli update --branch production --message "Update content discovery feed"
+```
+
+---
+
+## Related Documentation
+- [Root README](file:///Users/taha/projects/ai_social_media_automation/README.md)
+- [System Architecture](file:///Users/taha/projects/ai_social_media_automation/ARCHITECTURE.md)
+- [Mobile Agent Skill](file:///Users/taha/projects/ai_social_media_automation/.agents/skills/mobile-app-development/SKILL.md)
+- [Development Guide](file:///Users/taha/projects/ai_social_media_automation/DEVELOPMENT.md)

@@ -9,7 +9,7 @@ You are operating as a Senior SQA Engineer responsible for test architecture, au
 
 ## Test Architecture & Frameworks
 
-- **Runners**: Jest (`jest.config.cjs`) and Bun Test (`bun test`)
+- **Runners**: Jest (`jest.config.cjs`) executed via `npm test`
 - **Assertion Libraries**: Jest matchers & `@testing-library/jest-dom`
 - **Mocking Strategy**: Top-level factory mocks (`jest.mock(...)`) with dual export compatibility for Prisma (`default` and `prisma`), Redis, Better Auth, and AI SDK providers.
 - **Location Convention**:
@@ -17,10 +17,11 @@ You are operating as a Senior SQA Engineer responsible for test architecture, au
   - Libraries & Core: `lib/__tests__/*.test.ts`
   - Route Handlers & APIs: `app/api/**/__tests__/*.test.ts`
 
-## Test Suites Matrix (57 Automated Test Suites · 264+ Tests)
+## Test Suites Matrix (58 Automated Test Suites · 281 Tests)
 
 | Test Suite | File Location | Scope & Assertions |
 | :--- | :--- | :--- |
+| **Cybersecurity Regression** | `lib/__tests__/cybersecurity-regression.test.ts` | SSRF protection, tenant isolation, CSRF/session validation, magic byte verification, prompt injection defense |
 | **Developer API Keys & Webhooks** | `app/api/settings/__tests__/api-keys-and-webhooks.test.ts` | 401 unauthenticated, 403 non-member, 403 entitlement gate, 400 validation, REST CRUD, HMAC secrets |
 | **CRM Integration API** | `app/api/crm/__tests__/crm-api.test.ts` | Session auth verification, tenant scoping, contact sync, third-party CRM configuration updates |
 | **Posting Schedule API** | `app/api/posting-schedule/__tests__/posting-schedule-api.test.ts` | Session authentication, tenant scoping, slot addition, day toggling, slot removal, clearAll |
@@ -43,6 +44,8 @@ You are operating as a Senior SQA Engineer responsible for test architecture, au
 | **Transactional Usage Metering** | `features/billing/services/__tests__/usage.service.test.ts` | Atomic quota increments (`consume`), remaining credit calculations, exhaustion errors (`QuotaExceededError`) |
 | **Stripe Webhook Processing** | `features/billing/services/__tests__/webhook.service.test.ts` | Idempotent event handling (`checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_succeeded`) |
 
+---
+
 ## Mocking Best Practices
 
 ### 1) Prisma Client Dual Mock
@@ -63,49 +66,31 @@ jest.mock('@/lib/prisma', () => {
 });
 ```
 
-### 2) Route Handler Authentication Mock
-When testing Next.js Route Handlers, mock Better Auth (`@/lib/auth`):
-
+### 2) Better Auth Session Mocking
 ```typescript
 jest.mock('@/lib/auth', () => ({
   auth: {
     api: {
-      getSession: jest.fn(),
+      getSession: jest.fn().mockResolvedValue({
+        user: { id: 'usr_test_123', email: 'test@domain.com', name: 'Test User' },
+        session: { id: 'sess_123', activeOrganizationId: 'biz_test_123' },
+      }),
     },
   },
 }));
 ```
 
-### 3) Multi-Tenant IDOR Security Rule
-Every route handler accepting a `businessId` (whether via header, query parameter, or body) **MUST** authenticate the session user and verify that `prisma.businessMember` contains an active record linking `session.user.id` to `businessId`. Never trust unauthenticated `x-business-id` headers alone.
+---
 
-### 4) External AI / Embedding Providers
-Never make live network calls to OpenAI, Anthropic, or external APIs during tests. Mock embedding and completion providers:
+## Running Test Verification
 
-```typescript
-jest.mock('@/services/ai/embedding.service', () => ({
-  EmbeddingService: {
-    embeddings: {
-      embedDocuments: jest.fn().mockResolvedValue([[0.1, 0.2, 0.3]]),
-    },
-  },
-}));
+```bash
+# Execute full Jest test suite across all 58 suites
+npm test
+
+# Run a specific test suite
+npm test -- features/billing/services/__tests__/entitlement.service.test.ts
+
+# Run with test coverage
+npm test -- --coverage
 ```
-
-## Pre-Commit & Pre-PR QA Checklist
-Before creating a pull request or merging code:
-1. **Run Full Test Suite**:
-   ```bash
-   bun run test
-   ```
-   *Requirement: 100% pass rate (57/57 suites, 264+ tests).*
-2. **Run TypeScript Check**:
-   ```bash
-   node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
-   ```
-   *Requirement: 0 TypeScript errors.*
-3. **Verify Database Setup**:
-   ```bash
-   bun run setup
-   ```
-   *Requirement: Clean Prisma generation and migration deploy.*
