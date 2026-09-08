@@ -13,7 +13,7 @@ export default function MarketingLayout({
 }) {
    return (
       <ClientWrapper>
-         <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 selection:text-primary overflow-x-hidden transition-colors duration-300">
+         <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 selection:text-primary overflow-x-clip transition-colors duration-300">
             <Navbar />
             <main>{children}</main>
             <Testimonials />
