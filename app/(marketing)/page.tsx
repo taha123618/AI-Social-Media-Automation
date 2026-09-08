@@ -6,7 +6,7 @@ const Features = dynamic(() => import("@/components/home/Features"));
 const ToolsShowcase = dynamic(() => import("@/components/home/ToolsShowcase"));
 const UseCases = dynamic(() => import("@/components/home/UseCases"));
 const Workflow = dynamic(() => import("@/components/home/Workflow"));
-const Pricing = dynamic(() => import("@/components/home/Pricing"));
+// const Pricing = dynamic(() => import("@/components/home/Pricing"));
 
 import { Metadata } from "next";
 
@@ -31,7 +31,7 @@ export default function Home() {
         <ToolsShowcase />
         <UseCases />
         <Workflow />
-        <Pricing />
+        {/* <Pricing /> */}
       </div>
     </>
   );

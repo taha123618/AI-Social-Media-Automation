@@ -238,29 +238,29 @@ export default function ToolsShowcase() {
               <span className="text-foreground/40 font-normal">| 16 MODULES</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 tracking-tight leading-tight">
               Next-Gen Tool Suite to{" "}
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Supercharge Production.
               </span>
             </h2>
 
-            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-sm sm:text-lg max-w-2xl mx-auto leading-relaxed">
               Every specialized capability needed to ideate, synthesize, audit, schedule, and scale organic reach across all major networks.
             </p>
           </motion.div>
 
           {/* Filter Bar & Fast Search */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             {/* Category Filter Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-muted/50 border border-border/80 backdrop-blur-md">
+            <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-2xl bg-muted/50 border border-border/80 backdrop-blur-md">
               {filterCategories.map((category) => {
                 const isActive = activeFilter === category;
                 return (
                   <button
                     key={category}
                     onClick={() => setActiveFilter(category)}
-                    className={`relative px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer ${
+                    className={`relative px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-medium transition-all duration-200 cursor-pointer ${
                       isActive
                         ? "text-primary-foreground font-semibold"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -363,20 +363,20 @@ export default function ToolsShowcase() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6 shrink-0 font-mono text-xs">
+          <div className="flex items-center justify-around w-full md:w-auto gap-4 sm:gap-6 shrink-0 font-mono text-xs">
             <div className="text-center sm:text-right">
-              <div className="text-lg font-extrabold text-foreground tracking-tight">16+</div>
-              <div className="text-[9px] text-muted-foreground">PRODUCTION TOOLS</div>
+              <div className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">16+</div>
+              <div className="text-[8px] sm:text-[9px] text-muted-foreground">PRODUCTION TOOLS</div>
             </div>
-            <div className="h-8 w-px bg-border/80" />
+            <div className="h-7 sm:h-8 w-px bg-border/80" />
             <div className="text-center sm:text-right">
-              <div className="text-lg font-extrabold text-primary tracking-tight">100%</div>
-              <div className="text-[9px] text-muted-foreground">AUTONOMOUS</div>
+              <div className="text-base sm:text-lg font-extrabold text-primary tracking-tight">100%</div>
+              <div className="text-[8px] sm:text-[9px] text-muted-foreground">AUTONOMOUS</div>
             </div>
-            <div className="h-8 w-px bg-border/80" />
+            <div className="h-7 sm:h-8 w-px bg-border/80" />
             <div className="text-center sm:text-right">
-              <div className="text-lg font-extrabold text-emerald-500 tracking-tight">0ms</div>
-              <div className="text-[9px] text-muted-foreground">COLD START</div>
+              <div className="text-base sm:text-lg font-extrabold text-emerald-500 tracking-tight">0ms</div>
+              <div className="text-[8px] sm:text-[9px] text-muted-foreground">COLD START</div>
             </div>
           </div>
         </motion.div>

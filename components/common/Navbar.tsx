@@ -65,10 +65,10 @@ export default function Navbar() {
       }`}
     >
       <nav
-        className={`max-w-7xl mx-auto flex items-center justify-between px-6 py-3 rounded-2xl transition-all duration-300 relative ${
+        className={`max-w-7xl mx-auto flex items-center justify-between px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-2xl transition-all duration-300 relative ${
           scrolled
-            ? "bg-background/85 border border-border/80 shadow-lg shadow-black/5 backdrop-blur-xl mx-4 lg:mx-auto"
-            : "bg-background/60 border border-border/40 backdrop-blur-md mx-4 lg:mx-auto"
+            ? "bg-background/85 border border-border/80 shadow-lg shadow-black/5 backdrop-blur-xl mx-3 sm:mx-4 lg:mx-auto"
+            : "bg-background/60 border border-border/40 backdrop-blur-md mx-3 sm:mx-4 lg:mx-auto"
         }`}
       >
         <AppLogo />

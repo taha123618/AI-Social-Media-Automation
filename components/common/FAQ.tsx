@@ -139,29 +139,29 @@ function FAQComponent() {
 
       <section
         id="faq"
-        className="relative w-full overflow-hidden select-none bg-background text-foreground py-20 lg:py-28 px-6 sm:px-12 lg:px-16 transition-colors duration-300"
+        className="relative w-full overflow-hidden select-none bg-background text-foreground py-16 sm:py-20 lg:py-28 px-4 sm:px-8 lg:px-16 transition-colors duration-300"
       >
         {/* Subtle ambient mesh glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/10 blur-[140px] rounded-full pointer-events-none -z-10" />
 
-        <div className="max-w-[1472px] mx-auto flex flex-col gap-12 lg:gap-16 relative z-10">
+        <div className="max-w-[1472px] mx-auto flex flex-col gap-10 sm:gap-12 lg:gap-16 relative z-10">
           {/* 1. Header Row */}
           <motion.div
             variants={HEADER_ANIMATION}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: false, amount: 0.3 }}
-            className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 lg:gap-12"
+            className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 sm:gap-8 lg:gap-12"
           >
             {/* Left Block */}
-            <div className="max-w-[640px] flex flex-col gap-4 lg:gap-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold uppercase tracking-wider text-primary w-fit">
+            <div className="max-w-[640px] flex flex-col gap-3 sm:gap-4 lg:gap-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold uppercase tracking-wider text-primary w-fit">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span data-faq-geist>FAQS</span>
               </div>
               <h2
                 data-faq-gilda
-                className="text-4xl sm:text-6xl lg:text-7xl font-normal leading-[1.15] lg:leading-[1.2] tracking-[-0.04em] text-foreground"
+                className="text-3xl sm:text-5xl lg:text-7xl font-normal leading-[1.15] lg:leading-[1.2] tracking-[-0.04em] text-foreground"
               >
                 Clear Answers for Your{" "}
                 <span className="bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent">
@@ -174,7 +174,7 @@ function FAQComponent() {
             <div className="max-w-[543px]">
               <p
                 data-faq-geist
-                className="text-base sm:text-lg lg:text-xl font-normal leading-[1.6] tracking-[-0.02em] text-muted-foreground"
+                className="text-sm sm:text-base lg:text-xl font-normal leading-[1.6] tracking-[-0.02em] text-muted-foreground"
               >
                 From multi-agent marketing orchestration to enterprise brand safety
                 and direct publishing integrations, explore answers to common inquiries.
@@ -204,16 +204,16 @@ function FAQComponent() {
                     aria-expanded={isOpen}
                     className={`w-full text-left cursor-pointer flex items-center justify-between transition-all duration-300 group ${
                       isOpen
-                        ? "pt-7 sm:pt-8 lg:pt-9 pb-4 sm:pb-5"
-                        : "py-7 sm:py-8 lg:py-9"
+                        ? "pt-5 sm:pt-8 lg:pt-9 pb-3 sm:pb-5"
+                        : "py-5 sm:py-8 lg:py-9"
                     }`}
                   >
                     {/* Left Group (Number + Question) */}
-                    <div className="flex items-baseline gap-6 sm:gap-10 lg:gap-14 flex-1 pr-4 min-w-0">
+                    <div className="flex items-baseline gap-3 sm:gap-8 lg:gap-14 flex-1 pr-3 sm:pr-4 min-w-0">
                       {/* Item Number */}
                       <span
                         data-faq-gilda
-                        className={`text-2xl sm:text-3xl lg:text-4xl tracking-[-0.02em] shrink-0 transition-colors duration-300 ${
+                        className={`text-xl sm:text-3xl lg:text-4xl tracking-[-0.02em] shrink-0 transition-colors duration-300 ${
                           isOpen
                             ? "text-primary font-medium"
                             : "text-muted-foreground/60 group-hover:text-foreground"
@@ -227,8 +227,8 @@ function FAQComponent() {
                         data-faq-gilda
                         className={`transition-all duration-300 font-normal ${
                           isOpen
-                            ? "text-[26px] sm:text-[36px] lg:text-[44px] leading-[1.2] text-foreground"
-                            : "text-[20px] sm:text-[26px] lg:text-[32px] leading-[1.3] text-foreground/80 group-hover:text-foreground"
+                            ? "text-[18px] sm:text-[30px] lg:text-[44px] leading-[1.2] text-foreground"
+                            : "text-[15px] sm:text-[22px] lg:text-[32px] leading-[1.3] text-foreground/80 group-hover:text-foreground"
                         }`}
                       >
                         {item.question}
@@ -237,14 +237,14 @@ function FAQComponent() {
 
                     {/* Circular Indicator */}
                     <div
-                      className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 shadow-xs ${
+                      className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 shadow-xs ${
                         isOpen
                           ? "bg-primary text-primary-foreground rotate-180 shadow-primary/20"
                           : "bg-secondary text-secondary-foreground hover:bg-secondary/80 group-hover:scale-105"
                       }`}
                     >
                       <ChevronDown
-                        className="w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300"
+                        className="w-4 h-4 sm:w-6 sm:h-6 transition-transform duration-300"
                         strokeWidth={2.4}
                       />
                     </div>
@@ -261,11 +261,11 @@ function FAQComponent() {
                         exit="exit"
                         className="overflow-hidden"
                       >
-                        <div className="pl-10 sm:pl-16 lg:pl-20 pr-2 pt-2 pb-8 sm:pb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8 lg:gap-12">
+                        <div className="pl-3 sm:pl-14 lg:pl-20 pr-2 pt-2 pb-6 sm:pb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-5 sm:gap-8 lg:gap-12">
                           {/* Answer Paragraph */}
                           <p
                             data-faq-geist
-                            className="text-sm sm:text-base lg:text-lg font-normal leading-[1.75] text-muted-foreground max-w-[700px]"
+                            className="text-xs sm:text-base lg:text-lg font-normal leading-[1.75] text-muted-foreground max-w-[700px]"
                           >
                             {item.answer}
                           </p>

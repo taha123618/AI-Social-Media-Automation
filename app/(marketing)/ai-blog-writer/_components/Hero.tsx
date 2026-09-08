@@ -99,7 +99,7 @@ export default function Hero() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.08] mb-6">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1] sm:leading-[1.08] mb-6">
             <span className="hero-title-line block">
               Generate Long-Form Articles That
             </span>

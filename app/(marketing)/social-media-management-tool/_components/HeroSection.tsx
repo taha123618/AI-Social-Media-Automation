@@ -35,7 +35,7 @@ export default function HeroSection() {
           </div>
 
           {/* Main Title */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.08] mb-6">
+          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.1] sm:leading-[1.08] mb-6">
             Autonomous Social Fleet <br />
             <span className="bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent">
               Scheduling &amp; Dispatch

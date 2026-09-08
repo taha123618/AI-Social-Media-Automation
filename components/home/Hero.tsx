@@ -24,19 +24,19 @@ export default function Hero() {
           {/* Announcement Pill */}
           <motion.div
             variants={fadeIn}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/25 mb-8 shadow-xs backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/25 mb-6 sm:mb-8 shadow-xs backdrop-blur-md max-w-full"
           >
-            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-semibold text-primary tracking-tight">
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
+            <span className="text-[11px] sm:text-xs font-semibold text-primary tracking-tight truncate">
               V2.0 is live: Multi-channel AI Scheduling
             </span>
-            <ChevronRight className="w-3.5 h-3.5 text-primary" />
+            <ChevronRight className="w-3.5 h-3.5 text-primary shrink-0" />
           </motion.div>
 
           {/* Main Headline */}
           <motion.h1
             variants={fadeIn}
-            className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.08]"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.1]"
           >
             Autonomous Social Automation <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent">
@@ -47,7 +47,7 @@ export default function Hero() {
           {/* Subheader */}
           <motion.p
             variants={fadeIn}
-            className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed font-normal"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed font-normal"
           >
             Deploy 13 autonomous AI agents that analyze trends, research high-ranking content, and publish multi-channel campaigns seamlessly.
           </motion.p>
@@ -55,7 +55,7 @@ export default function Hero() {
           {/* Action CTAs */}
           <motion.div
             variants={fadeIn}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 max-w-md mx-auto relative z-20"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 sm:mb-10 max-w-md mx-auto relative z-20"
           >
             <Link href="/register" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto text-base font-semibold px-8 h-12 rounded-xl shadow-lg shadow-primary/25">
@@ -73,21 +73,21 @@ export default function Hero() {
           {/* Trust Value Props */}
           <motion.div
             variants={fadeIn}
-            className="text-xs font-medium text-muted-foreground mb-16 flex flex-wrap items-center justify-center gap-4 sm:gap-6"
+            className="text-[11px] sm:text-xs font-medium text-muted-foreground mb-10 sm:mb-16 flex flex-wrap items-center justify-center gap-3 sm:gap-6"
           >
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
               14-Day Free Trial
             </span>
-            <span className="w-1 h-1 rounded-full bg-border" />
+            <span className="w-1 h-1 rounded-full bg-border hidden xs:inline-block" />
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
               Zero Credit Card Required
             </span>
-            <span className="w-1 h-1 rounded-full bg-border" />
+            <span className="w-1 h-1 rounded-full bg-border hidden xs:inline-block" />
             <TextType
               text={["10x Higher Velocity", "Deterministic RAG Safety", "Gutenberg + CMS Ingestion"]}
-              className="text-xs font-medium text-foreground"
+              className="text-[11px] sm:text-xs font-medium text-foreground"
             />
           </motion.div>
 

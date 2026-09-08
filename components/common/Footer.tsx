@@ -347,7 +347,7 @@ function FooterComponent() {
             <div className="md:col-span-2">
               <form
                 onSubmit={handleSubscribe}
-                className="border-b border-border/80 pb-2 focus-within:border-primary transition-colors duration-300 flex items-center justify-between gap-4"
+                className="border-b border-border/80 pb-3 sm:pb-2 focus-within:border-primary transition-colors duration-300 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4"
               >
                 <input
                   type="email"
@@ -359,11 +359,11 @@ function FooterComponent() {
                       : "Your email address"
                   }
                   required
-                  className="bg-transparent text-[14px] py-2 placeholder:text-muted-foreground/60 text-foreground focus:outline-none w-full font-mono"
+                  className="bg-transparent text-[13px] sm:text-[14px] py-2 placeholder:text-muted-foreground/60 text-foreground focus:outline-none w-full font-mono"
                 />
                 <button
                   type="submit"
-                  className="bg-primary text-primary-foreground font-bold text-[12px] tracking-[0.1em] uppercase px-6 py-2.5 relative cursor-pointer hover:bg-primary/90 transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-2"
+                  className="bg-primary text-primary-foreground font-bold text-[11px] sm:text-[12px] tracking-[0.1em] uppercase px-5 sm:px-6 py-2.5 relative cursor-pointer hover:bg-primary/90 transition-all duration-200 active:scale-95 shrink-0 flex items-center justify-center gap-2 w-full sm:w-auto"
                 >
                   <span>{submitted ? "Joined" : "Submit"}</span>
                   <span className="w-1.5 h-1.5 bg-primary-foreground inline-block" />
@@ -376,31 +376,22 @@ function FooterComponent() {
         </div>
 
         {/* Section 3 — Brand block */}
-        <div className="px-6 md:px-10 max-w-7xl mx-auto">
+        <div className="px-4 sm:px-6 md:px-10 max-w-7xl mx-auto">
           <div className="border border-border/80 relative overflow-hidden bg-card/60 backdrop-blur-sm">
             {/* Corner Brackets */}
-            <div className="w-5 h-5 border-t-2 border-l-2 border-foreground/30 absolute top-0 left-0 pointer-events-none" />
-            <div className="w-5 h-5 border-t-2 border-r-2 border-foreground/30 absolute top-0 right-0 pointer-events-none" />
-            <div className="w-5 h-5 border-b-2 border-l-2 border-foreground/30 absolute bottom-0 left-0 pointer-events-none" />
-            <div className="w-5 h-5 border-b-2 border-r-2 border-foreground/30 absolute bottom-0 right-0 pointer-events-none" />
-
-            {/* Location & Live Clock Bar */}
-            {/* <div className="py-4 border-b border-border/60 text-center text-[10px] md:text-[11px] text-muted-foreground tracking-[0.15em] font-mono uppercase px-4">
-              Located in Australia &amp; Japan, working globally. // 37.8136° S,
-              144.9631° E //{" "}
-              <span className="text-foreground font-semibold">
-                {time || "12:00 PM"}
-              </span>
-            </div> */}
+            <div className="w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-l-2 border-foreground/30 absolute top-0 left-0 pointer-events-none" />
+            <div className="w-4 sm:w-5 h-4 sm:h-5 border-t-2 border-r-2 border-foreground/30 absolute top-0 right-0 pointer-events-none" />
+            <div className="w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-l-2 border-foreground/30 absolute bottom-0 left-0 pointer-events-none" />
+            <div className="w-4 sm:w-5 h-4 sm:h-5 border-b-2 border-r-2 border-foreground/30 absolute bottom-0 right-0 pointer-events-none" />
 
             {/* Massive Brand Word with ShuffleText scramble */}
             <div
-              className="py-10 px-4 flex justify-center items-center overflow-hidden min-h-[160px] md:min-h-[400px]"
+              className="py-6 sm:py-10 px-2 sm:px-4 flex justify-center items-center overflow-hidden min-h-[100px] sm:min-h-[160px] md:min-h-[400px]"
               data-footer-condensed
             >
               <ShuffleText
                 text="SOCIAL AI"
-                className="font-bold text-foreground/80 text-[120px] sm:text-[180px] md:text-[420px] leading-[0.8] tracking-[-0.05em] whitespace-nowrap uppercase font-['Barlow_Condensed',sans-serif]"
+                className="font-bold text-foreground/80 text-[46px] xs:text-[64px] sm:text-[130px] md:text-[240px] lg:text-[340px] xl:text-[420px] leading-[0.85] tracking-[-0.05em] whitespace-nowrap uppercase font-['Barlow_Condensed',sans-serif]"
                 style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
               />
             </div>

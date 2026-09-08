@@ -55,13 +55,13 @@ export default function UseCases() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-3">
             TARGET USE CASES
           </div>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
             Architected for <br />
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Every Scale of Operation
             </span>
           </h2>
-          <p className="text-muted-foreground text-sm md:text-base">
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
             Whether launching a bootstrapped product or scaling enterprise organic search, our multi-agent fleet adapts to your exact operational requirements.
           </p>
         </motion.div>
@@ -81,7 +81,7 @@ export default function UseCases() {
               viewport={{ once: true }}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.35, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className={`group p-6 rounded-xl border flex flex-col justify-between transition-all duration-200 ${
+              className={`relative group p-6 rounded-xl border flex flex-col justify-between transition-all duration-200 ${
                 persona.featured
                   ? "border-primary/40 bg-card shadow-xl shadow-primary/8 ring-1 ring-primary/20"
                   : "border-border/80 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 shadow-xs"

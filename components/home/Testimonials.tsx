@@ -86,7 +86,7 @@ export default function Testimonials() {
   return (
     <section
       id="testimonials"
-      className="w-full bg-background py-24 md:py-32 px-6 sm:px-8 md:px-12 lg:px-16 relative overflow-hidden selection:bg-primary selection:text-white"
+      className="w-full bg-background py-20 md:py-32 px-4 sm:px-8 md:px-12 lg:px-16 relative overflow-hidden selection:bg-primary selection:text-white"
     >
       {/* Ambient background glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/10 blur-[120px] rounded-full pointer-events-none -z-10" />
@@ -106,12 +106,12 @@ export default function Testimonials() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* 1. Top Header Row */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 lg:mb-16 gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 lg:mb-16 gap-6">
           <div className="max-w-2xl">
             {/* Section Tag Row */}
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-2 mb-4 sm:mb-6">
               {/* Circular Badge with continuously rotating sparkles */}
-              <div className="w-11 h-11 rounded-full border border-border/80 bg-card/80 backdrop-blur-md flex items-center justify-center shadow-xs overflow-hidden">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border/80 bg-card/80 backdrop-blur-md flex items-center justify-center shadow-xs overflow-hidden">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{
@@ -125,15 +125,15 @@ export default function Testimonials() {
               </div>
 
               {/* Pill Badge */}
-              <div className="px-3.5 py-1.5 rounded-full border border-border/80 bg-card/80 backdrop-blur-md flex items-center justify-center shadow-xs">
-                <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              <div className="px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-border/80 bg-card/80 backdrop-blur-md flex items-center justify-center shadow-xs">
+                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-primary">
                   Verified Social Proof
                 </span>
               </div>
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.12] tracking-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.15] sm:leading-[1.12] tracking-tight">
               What growth teams say
               <br />
               <span className="bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent">

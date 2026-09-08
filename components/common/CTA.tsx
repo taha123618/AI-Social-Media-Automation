@@ -191,14 +191,14 @@ function CTAComponent({ className = "" }: CTAProps) {
               AUTONOMOUS REACH AT SCALE
             </span>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-[1.12] tracking-tight mb-6">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-[1.15] sm:leading-[1.12] tracking-tight mb-4 sm:mb-6">
               Ready to scale<br />
               <span className="bg-gradient-to-r from-primary via-accent to-purple-400 bg-clip-text text-transparent">
                 your marketing fleet?
               </span>
             </h2>
 
-            <p className="text-muted-foreground text-[15px] sm:text-base leading-relaxed mb-10 max-w-[480px] mx-auto">
+            <p className="text-muted-foreground text-xs sm:text-[15px] md:text-base leading-relaxed mb-8 sm:mb-10 max-w-[480px] mx-auto">
               Deploy 13 autonomous AI agents to research, draft, format, and
               dispatch high-converting social campaigns with deterministic brand
               safety.
@@ -207,9 +207,9 @@ function CTAComponent({ className = "" }: CTAProps) {
             <div className="flex justify-center">
               <Link
                 href="/talk-to-sales"
-                className="bg-primary text-primary-foreground font-bold py-4 px-10 rounded-full flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(168,85,247,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-transform text-sm sm:text-base cursor-pointer"
+                className="bg-primary text-primary-foreground font-bold py-3 sm:py-4 px-6 sm:px-10 rounded-full flex items-center justify-center gap-2 sm:gap-3 shadow-[0_10px_30px_rgba(168,85,247,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-transform text-xs sm:text-base cursor-pointer"
               >
-                <Phone size={18} fill="currentColor" />
+                <Phone size={16} fill="currentColor" />
                 <span>Book a FREE consultation</span>
               </Link>
             </div>
