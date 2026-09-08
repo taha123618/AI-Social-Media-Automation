@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { acceptTeamInvitation } from './actions';
 import { Button } from '@/components/ui/button';
+import { AlertCircle, Users } from 'lucide-react';
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -19,16 +20,21 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   if (!invitation || invitation.acceptedAt || invitation.expiresAt < new Date()) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-          <h1 className="mb-4 text-2xl font-bold text-white">Invalid Invitation</h1>
-          <p className="mb-6 text-gray-400">
-            This invitation link is invalid, has expired, or has already been accepted.
-          </p>
-          <Link href="/">
-            <Button className="w-full">Return Home</Button>
-          </Link>
+      <div className="w-full max-w-md mx-auto bg-card/95 backdrop-blur-xl rounded-2xl border border-border p-6 sm:p-8 text-center shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center text-destructive mx-auto mb-4">
+          <AlertCircle className="w-6 h-6" />
         </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
+          Invalid Invitation
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+          This invitation link is invalid, has expired, or has already been accepted.
+        </p>
+        <Link href="/" className="block">
+          <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm rounded-lg transition-colors shadow-xs">
+            Return Home
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -37,21 +43,27 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   if (!session?.user?.id) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-          <h1 className="mb-4 text-2xl font-bold text-white">Sign In Required</h1>
-          <p className="mb-6 text-gray-400">
-            You have been invited to join <strong>{invitation.business.name}</strong> as a <strong>{invitation.role}</strong>.
-            Please sign in or create an account to accept.
-          </p>
-          <div className="space-y-3">
-            <Link href="/login">
-              <Button className="w-full">Sign In</Button>
-            </Link>
-            <Link href="/register">
-              <Button variant="outline" className="w-full">Create Account</Button>
-            </Link>
-          </div>
+      <div className="w-full max-w-md mx-auto bg-card/95 backdrop-blur-xl rounded-2xl border border-border p-6 sm:p-8 text-center shadow-sm">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary via-indigo-600 to-purple-600 flex items-center justify-center font-extrabold text-white text-lg shadow-md shadow-primary/25 mx-auto mb-4">
+          S
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
+          Sign In Required
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+          You have been invited to join <span className="font-semibold text-foreground">{invitation.business.name}</span> as a <span className="font-semibold text-foreground">{invitation.role}</span>. Please sign in or create an account to accept.
+        </p>
+        <div className="space-y-3">
+          <Link href={`/login?redirect=/invite/${token}`} className="block">
+            <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm rounded-lg transition-colors shadow-xs">
+              Sign In
+            </Button>
+          </Link>
+          <Link href={`/register?redirect=/invite/${token}`} className="block">
+            <Button variant="outline" className="w-full h-11 border-border font-medium text-sm rounded-lg hover:bg-muted transition-colors">
+              Create Account
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -64,25 +76,25 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     if (result.success) {
       redirect('/team');
     }
-    // We could handle errors here, but for simplicity, the page will just redirect
-    // or we can just redirect in the action. Let's redirect in the action directly
-    // but action is called via form.
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-        <h1 className="mb-4 text-2xl font-bold text-white">Join Workspace</h1>
-        <p className="mb-6 text-gray-400">
-          <strong>{invitation.invitedBy.name}</strong> has invited you to join <strong>{invitation.business.name}</strong> as a <strong>{invitation.role}</strong>.
-        </p>
-
-        <form action={acceptInviteAction}>
-          <Button type="submit" className="w-full">
-            Accept Invitation
-          </Button>
-        </form>
+    <div className="w-full max-w-md mx-auto bg-card/95 backdrop-blur-xl rounded-2xl border border-border p-6 sm:p-8 text-center shadow-sm">
+      <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mx-auto mb-4">
+        <Users className="w-6 h-6" />
       </div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
+        Join Workspace
+      </h1>
+      <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+        <span className="font-semibold text-foreground">{invitation.invitedBy.name}</span> has invited you to join <span className="font-semibold text-foreground">{invitation.business.name}</span> as a <span className="font-semibold text-foreground">{invitation.role}</span>.
+      </p>
+
+      <form action={acceptInviteAction}>
+        <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm rounded-lg transition-colors shadow-xs cursor-pointer">
+          Accept Invitation
+        </Button>
+      </form>
     </div>
   );
 }

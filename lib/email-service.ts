@@ -19,6 +19,30 @@ export const sendEmail = async (
   await addEmailToQueue(emailData);
 };
 
+// Send registration OTP verification email
+export const sendRegisterOtpEmail = async (email: string, otp: string, name?: string) => {
+  console.log(`🔐 [REGISTER 2FA OTP] Generating code for ${email}: ${otp}`);
+  const template = getEmailTemplate('register-otp', { otp, name });
+
+  try {
+    const { sendEmailImmediate } = await import('./send-email');
+    const result = await sendEmailImmediate(email, template.subject, template.html);
+    if (result?.success) {
+      return;
+    }
+    console.warn(`⚠️ Immediate SMTP send failed (${result?.error}). Enqueueing to BullMQ email queue...`);
+  } catch (err) {
+    console.warn('⚠️ sendEmailImmediate exception. Enqueueing to BullMQ email queue...', err);
+  }
+
+  // BullMQ Queue Fallback
+  try {
+    await sendEmail(email, 'register-otp', { otp, name });
+  } catch (queueErr) {
+    console.error('❌ Failed to enqueue OTP email to BullMQ:', queueErr);
+  }
+};
+
 // Send registration/welcome email
 export const sendRegistrationEmail = async (email: string, name?: string) => {
   await sendEmail(email, 'registration', {

@@ -7,20 +7,37 @@ import { EmailData } from '@/lib/emailQueue';
 // ─────────────────────────────────────────────────────────────────────────────
 // Nodemailer transporter
 // ─────────────────────────────────────────────────────────────────────────────
-const transporter = createTransport({
-  service: process.env.EMAIL_HOST ||"gmail",
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
- auth: {
-    user: process.env.EMAIL_USER || "saad@devteampro.com",
-    pass: process.env.EMAIL_PASSWORD || "efkcvxwxghikaoyg",
-  },
-  // pool: true,
-  // maxConnections: 5,
-  // maxMessages: 100,
-});
+const createEmailWorkerTransporter = () => {
+  const service = process.env.EMAIL_HOST;
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASSWORD;
 
+  if (!service || !user || !pass) {
+    throw new Error('EMAIL_HOST, EMAIL_USER, and EMAIL_PASSWORD must be defined');
+  }
 
+  if (service.toLowerCase() === "gmail") {
+    return createTransport({
+      service: "gmail",
+      auth: {
+        user,
+        pass,
+      },
+    });
+  }
+
+  return createTransport({
+    host: service,
+    port: parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || "587"),
+    secure: process.env.EMAIL_USE_TLS === "false" ? false : process.env.SMTP_SECURE === "true",
+    auth: {
+      user,
+      pass,
+    },
+  });
+};
+
+const transporter = createEmailWorkerTransporter();
 
 // Verify SMTP connection on startup
 transporter.verify((error) => {
@@ -42,8 +59,9 @@ export const emailWorker = new Worker<EmailData>(
 
     console.log(`📤 Processing email job ${job.id} → ${to}`);
 
+    const from = process.env.EMAIL_FROM || `"AI Social Media Automation" <${process.env.EMAIL_USER}>`;
     const info = await transporter.sendMail({
-      from: `"AI Social Media Automation" <${process.env.EMAIL_USER || 'saad@devteampro.com'}>`,
+      from,
       to,
       subject,
       html,

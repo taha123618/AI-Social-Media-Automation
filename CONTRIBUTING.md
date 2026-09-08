@@ -22,19 +22,23 @@ Our project follows a **Modular Monolith** architecture designed for scalability
 
 | Component | Technology |
 |-----------|------------|
-| **Backend** | Node.js with TypeScript |
-| **Database** | PostgreSQL + Prisma ORM |
-| **Vector Search** | pgvector extension |
-| **AI Orchestration** | LangChain.js |
-| **Task Queue** | BullMQ + Redis |
-| **Async Processing** | Image/Video generation workers |
+| **Frontend Framework** | Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS v4 |
+| **UI Components** | shadcn/ui, Radix UI, Framer Motion, GSAP, Recharts, TipTap |
+| **Backend & APIs** | Next.js Route Handlers, Server Actions, Zod runtime schemas |
+| **Authentication** | Better Auth with bcrypt (12 rounds) & Google OAuth 2.0 PKCE |
+| **Database & ORM** | PostgreSQL 16/18 with `pgvector` extension, Prisma 7 ORM |
+| **Task Queue & Cache** | BullMQ 5.68 + Redis 7 |
+| **AI Orchestration** | Custom AI Engine (`services/ai/*`), OpenRouter (dev), OpenAI (prod) |
+| **Asset Storage** | AWS S3 / Cloudflare R2 presigned URLs with magic byte verification |
 
 ### Architectural Principles
 
-- **Modular Design**: Each feature module should be independently testable
-- **Type Safety**: No `any` types allowed; use strict TypeScript interfaces
-- **Separation of Concerns**: Util logic, service logic, and API routes should be clearly separated
-- **Error Management**: Use the global `AppError` class for consistent error handling
+- **Tenant Isolation**: ALL database queries MUST be scoped by `businessId` or `organizationId`. Unscoped queries are strictly prohibited.
+- **SSRF Prevention**: All external URLs fetched by agents or services MUST be validated via `SecurityService.validateSafeUrl()`.
+- **Modular Design**: Each feature module under `features/` is self-contained with services, types, hooks, and workers.
+- **Type Safety**: No `any` types allowed; strict TypeScript compiler mode is enforced across the entire codebase.
+- **Async Processing**: Long-running operations (AI generation, video processing, bulk publishing) are dispatched via BullMQ workers, never run synchronously in API handlers.
+- **Error Management**: Use standard error handling and log to `AuditLog` or `ErrorLog` models.
 
 ---
 
@@ -182,30 +186,38 @@ const response = await llm.generate({
    - Include unit and integration tests
    - Update TypeScript types
 
-3. **Write Tests**
+3. **Run Code Quality Checks & Tests**
+   Before opening a pull request, ensure all validation gates pass:
    ```bash
-   npm run test -- --watch
-   npm run test:coverage
+   # Run linter
+   npm run lint
+
+   # Run TypeScript static analysis (8GB heap allocation)
+   node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
+
+   # Run automated test suites (58 suites / 281 tests)
+   npm test
+
+   # Run production build
+   npm run build
+
+   # Synchronize agent skills (if .agents/skills/ was modified)
+   npm run skills:sync
    ```
 
 4. **Submit Pull Request**
-   - Title: `feat(module): descriptive title`
-   - Description: Link to issue, explain changes, note breaking changes
-   - Push to origin and open PR to `development`
+   - Title format: `feat(module): descriptive title` or `fix(module): descriptive title`
+   - Fill out the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) completely.
+   - Push to origin and open a PR targeting the `development` branch.
 
-5. **Code Review**
-   - Request review from team leads
-   - **For AI/RAG changes**: Mandatory human review for prompt safety
-   - Address feedback and push updates
-   - Resolve conflicts if any
+5. **Code Review & Community Guidelines**
+   - All contributions must comply with our [Code of Conduct](CODE_OF_CONDUCT.md).
+   - Review the [Security Policy](SECURITY.md) before making security-sensitive changes.
+   - For AI agent and tool additions, register them in `services/ai/index.ts` with Zod schemas.
 
-6. **Merge**
-   - Squash and merge into `development`
-   - Use conventional commit message for merge commit
-
-### Release Process
-
-Releases go through: `development` → `main` with semantic versioning
+6. **Merge & Release**
+   - PRs must pass automated CI checks and receive approval from a maintainer.
+   - Commits are squashed with conventional commit messages.
 
 ---
 
@@ -213,9 +225,10 @@ Releases go through: `development` → `main` with semantic versioning
 
 ### Prerequisites
 
-- Node.js 20+
-- Docker & Docker Compose
-- Git
+- **Node.js**: `>=22.18.0` or **Bun**: `>=1.0.0`
+- **PostgreSQL**: Version 16+ with `pgvector` extension
+- **Redis**: Version 6+ (locally or via Docker)
+- **Docker & Docker Compose** (optional, for local services)
 
 ### Quick Start
 

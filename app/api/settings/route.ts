@@ -4,13 +4,19 @@ import { SettingsService } from '@/features/settings/services/settings.service';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
-import { getActiveWorkspaceId } from '@/app/(user)/actions/workspace';
 
 const updateBusinessSchema = z.object({
   name: z.string().optional(),
-  website: z.string().url().optional().or(z.literal('')),
-  logo: z.string().optional(),
-  location: z.string().optional(),
+  website: z.string().url().optional().or(z.literal('')).or(z.null()),
+  logo: z.string().optional().or(z.null()),
+  location: z.string().optional().or(z.null()),
+  description: z.string().optional().or(z.null()),
+  industry: z.string().optional().or(z.null()),
+  size: z.string().optional().or(z.null()),
+  timezone: z.string().optional(),
+  autoApproveContent: z.boolean().optional(),
+  requireApprovalForPosts: z.boolean().optional(),
+  contentGuidelines: z.string().optional().or(z.null()),
 });
 
 const updateProfileSchema = z.object({
@@ -36,14 +42,20 @@ async function getAuthContext(req: NextRequest) {
   }
 
   // Get businessId from cookie/header
-  const businessId = req.headers.get('x-business-id') || 
+  let businessId = req.headers.get('x-business-id') || 
     req.cookies.get('active-business-id')?.value;
+
+  if (!businessId || businessId === 'active-workspace' || businessId === '') {
+    const membership = await prisma.businessMember.findFirst({
+      where: { userId: session.user.id },
+      select: { businessId: true },
+    });
+    businessId = membership?.businessId;
+  }
 
   if (!businessId) {
     throw new Error('Business ID required');
   }
-
-  console.log('[Settings API] User:', session.user.id, 'Business:', businessId);
 
   return { user: session.user, businessId };
 }
@@ -82,8 +94,6 @@ export async function PUT(req: NextRequest) {
     const userMember = await prisma.businessMember.findUnique({
       where: { userId_businessId: { userId: user.id, businessId } },
     });
-
-    console.log('[Settings API] User member check:', userMember);
 
     if (!userMember) {
       return NextResponse.json({ error: "Unauthorized - Not a member of this business" }, { status: 403 });

@@ -8,17 +8,23 @@ import { ContentDetailsModal } from '@/app/(user)/contents/_components/content-d
 import { ScheduleContentModal } from '@/app/(user)/contents/_components/schedule-content-modal';
 import { AnimatePresence } from 'framer-motion';
 import { ContentDraft } from '@/app/(user)/contents/types';
+import { useCurrentBusiness } from '@/hooks/use-current-business';
 
 export function GlobalModals() {
+  const { businessId: currentBusinessId } = useCurrentBusiness();
+
   const [showContentModal, setShowContentModal] = useState(false);
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedContent, setSelectedContent] = useState<ContentDraft | null>(null);
-  const [selectedInvitation, setSelectedInvitation] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [activeBusinessId, setActiveBusinessId] = useState<string>('placeholder-id');
+  const [selectedInvitation, setSelectedInvitation] = useState<any>(null);
+  const [activeBusinessId, setActiveBusinessId] = useState<string>('');
+
+  const targetBusinessId = activeBusinessId || currentBusinessId || '';
 
   useEffect(() => {
     const openCreateContent = (e: Event) => {
@@ -45,17 +51,20 @@ export function GlobalModals() {
       if (detail?.businessId) setActiveBusinessId(detail.businessId);
       setShowInviteModal(true);
     };
+
     const openWorkflow = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       setSelectedTemplate(detail?.workflow || detail?.template || null);
       if (detail?.businessId) setActiveBusinessId(detail.businessId);
       setShowWorkflowModal(true);
     };
+
     const openDetails = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       setSelectedContent(detail?.content || null);
       setShowDetailsModal(true);
     };
+
     const openSchedule = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       setSelectedContent(detail?.content || null);
@@ -85,61 +94,64 @@ export function GlobalModals() {
   }, []);
 
   return (
-    <>
+    <AnimatePresence>
       {showContentModal && (
         <CreateContentModal
-          key={selectedContent?.id || 'new'}
+          key={selectedContent?.id || 'new-content-modal'}
           onClose={() => {
             setShowContentModal(false);
             setSelectedContent(null);
           }}
           initialData={selectedContent}
-          businessId={activeBusinessId}
+          businessId={targetBusinessId}
         />
       )}
+
       {showWorkflowModal && (
         <CreateWorkflowModal
+          key="create-workflow-modal"
           onClose={() => {
             setShowWorkflowModal(false);
             setSelectedTemplate(null);
           }}
           initialData={selectedTemplate}
-          businessId={activeBusinessId}
+          businessId={targetBusinessId}
         />
       )}
+
       {showInviteModal && (
         <InviteMemberModal
+          key="invite-member-modal"
           onClose={() => {
             setShowInviteModal(false);
             setSelectedInvitation(null);
           }}
           initialData={selectedInvitation}
-          businessId={activeBusinessId}
+          businessId={targetBusinessId}
         />
       )}
 
-      <AnimatePresence>
-        {showDetailsModal && selectedContent && (
-          <ContentDetailsModal
-            key="content-details-modal"
-            content={selectedContent}
-            onClose={() => {
-              setShowDetailsModal(false);
-              setSelectedContent(null);
-            }}
-          />
-        )}
-        {showScheduleModal && selectedContent && (
-          <ScheduleContentModal
-            key="schedule-content-modal"
-            content={selectedContent}
-            onClose={() => {
-              setShowScheduleModal(false);
-              setSelectedContent(null);
-            }}
-          />
-        )}
-      </AnimatePresence>
-    </>
+      {showDetailsModal && selectedContent && (
+        <ContentDetailsModal
+          key="content-details-modal"
+          content={selectedContent}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedContent(null);
+          }}
+        />
+      )}
+
+      {showScheduleModal && selectedContent && (
+        <ScheduleContentModal
+          key="schedule-content-modal"
+          content={selectedContent}
+          onClose={() => {
+            setShowScheduleModal(false);
+            setSelectedContent(null);
+          }}
+        />
+      )}
+    </AnimatePresence>
   );
 }

@@ -57,12 +57,50 @@ if (!membership) {
 }
 ```
 
+### 1.4 Admin Panel Security & Audit Trails
+- Administrative routes (`/admin/*`) require dedicated session verification via `validateAdminSession()` (`lib/admin-auth.ts`).
+- All privileged actions (manual billing plan updates, user status toggles, webhook retries) must write an immutable audit trail entry to `AuditLog`:
+```typescript
+await prisma.auditLog.create({
+  data: {
+    userId: adminId,
+    action: 'ADMIN_OVERRIDE_PLAN',
+    entityType: 'SUBSCRIPTION',
+    entityId: subscriptionId,
+    metadata: { previousPlan, newPlan, reasonNote },
+  },
+});
+```
+
+### 1.5 Server-Side Request Forgery (SSRF) Defense
+- When fetching external URLs (e.g. website scrapers, webhooks, RSS feeds), **never** execute raw `fetch()` on unsanitized user inputs.
+- Always validate destination hostnames and IP addresses against restricted networks, loopback, and Cloud Instance Metadata (IMDS):
+```typescript
+import { SecurityService } from '@/lib/security';
+
+const urlValidation = SecurityService.validateSafeUrl(targetUrl);
+if (!urlValidation.safe) {
+  throw new Error(`SSRF attempt blocked: ${urlValidation.reason}`);
+}
+```
+
+### 1.6 API Perimeter Defense (Deny by Default)
+- `proxy.ts` enforces a **Deny-by-Default** perimeter policy across all `/api/*` endpoints.
+- Any API route not explicitly listed in `PUBLIC_PREFIXES` automatically requires a valid user session.
+- Never add wildcards or weaken `PUBLIC_PREFIXES` to bypass authentication for tests.
+
+### 1.7 Production Secrets & Admin Cryptography
+- Never allow fallback placeholder secrets in production (`lib/admin-auth.ts`).
+- Ensure `ADMIN_JWT_SECRET` is at least 32 characters in production environments.
+- Always use `getAdminJwtSecret()` to verify admin sessions.
+
 ---
 
 ## 2. Testing Security Scenarios
 
 ```bash
-# Run security test suite
-npm test -- lib/__tests__/security.test.ts
-npm test -- lib/__tests__/auth-security.test.ts
+# Run security regression & defensive validation test suites
+bun test lib/__tests__/cybersecurity-regression.test.ts
+bun test lib/__tests__/security.test.ts
+bun test lib/__tests__/auth-security.test.ts
 ```

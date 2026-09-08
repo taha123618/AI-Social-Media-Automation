@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -6,12 +7,17 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { GoogleAuthButton } from "./google-auth-button";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -47,53 +53,88 @@ export function LoginForm() {
     }
   };
 
-
   return (
     <div className="w-full">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-black text-slate-700 dark:text-slate-300 tracking-tight ml-1">
-            Email Address
-          </label>
-          <input
+      {/* Google OAuth Button First */}
+      <GoogleAuthButton text="Sign in with Google" />
+
+      {/* Separator */}
+      <div className="relative my-6">
+        <div className="border-t border-border" />
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-sm text-muted-foreground">
+          or
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2 text-left">
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">
+            Email
+          </Label>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="john.doe@example.com"
-            className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 focus:outline-none focus:ring-4 focus:ring-[#2D46FF]/10 focus:border-[#2D46FF] transition-all text-slate-950 dark:text-white font-bold placeholder:text-slate-300 dark:placeholder:text-slate-700"
+            placeholder="you@company.com"
+            className="h-11 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
           />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between ml-1">
-            <label htmlFor="password" className="text-sm font-black text-slate-700 dark:text-slate-300 tracking-tight">
-              Login Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-xs font-black text-[#2D46FF] dark:text-blue-500 hover:text-blue-600 transition-colors"
+        <div className="space-y-2 text-left">
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            Password
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              className="h-11 pr-10 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded focus:outline-none cursor-pointer"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              Forgot password?
-            </Link>
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
           </div>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-            className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 focus:outline-none focus:ring-4 focus:ring-[#2D46FF]/10 focus:border-[#2D46FF] transition-all text-slate-950 dark:text-white font-bold placeholder:text-slate-300 dark:placeholder:text-slate-700"
-          />
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="remember"
+              checked={remember}
+              onCheckedChange={(checked) => setRemember(Boolean(checked))}
+            />
+            <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground cursor-pointer select-none">
+              Remember for 30 days
+            </Label>
+          </div>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-primary hover:underline transition-colors duration-200"
+          >
+            Forgot password?
+          </Link>
         </div>
 
         {error && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="text-red-500 text-xs font-bold ml-1"
+            className="text-destructive text-xs font-medium"
           >
             {error}
           </motion.div>
@@ -102,28 +143,18 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full h-16 bg-[#2D46FF] hover:bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-blue-200 dark:shadow-none transition-all active:scale-[0.98] disabled:opacity-70"
+          className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200 font-medium text-sm rounded-lg cursor-pointer shadow-xs"
         >
           {isLoading ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Signing in...</span>
+            </div>
           ) : (
-            "Login"
+            "Sign in to workspace"
           )}
         </Button>
       </form>
-
-      <div className="mt-10">
-        <div className="relative mb-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t-2 border-slate-100 dark:border-slate-800" />
-          </div>
-          <div className="relative flex justify-center text-xs font-black uppercase tracking-[0.2em]">
-            <span className="px-4 bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-600">or continue with</span>
-          </div>
-        </div>
-
-        <GoogleAuthButton />
-      </div>
     </div>
   );
 }

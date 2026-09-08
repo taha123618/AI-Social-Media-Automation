@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building, Globe, Save, Info, ShieldCheck, Target, CheckCircle, AlertCircle } from 'lucide-react';
 import { BusinessSettings } from '../types';
 import { motion } from 'framer-motion';
@@ -40,22 +40,80 @@ export function BusinessSettingsPanel({ businessSettings: initialBusinessSetting
 }
 
 function BusinessSettingsPanelForm({ settings, businessId }: { settings: BusinessSettings | null; businessId: string | null }) {
-  const [formData, setFormData] = useState<BusinessFormData>({
-    name: settings?.name || '',
-    website: settings?.website || '',
-    location: settings?.location || '',
-    description: settings?.description || '',
-    industry: settings?.industry || '',
-    size: settings?.size || '',
-    timezone: settings?.timezone || 'UTC',
-    autoApproveContent: settings?.autoApproveContent || false,
-    requireApprovalForPosts: settings?.requireApprovalForPosts ?? true,
-    contentGuidelines: settings?.contentGuidelines || '',
+  const cacheKey = businessId ? `socialai_business_settings_${businessId}` : 'socialai_business_settings_default';
+
+  const [formData, setFormData] = useState<BusinessFormData>(() => {
+    if (typeof window !== 'undefined' && settings?.name) {
+      return {
+        name: settings?.name || '',
+        website: settings?.website || '',
+        location: settings?.location || '',
+        description: settings?.description || '',
+        industry: settings?.industry || '',
+        size: settings?.size || '',
+        timezone: settings?.timezone || 'UTC',
+        autoApproveContent: settings?.autoApproveContent || false,
+        requireApprovalForPosts: settings?.requireApprovalForPosts ?? true,
+        contentGuidelines: settings?.contentGuidelines || '',
+      };
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          return JSON.parse(cached);
+        }
+      } catch (e) {}
+    }
+    return {
+      name: settings?.name || '',
+      website: settings?.website || '',
+      location: settings?.location || '',
+      description: settings?.description || '',
+      industry: settings?.industry || '',
+      size: settings?.size || '',
+      timezone: settings?.timezone || 'UTC',
+      autoApproveContent: settings?.autoApproveContent || false,
+      requireApprovalForPosts: settings?.requireApprovalForPosts ?? true,
+      contentGuidelines: settings?.contentGuidelines || '',
+    };
   });
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const hasHydrated = useHasHydrated();
   
+  // Sync state whenever settings change
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        name: settings.name || '',
+        website: settings.website || '',
+        location: settings.location || '',
+        description: settings.description || '',
+        industry: settings.industry || '',
+        size: settings.size || '',
+        timezone: settings.timezone || 'UTC',
+        autoApproveContent: settings.autoApproveContent || false,
+        requireApprovalForPosts: settings.requireApprovalForPosts ?? true,
+        contentGuidelines: settings.contentGuidelines || '',
+      });
+      if (typeof window !== 'undefined' && businessId) {
+        localStorage.setItem(cacheKey, JSON.stringify({
+          name: settings.name || '',
+          website: settings.website || '',
+          location: settings.location || '',
+          description: settings.description || '',
+          industry: settings.industry || '',
+          size: settings.size || '',
+          timezone: settings.timezone || 'UTC',
+          autoApproveContent: settings.autoApproveContent || false,
+          requireApprovalForPosts: settings.requireApprovalForPosts ?? true,
+          contentGuidelines: settings.contentGuidelines || '',
+        }));
+      }
+    }
+  }, [settings, businessId]);
+
   // Use React Query mutation for updating settings with Axios
   const updateSettingsMutation = useUpdateBusinessSettings(businessId || '');
 
@@ -83,6 +141,11 @@ function BusinessSettingsPanelForm({ settings, businessId }: { settings: Busines
         contentGuidelines: formData.contentGuidelines || null,
       });
 
+      // Write-through to localStorage
+      if (typeof window !== 'undefined' && businessId) {
+        localStorage.setItem(cacheKey, JSON.stringify(formData));
+      }
+
       setSaveStatus('success');
       toast.success('Business settings saved successfully!');
 
@@ -96,10 +159,18 @@ function BusinessSettingsPanelForm({ settings, businessId }: { settings: Busines
   };
 
   const handleInputChange = (field: keyof BusinessFormData, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const next = {
+        ...prev,
+        [field]: value
+      };
+      if (typeof window !== 'undefined' && businessId) {
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(next));
+        } catch (e) {}
+      }
+      return next;
+    });
 
     // Reset save status when user makes changes
     if (saveStatus === 'success' || saveStatus === 'error') {

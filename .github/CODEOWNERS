@@ -1,0 +1,23 @@
+# Core Repository Codeowners
+
+# Global repository maintainers
+* @taha123618
+
+# AI Engine, Autonomous Agents & Workflows
+/services/ai/ @taha123618
+/.agents/ @taha123618
+
+# Security, Edge Proxy & Authentication
+/lib/security.ts @taha123618
+/lib/admin-auth.ts @taha123618
+/lib/auth.ts @taha123618
+/proxy.ts @taha123618
+
+# Database & Migrations
+/prisma/ @taha123618
+
+# DevOps, CI/CD & Infrastructure
+/.github/workflows/ @taha123618
+/infrastructure/ @taha123618
+/Dockerfile @taha123618
+/docker-compose*.yml @taha123618

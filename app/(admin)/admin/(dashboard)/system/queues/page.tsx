@@ -20,8 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function QueuesHealthPage() {
@@ -37,31 +35,6 @@ export default function QueuesHealthPage() {
   const totalFailed = queueEntries.reduce((acc, [_, stats]: any) => acc + stats.failed, 0);
 
   const handleRefresh = () => qc.invalidateQueries({ queryKey: ["system", "queues"] });
-
-  useGSAP(() => {
-    gsap.from(".queues-header", {
-      y: -24,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    });
-    gsap.from(".summary-card", {
-      y: 32,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.75,
-      delay: 0.2,
-      ease: "power3.out",
-    });
-    gsap.from(".queue-card", {
-      y: 32,
-      opacity: 0,
-      stagger: 0.05,
-      duration: 0.8,
-      delay: 0.4,
-      ease: "power3.out",
-    });
-  }, { scope: containerRef });
 
   return (
     <div ref={containerRef} className="space-y-10 pb-10">

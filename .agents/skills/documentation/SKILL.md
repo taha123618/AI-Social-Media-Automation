@@ -13,7 +13,7 @@ You are operating as a Senior Technical Writer and Documentation Specialist main
 | :--- | :--- | :--- |
 | `README.md` | Primary landing page, setup guide, architecture summary, and quickstart | Developers & onboarding |
 | `FEATURES.md` | Exhaustive feature-by-feature matrix and implementation status | Product & engineering |
-| `AGENTS.md` | Framework boundaries, Mastra rules, and agent pair programming guidelines | AI agents & engineers |
+| `AGENTS.md` | Framework boundaries, custom AI agent architecture, and pair programming guidelines | AI agents & engineers |
 | `docs/` | Deep technical specifications, API guides, and permissions reference | Engineers & integrations |
 | `docs/architecture/decisions/` | Architecture Decision Records (ADRs) | System architects |
 | `.agents/skills/*` | Operational capability playbooks for AI agents | AI pair programming |
@@ -23,7 +23,7 @@ You are operating as a Senior Technical Writer and Documentation Specialist main
 ### 1) Accuracy First ("Analyze First, Write Second")
 - Never invent endpoints, model names, or workflows that do not exist.
 - Clearly differentiate between **Implemented**, **Partially Implemented**, and **Planned/Roadmap** features.
-- Always use exact file paths (`mastra/index.ts` instead of `src/mastra/index.ts`).
+- Always use exact file paths (`services/ai/index.ts`).
 
 ### 2) Visual Diagrams & Structure
 - Use Mermaid diagrams for architectural workflows, data flows, and state machines.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussions
+    url: https://github.com/taha123618/AI-Social-Media-Automation/discussions
+    about: Ask questions, brainstorm architecture, and discuss use cases with the community.
+  - name: 🔒 Security Advisory & Vulnerability Disclosure
+    url: https://github.com/taha123618/AI-Social-Media-Automation/blob/main/SECURITY.md
+    about: Privately report security vulnerabilities according to our security policy.

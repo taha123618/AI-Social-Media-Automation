@@ -42,6 +42,7 @@ export interface PlanFeatureConfig {
   white_label_reports: boolean;
   api_access: boolean;
   custom_model_finetuning: boolean;
+  [key: string]: any;
 }
 
 export interface PlanDefinition {
@@ -226,3 +227,36 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     ],
   },
 };
+
+/**
+ * Developer Extension Abstraction
+ * Register a new boolean feature across all tiers.
+ */
+export function registerFeature(config: {
+  key: string;
+  name: string;
+  tiers: Record<PlanId, boolean>;
+}) {
+  for (const [planId, enabled] of Object.entries(config.tiers)) {
+    if (PLANS[planId as PlanId]) {
+      PLANS[planId as PlanId].features[config.key] = enabled;
+    }
+  }
+}
+
+/**
+ * Developer Extension Abstraction
+ * Register a new metered numeric feature across all tiers.
+ */
+export function registerMeteredFeature(config: {
+  key: string;
+  name: string;
+  unit: string;
+  limits: Record<PlanId, number>; // -1 for unlimited
+}) {
+  for (const [planId, limit] of Object.entries(config.limits)) {
+    if (PLANS[planId as PlanId]) {
+      PLANS[planId as PlanId].features[config.key] = limit;
+    }
+  }
+}

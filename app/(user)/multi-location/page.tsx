@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, BarChart3, Globe, Settings, RefreshCw, ChevronRight, Building2, Sparkles, MessageSquare, Plus, Loader2 } from 'lucide-react';
+import { MapPin, BarChart3, Globe, Settings, RefreshCw, ChevronRight, Building2, Sparkles, Plus, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 const businessTypeOptions = [
   { value: 'RESTAURANT', label: 'Restaurant' },
@@ -78,55 +79,60 @@ export default function MultiLocationPage() {
   const [brandVoice, setBrandVoice] = useState('Professional yet friendly, focusing on local expertise and quality service.');
 
   const handleGetCurrentLocation = async () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
+    if (typeof window === 'undefined' || !navigator?.geolocation) {
+      toast.info("Geolocation is not supported. Please enter your location manually.");
       return;
     }
 
     setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await res.json();
-          if (data && data.address) {
-            const city = data.address.city || data.address.town || data.address.village || data.address.suburb || '';
-            const state = data.address.state || '';
-            let formattedAddress = '';
-            if (city) {
-              formattedAddress = city;
-              if (state) formattedAddress += `, ${state}`;
+    try {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await res.json();
+            if (data && data.address) {
+              const city = data.address.city || data.address.town || data.address.village || data.address.suburb || '';
+              const state = data.address.state || '';
+              let formattedAddress = '';
+              if (city) {
+                formattedAddress = city;
+                if (state) formattedAddress += `, ${state}`;
+              } else {
+                formattedAddress = data.display_name;
+              }
+              setNewLocation((prev) => ({ ...prev, address: formattedAddress }));
+              toast.success(`Location set to: ${formattedAddress}`);
             } else {
-              formattedAddress = data.display_name;
+              const coordStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+              setNewLocation((prev) => ({ ...prev, address: coordStr }));
+              toast.success(`Coordinates set to: ${coordStr}`);
             }
-            setNewLocation((prev) => ({ ...prev, address: formattedAddress }));
-            toast.success(`Location set to: ${formattedAddress}`);
-          } else {
+          } catch {
             const coordStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
             setNewLocation((prev) => ({ ...prev, address: coordStr }));
-            toast.success(`Coordinates set to: ${coordStr}`);
+            toast.success(`Location set to coordinates: ${coordStr}`);
+          } finally {
+            setIsLocating(false);
           }
-        } catch (error) {
-          console.error('Error reverse geocoding:', error);
-          const coordStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          setNewLocation((prev) => ({ ...prev, address: coordStr }));
-          toast.success(`Location set to coordinates: ${coordStr}`);
-        } finally {
+        },
+        (error) => {
           setIsLocating(false);
-        }
-      },
-      (error) => {
-        console.error('Geolocation error:', error?.message);
-        setIsLocating(false);
-        if (error?.code === 3) {
-          toast.error('Geolocation timed out. Please enter your location manually.');
-        } else {
-          toast.error('Could not get your location. Please enter it manually.');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+          if (error?.code === 1) {
+            toast.info('Location access not permitted. Please enter your location manually.');
+          } else if (error?.code === 3) {
+            toast.info('Geolocation timed out. Please enter your location manually.');
+          } else {
+            toast.info('Could not detect location. Please enter it manually.');
+          }
+        },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      );
+    } catch {
+      setIsLocating(false);
+      toast.info('Please enter your location manually.');
+    }
   };
 
   useEffect(() => {
@@ -208,7 +214,7 @@ export default function MultiLocationPage() {
       } else {
         toast.error(result.error || 'Failed to add location');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setIsAddingLocation(false);
@@ -234,7 +240,7 @@ export default function MultiLocationPage() {
       } else {
         toast.error('Failed to get advice');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setIsGettingAdvice(false);
@@ -261,7 +267,7 @@ export default function MultiLocationPage() {
       } else {
         toast.error('Failed to customize content');
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred');
     } finally {
       setIsCustomizing(false);
@@ -270,145 +276,151 @@ export default function MultiLocationPage() {
 
   if (businessLoading || isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-12 w-1/3" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
         </div>
-        <Skeleton className="h-96 w-full" />
+        <Skeleton className="h-80 w-full rounded-2xl" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4"
-      >
-        <div className="flex items-center gap-4">
-          <Globe className="h-10 w-10 text-blue-600" />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Multi-Location Hub</h1>
-            <p className="text-slate-500">Manage brand consistency and performance across all business locations</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-card border border-border/80 shadow-xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">
+              Franchise &amp; Branch Distribution
+            </span>
           </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+            Multi-Location Hub
+            <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+              Geo-Targeted
+            </Badge>
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Enforce corporate brand alignment, localized hashtags, and regional analytics across physical branches.
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-2.5">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2 border-blue-200 text-blue-600 hover:bg-blue-50">
-                <Sparkles className="h-4 w-4" />
-                Get Strategy
+              <Button variant="outline" size="sm" className="h-9 rounded-xl px-3.5 text-xs font-semibold gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span>AI Strategist</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-lg rounded-2xl bg-card border-border">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-600" />
-                  AI Multi-Location Strategist
+                <DialogTitle className="flex items-center gap-2 text-base font-bold">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  AI Regional Strategist
                 </DialogTitle>
-                <DialogDescription>
-                  Ask our AI agent for strategic advice on managing your locations.
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Generate cross-location syndication strategies and regional performance optimizations.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="query">What would you like to know?</Label>
+              <div className="space-y-3 py-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="query" className="text-xs font-medium text-foreground">Strategic Query</Label>
                   <Textarea
                     id="query"
-                    placeholder="e.g., How can I improve engagement at my underperforming locations?"
+                    placeholder="e.g., How can I tailor weekend promotion campaigns for urban vs suburban branches?"
                     value={adviceQuery}
                     onChange={(e) => setAdviceQuery(e.target.value)}
+                    className="text-xs min-h-[90px] rounded-xl bg-secondary/30 border-border/80"
                   />
                 </div>
                 {adviceResult && (
-                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 max-h-[300px] overflow-y-auto">
-                    <p className="text-sm text-blue-900 whitespace-pre-wrap">{adviceResult}</p>
+                  <div className="p-3 bg-secondary/40 rounded-xl border border-border/80 max-h-[220px] overflow-y-auto text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+                    {adviceResult}
                   </div>
                 )}
               </div>
-              <DialogFooter>
+              <DialogFooter className="gap-2">
                 <Button
                   onClick={handleGetAdvice}
                   disabled={isGettingAdvice || !adviceQuery}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  size="sm"
+                  className="h-9 rounded-xl px-4 text-xs font-semibold gap-1.5 shadow-xs"
                 >
-                  {isGettingAdvice ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                  Generate Strategy
+                  {isGettingAdvice ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  <span>Generate Strategy</span>
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
-          <Dialog onOpenChange={(open) => {
-            if (open) {
-              handleGetCurrentLocation();
-            }
-          }}>
+          <Dialog>
             <DialogTrigger asChild>
-              <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4" />
-                Add Location
+              <Button size="sm" className="h-9 rounded-xl px-4 text-xs font-semibold gap-1.5 shadow-xs active:scale-95">
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add Location</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md rounded-2xl bg-card border-border">
               <DialogHeader>
-                <DialogTitle>Add New Location</DialogTitle>
-                <DialogDescription>
-                  Enter the details of the new business location.
+                <DialogTitle className="text-base font-bold">Add Physical Branch</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Register a physical store, branch, or franchise territory.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Business Name</Label>
+              <div className="grid gap-3 py-2">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="name" className="text-xs font-medium">Location Name</Label>
                   <Input
                     id="name"
                     value={newLocation.name}
                     onChange={(e) => setNewLocation({ ...newLocation, name: e.target.value })}
-                    placeholder="e.g. Downtown Office"
+                    placeholder="e.g. Downtown Flagship Store"
+                    className="h-9 text-xs rounded-xl bg-secondary/30 border-border/80"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="address">Address / City</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="address" className="text-xs font-medium">Address / City</Label>
                   <div className="relative flex items-center">
                     <Input
                       id="address"
                       value={newLocation.address}
                       onChange={(e) => setNewLocation({ ...newLocation, address: e.target.value })}
-                      placeholder="e.g. New York, NY"
-                      className="pr-10"
+                      placeholder="e.g. Austin, TX"
+                      className="h-9 text-xs pr-9 rounded-xl bg-secondary/30 border-border/80"
                     />
                     <button
                       type="button"
                       onClick={handleGetCurrentLocation}
                       disabled={isLocating}
-                      className="absolute right-3 text-slate-400 hover:text-blue-600 disabled:opacity-50 transition-colors"
-                      title="Detect current location"
+                      className="absolute right-2.5 text-muted-foreground hover:text-primary disabled:opacity-50 transition-colors"
+                      title="Detect current GPS location"
                     >
                       {isLocating ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
                       ) : (
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-3.5 w-3.5" />
                       )}
                     </button>
                   </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="type">Business Type</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="type" className="text-xs font-medium">Industry Category</Label>
                   <Select
                     value={newLocation.type}
                     onValueChange={(value) => setNewLocation({ ...newLocation, type: value })}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="h-9 text-xs rounded-xl bg-secondary/30 border-border/80">
                       <SelectValue placeholder="Select Business Type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl bg-card border-border">
                       {businessTypeOptions.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
+                        <SelectItem key={opt.value} value={opt.value} className="text-xs">
                           {opt.label}
                         </SelectItem>
                       ))}
@@ -417,166 +429,173 @@ export default function MultiLocationPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleAddLocation} disabled={isAddingLocation} className="bg-blue-600">
-                  {isAddingLocation && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  Add Location
+                <Button onClick={handleAddLocation} disabled={isAddingLocation} size="sm" className="h-9 rounded-xl px-4 text-xs font-semibold">
+                  {isAddingLocation && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+                  Register Location
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
-      </motion.div>
+      </div>
 
       {/* Analytics Summary */}
       {analytics && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-blue-50/50 border-blue-100">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-blue-600 font-semibold uppercase text-[10px] tracking-wider">Total Locations</CardDescription>
-              <CardTitle className="text-3xl font-bold">{analytics.locationCount}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-purple-50/50 border-purple-100">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-purple-600 font-semibold uppercase text-[10px] tracking-wider">Total Engagement</CardDescription>
-              <CardTitle className="text-3xl font-bold">{analytics.totalEngagement.toLocaleString()}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-emerald-50/50 border-emerald-100">
-            <CardHeader className="pb-2">
-              <CardDescription className="text-emerald-600 font-semibold uppercase text-[10px] tracking-wider">Total Leads</CardDescription>
-              <CardTitle className="text-3xl font-bold">{analytics.totalLeads.toLocaleString()}</CardTitle>
-            </CardHeader>
-          </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Total Locations</p>
+            <p className="text-2xl font-mono font-bold text-foreground">{analytics.locationCount}</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">Total Engagement</p>
+            <p className="text-2xl font-mono font-bold text-foreground">{analytics.totalEngagement.toLocaleString()}</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-xs space-y-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-500">Total Leads</p>
+            <p className="text-2xl font-mono font-bold text-foreground">{analytics.totalLeads.toLocaleString()}</p>
+          </div>
         </div>
       )}
 
       {/* Main Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="list" className="gap-2">
-            <MapPin className="h-4 w-4" />
-            Locations
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
+        <TabsList className="h-9 p-1 bg-secondary/50 rounded-xl border border-border/80">
+          <TabsTrigger value="list" className="h-7 px-3 text-xs font-semibold rounded-lg gap-1.5">
+            <MapPin className="h-3.5 w-3.5" />
+            <span>Locations ({locations.length})</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Global Settings
+          <TabsTrigger value="settings" className="h-7 px-3 text-xs font-semibold rounded-lg gap-1.5">
+            <Settings className="h-3.5 w-3.5" />
+            <span>Global Brand Settings</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="list" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {locations?.map((loc) => (
+        <TabsContent value="list" className="space-y-4 mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {locations.map((loc) => (
               <Dialog key={loc.id}>
                 <DialogTrigger asChild>
-                  <Card
-                    className="group hover:shadow-lg transition-all cursor-pointer border-slate-200"
+                  <div
+                    className="group p-5 rounded-2xl border border-border/80 bg-card hover:border-primary/40 shadow-xs transition-all cursor-pointer space-y-4"
                     onClick={() => {
                       setSelectedLocation(loc);
                       setCustomizedContent('');
                     }}
                   >
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <Badge variant="outline" className="mb-2">{getBusinessTypeLabel(loc.businessType)}</Badge>
-                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                      </div>
-                      <CardTitle>{loc.name}</CardTitle>
-                      <CardDescription className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {loc.location || 'Address not set'}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between text-sm pt-4 border-t border-slate-100">
-                        <span className="text-slate-500">Status</span>
-                        <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none">Active</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <div className="flex items-start justify-between gap-2">
+                      <Badge variant="outline" className="text-[10px] font-mono border-border">
+                        {getBusinessTypeLabel(loc.businessType)}
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                        {loc.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                        <span className="truncate">{loc.location || 'Address not set'}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-3 border-t border-border/60">
+                      <span className="text-muted-foreground text-[11px] font-mono">Sync Status</span>
+                      <Badge variant="default" className="text-[10px] font-mono bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
+                        Active
+                      </Badge>
+                    </div>
+                  </div>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-md rounded-2xl bg-card border-border">
                   <DialogHeader>
-                    <DialogTitle>Customize Content for {loc.name}</DialogTitle>
-                    <DialogDescription>
-                      Adapt your global content to fit this specific location's local flavor.
+                    <DialogTitle className="text-base font-bold">Localize Copy: {loc.name}</DialogTitle>
+                    <DialogDescription className="text-xs text-muted-foreground">
+                      Adapt global social media copy with regional dialect, addresses, and hashtags.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Base Content</Label>
+                  <div className="space-y-3 py-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium">Master Copy</Label>
                       <Textarea
-                        placeholder="Paste your global social media post here..."
+                        placeholder="Paste base marketing message here..."
                         value={baseContent}
                         onChange={(e) => setBaseContent(e.target.value)}
-                        className="min-h-[100px]"
+                        className="text-xs min-h-[90px] rounded-xl bg-secondary/30 border-border/80"
                       />
                     </div>
                     {customizedContent && (
-                      <div className="space-y-2">
-                        <Label className="text-blue-600 flex items-center gap-1">
-                          <Sparkles className="h-3 w-3" />
-                          AI Customized Version
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-primary flex items-center gap-1">
+                          <Sparkles className="h-3.5 w-3.5" />
+                          AI Localized Variation
                         </Label>
-                        <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-sm whitespace-pre-wrap">
+                        <div className="p-3 bg-secondary/40 rounded-xl border border-border/80 text-xs text-foreground whitespace-pre-wrap leading-relaxed">
                           {customizedContent}
                         </div>
                       </div>
                     )}
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="gap-2">
                     <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => {
                         setBaseContent('');
                         setCustomizedContent('');
                       }}
+                      className="h-8 rounded-lg text-xs"
                     >
                       Clear
                     </Button>
                     <Button
                       onClick={handleCustomize}
                       disabled={isCustomizing || !baseContent}
-                      className="bg-blue-600"
+                      size="sm"
+                      className="h-8 rounded-lg text-xs font-semibold gap-1.5"
                     >
-                      {isCustomizing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                      Adapt for Location
+                      {isCustomizing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                      <span>Localize for Branch</span>
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             ))}
+
             {locations.length === 0 && (
-              <div className="col-span-full py-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                <Building2 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500 font-medium">No additional locations found</p>
-                <Button variant="link" className="text-blue-600 mt-2">Create your first branch</Button>
+              <div className="col-span-full py-16 text-center rounded-2xl border border-dashed border-border/80 bg-card/40">
+                <Building2 className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                <p className="text-xs font-bold text-foreground">No branch locations registered</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Add physical branches to start localizing content automatically.</p>
               </div>
             )}
           </div>
         </TabsContent>
 
-        <TabsContent value="settings" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Global Brand Settings</CardTitle>
-              <CardDescription>Changes here will be applied to all business locations unless overridden.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold">Master Brand Voice</label>
-                <textarea
-                  className="w-full p-3 rounded-xl border border-slate-200 min-h-[100px]"
-                  placeholder="Describe your brand voice..."
-                  value={brandVoice}
-                  onChange={(e) => setBrandVoice(e.target.value)}
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSyncSettings}>Save & Sync All</Button>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="settings" className="mt-0">
+          <div className="p-5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-4 max-w-2xl">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Master Brand Voice</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Baseline tone and core principles enforced across all regional branches.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Textarea
+                className="w-full text-xs p-3 rounded-xl border-border/80 bg-secondary/30 min-h-[110px]"
+                placeholder="Describe your brand voice and mandatory guidelines..."
+                value={brandVoice}
+                onChange={(e) => setBrandVoice(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <Button size="sm" className="h-9 px-4 rounded-xl text-xs font-semibold shadow-xs" onClick={handleSyncSettings}>
+                Save &amp; Sync Across Branches
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

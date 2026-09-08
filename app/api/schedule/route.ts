@@ -3,6 +3,7 @@ import { apiHandler, parseBody } from '@/lib/api-utils';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
 import { SystemLogger } from '@/features/system/services/logger.service';
+import { EntitlementGuard } from '@/lib/guards/entitlement.guard';
 
 export const GET = apiHandler(async (req, { businessId, user }) => {
   if (!businessId) {
@@ -71,6 +72,12 @@ export const PUT = apiHandler(async (req, { businessId, user }) => {
     return NextResponse.json({ error: "Business ID required" }, { status: 400 });
   }
 
+  // 1. Enforce Scheduling Feature Entitlement (requires Starter or Pro plan)
+  const featureError = await EntitlementGuard.requireFeature(businessId, 'scheduling');
+  if (featureError) {
+    return featureError;
+  }
+
   const body = await parseBody(req, scheduleUpdateSchema);
 
   const draft = await prisma.contentDraft.findUnique({
@@ -125,7 +132,7 @@ export const DELETE = apiHandler(async (req, { businessId, user }) => {
   const draftId = url.searchParams.get('draftId');
 
   if (!draftId) {
-    return NextResponse.json({ error: "Draft ID required" }, { status: 400 });
+    return NextResponse.json({ error: "draftId is required" }, { status: 400 });
   }
 
   const draft = await prisma.contentDraft.findUnique({
@@ -136,18 +143,10 @@ export const DELETE = apiHandler(async (req, { businessId, user }) => {
     return NextResponse.json({ error: "Draft not found" }, { status: 404 });
   }
 
-  // Can only unschedule if status is SCHEDULED
-  if (draft.status !== 'SCHEDULED') {
-    return NextResponse.json(
-      { error: "Can only unschedule posts with SCHEDULED status" },
-      { status: 400 }
-    );
-  }
-
   const updated = await prisma.contentDraft.update({
     where: { id: draftId },
     data: {
-      status: 'APPROVED',
+      status: 'DRAFT',
       scheduledFor: null,
     },
   });

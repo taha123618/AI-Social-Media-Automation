@@ -7,64 +7,54 @@ import { LoginForm } from "@/components/auth/login-form";
 export default function LoginPage() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full"
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full max-w-md mx-auto bg-card/95 backdrop-blur-xl rounded-2xl shadow-sm border border-border p-6 sm:p-8"
     >
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] dark:shadow-none p-10 border border-slate-100 dark:border-slate-800 relative overflow-hidden group">
-        <div className="mb-10 text-center relative z-10">
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl font-black text-slate-950 dark:text-white tracking-tighter mb-3"
-          >
-            Welcome back
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-slate-500 dark:text-slate-400 font-bold"
-          >
-            Sign in to manage your account.
-          </motion.p>
+      {/* Header: Project Brand & Welcome */}
+      <div className="flex flex-col items-center mb-6 text-center">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary via-indigo-600 to-purple-600 flex items-center justify-center font-extrabold text-white text-lg shadow-md shadow-primary/25 mb-3.5">
+          S
         </div>
-
-        <LoginForm />
-
-        <div className="mt-10 text-center relative z-10">
-          <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
-            Don't have an account yet?{" "}
-            <Link
-              href="/register"
-              className="text-[#2D46FF] dark:text-blue-500 hover:text-blue-600 transition-colors"
-            >
-              Create New Account
-            </Link>
-          </p>
-        </div>
-
-        {/* Subtle Gradient Accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <h1 className="text-2xl font-bold text-foreground">
+          Log in to SocialAI
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          Welcome back! Access your autonomous social workspace.
+        </p>
       </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500 px-6 leading-relaxed"
-      >
-        By continuing, you agree to our{" "}
-        <Link href="/terms" className="text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-colors underline decoration-slate-200 dark:decoration-slate-800 underline-offset-4">
-          Terms of Service
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-colors underline decoration-slate-200 dark:decoration-slate-800 underline-offset-4">
-          Privacy Policy
+      {/* Segment Switcher Tabs */}
+      <div className="flex rounded-lg border border-border p-1 mb-6 bg-muted/40">
+        <Link
+          href="/register"
+          className="flex-1 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-md text-center"
+        >
+          Sign up
         </Link>
-      </motion.p>
+        <button
+          type="button"
+          className="flex-1 py-2 text-sm font-medium text-foreground bg-background rounded-md relative text-center shadow-xs cursor-default"
+        >
+          Log in
+          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
+        </button>
+      </div>
+
+      {/* Login Form Core */}
+      <LoginForm />
+
+      {/* Footer Link */}
+      <p className="text-center text-sm text-muted-foreground mt-6">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="text-primary hover:underline font-medium transition-colors duration-200"
+        >
+          Start free trial
+        </Link>
+      </p>
     </motion.div>
   );
 }

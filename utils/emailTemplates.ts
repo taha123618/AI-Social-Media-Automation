@@ -67,6 +67,69 @@ export const getEmailTemplate = (
         `,
       };
 
+    case 'register-otp':
+      return {
+        subject: `${data.otp} is your verification code for ${appName}`,
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Verification Code</title>
+  <style>
+    body { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif; background-color:#0B0F19; color:#f8fafc; line-height:1.6; -webkit-font-smoothing: antialiased; }
+    .wrapper { padding: 40px 20px; text-align: center; }
+    .container { max-width:600px; margin:0 auto; background-color:#141A29; border: 1px solid #1E293B; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.5); text-align: left; }
+    .header { background: linear-gradient(180deg, rgba(45, 70, 255, 0.15) 0%, rgba(20, 26, 41, 0) 100%), #141A29; padding:40px 40px 20px 40px; text-align:center; border-bottom: 1px solid #1E293B; }
+    .header .icon-container { width: 64px; height: 64px; margin: 0 auto 20px auto; background-color: rgba(45, 70, 255, 0.12); border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(45, 70, 255, 0.3); }
+    .header h1 { margin:0; font-size:24px; font-weight:700; color: #ffffff; letter-spacing: -0.5px; }
+    .content { padding:40px; }
+    .message { font-size:16px; color:#94a3b8; margin:0 0 24px 0; }
+    .message strong { color: #ffffff; font-weight: 600; }
+    .otp-container { text-align: center; margin: 32px 0; }
+    .otp-box { display: inline-block; background: linear-gradient(135deg, rgba(45, 70, 255, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%); border: 2px solid #3b82f6; border-radius: 14px; padding: 18px 36px; font-size: 36px; font-weight: 800; letter-spacing: 10px; color: #60a5fa; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25); text-shadow: 0 2px 10px rgba(96, 165, 250, 0.5); }
+    .security-notice { background-color: #0B0F19; border: 1px solid #1E293B; border-radius: 10px; padding: 16px 20px; font-size: 13px; color: #94a3b8; margin-top: 28px; }
+    .security-notice strong { color: #f59e0b; }
+    .footer { padding:30px 40px; text-align:center; color:#64748b; font-size:13px; border-top: 1px solid #1E293B; background-color: #0B0F19; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <div class="icon-container">
+          <span style="font-size: 28px; line-height: 64px;">🛡️</span>
+        </div>
+        <h1>Two-Factor Verification</h1>
+      </div>
+      <div class="content">
+        <p class="message">Hi <strong>${data.name || 'there'}</strong>,</p>
+        <p class="message">Thank you for registering with <strong>${appName}</strong>. To verify your email address and activate your workspace, enter the 6-digit verification code below:</p>
+        
+        <div class="otp-container">
+          <div class="otp-box">${data.otp}</div>
+        </div>
+
+        <p class="message" style="text-align:center; font-size:14px; color:#64748b;">
+          ⏳ This code is valid for <strong>2 minutes</strong>.
+        </p>
+
+        <div class="security-notice">
+          <strong>Security Tip:</strong> Never share this one-time password with anyone. Our support team will never ask for your code.
+        </div>
+      </div>
+      <div class="footer">
+        © ${currentYear} ${appName}. All rights reserved.<br>
+        This is an automated security message, please do not reply.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+        `,
+      };
+
     case 'registration':
       return {
         subject: 'Welcome to AI Social Media Automation!',

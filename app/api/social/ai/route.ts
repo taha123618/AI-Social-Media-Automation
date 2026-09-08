@@ -1,4 +1,3 @@
-// import { mastra } from '@/mastra';
 import { ImageService } from '@/features/image_generation/services/image.service';
 import { AnalyticsService } from '@/features/social/services/analytics.service';
 import { AIService } from '@/services/ai/ai.service';
@@ -182,11 +181,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'generate-image') {
-      // Mastra approach - commented out
-      // const tool = mastra.getTool('generate-post-image');
-      // const result = await tool.execute(input);
-      // return NextResponse.json({ success: true, ...result });
-
       // Direct ImageService approach
       try {
         // Map frontend 'size' parameter to 'aspectRatio'
@@ -252,11 +246,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'fetch-analytics') {
-      // Mastra approach - commented out
-      // const tool = mastra.getTool('fetch-post-analytics');
-      // const result = await tool.execute({ postId: input.postId });
-      // return NextResponse.json({ success: true, ...result });
-
       // Direct AnalyticsService approach
       try {
 

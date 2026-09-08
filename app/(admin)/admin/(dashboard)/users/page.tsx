@@ -17,8 +17,6 @@ import { Plus, Users, RefreshCw, Shield, Search, Loader2, Trash2 } from "lucide-
 import Link from "next/link";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
 
 import { MessagingDialog } from "../../_components/dialogs/messaging-dialog";
@@ -47,24 +45,6 @@ export default function UserManagementPage() {
       fetchUsers();
    }, []);
 
-   useGSAP(() => {
-      if (!isLoading) {
-         gsap.from(".header-section", {
-            y: -20,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.out"
-         });
-         gsap.from(".table-section", {
-            y: 30,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            delay: 0.2
-         });
-      }
-   }, [isLoading]);
-
    async function handleDelete() {
       if (!deleteId) return;
       setIsDeleting(true);
@@ -90,7 +70,7 @@ export default function UserManagementPage() {
                   </div>
                   <h1 className="text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm">User Registry</h1>
                </div>
-               <p className="text-muted-foreground text-lg font-medium ml-15">Manage platform identities, permissions, and service access.</p>
+               <p className="text-muted-foreground text-lg font-medium ml-15">Manage application subscriber accounts and customer identities (administrators are managed in Admin Registry).</p>
             </div>
             <div className="flex items-center gap-3">
                <Button variant="outline" onClick={fetchUsers} className="glass-card hover:bg-muted font-semibold px-6 border-border" disabled={isLoading}>

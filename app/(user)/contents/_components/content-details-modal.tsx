@@ -1,22 +1,26 @@
 'use client';
 
-import { X, Copy, Check, Calendar, Clock, Sparkles } from 'lucide-react';
+import { X, Copy, Check, Calendar, Clock, Sparkles, Edit3, Send } from 'lucide-react';
 import { FaXTwitter } from 'react-icons/fa6';
 import { FaLinkedin, FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { ContentDraft } from '../types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ContentDetailsModalProps {
   content: ContentDraft;
   onClose: () => void;
 }
 
-const icons: Record<string, any> = {
+const PLATFORM_ICONS: Record<string, any> = {
   TWITTER: FaXTwitter,
   LINKED_IN: FaLinkedin,
+  LINKEDIN: FaLinkedin,
   INSTAGRAM: FaInstagram,
   FACEBOOK: FaFacebook,
   YOUTUBE: FaYoutube,
@@ -35,134 +39,149 @@ export function ContentDetailsModal({ content, onClose }: ContentDetailsModalPro
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const rawText = typeof content.generatedContent === 'string'
+    ? content.generatedContent
+    : (content.generatedContent as any)?.text || JSON.stringify(content.generatedContent, null, 2);
+
+  const wordCount = rawText ? rawText.trim().split(/\s+/).length : 0;
+  const charCount = rawText ? rawText.length : 0;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+        exit={{ opacity: 0, scale: 0.95, y: 12 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl bg-card border border-border/80 shadow-2xl overflow-hidden text-foreground"
       >
-        <div className="flex h-[80vh] flex-col">
-          {/* Header */}
-          <div className="p-8 pb-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                    <Sparkles className="h-3 w-3" />
-                    {content.status}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{content.intent}</span>
-                </div>
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-                  {content.title || 'Untitled Content'}
-                </h2>
+        {/* Ambient Glow */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Modal Header */}
+        <div className="p-5 sm:p-6 pb-4 border-b border-border/60 flex items-start justify-between shrink-0 relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Badge variant="secondary" className="text-[10px] uppercase font-mono font-bold tracking-wider bg-primary/10 text-primary border-primary/30">
+                <Sparkles className="h-3 w-3 mr-1" />
+                {content.status}
+              </Badge>
+              <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-mono">
+                {content.intent}
+              </Badge>
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">
+              {content.title || 'Untitled Post'}
+            </h2>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 relative z-10 custom-scrollbar">
+          {/* Metadata Cards */}
+          <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-secondary/30 border border-border/70">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center text-primary shadow-xs">
+                <Calendar className="h-4 w-4" />
               </div>
-              <button
-                onClick={onClose}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
+              <div>
+                <div className="text-[10px] font-mono uppercase text-muted-foreground font-semibold">Created Date</div>
+                <div className="text-xs font-semibold text-foreground" suppressHydrationWarning>
+                  {format(new Date(content.createdAt), 'MMM d, yyyy')}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center text-primary shadow-xs">
+                <Clock className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-[10px] font-mono uppercase text-muted-foreground font-semibold">Scheduled Slot</div>
+                <div className="text-xs font-semibold text-foreground" suppressHydrationWarning>
+                  {content.scheduledFor ? format(new Date(content.scheduledFor), 'MMM d, h:mm a') : 'Not Scheduled'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyable Content Card */}
+          <div className="relative rounded-xl border border-border/80 bg-secondary/20 p-4 sm:p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono text-muted-foreground">
+                {wordCount} words • {charCount} characters
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopy}
+                className="h-7 px-2.5 text-xs rounded-lg gap-1.5 bg-card/80 backdrop-blur-xs hover:bg-card shadow-xs"
               >
-                <X className="h-5 w-5" />
-              </button>
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+              </Button>
             </div>
+
+            <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-foreground font-sans selection:bg-primary/20">
+              {rawText}
+            </p>
           </div>
 
-          {/* Content Body */}
-          <div className="flex-1 overflow-y-auto p-8 pt-0 custom-scrollbar">
-            <div className="space-y-8">
-              {/* Info Bar */}
-              <div className="grid grid-cols-2 gap-4 rounded-3xl bg-slate-50 p-6 dark:bg-slate-800/50">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center dark:bg-slate-900 shadow-sm">
-                    <Calendar className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Created</div>
-                    <div className="text-sm font-bold text-slate-700 dark:text-slate-300" suppressHydrationWarning>
-                      {format(new Date(content.createdAt), 'MMM d, yyyy')}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center dark:bg-slate-900 shadow-sm">
-                    <Clock className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Scheduled For</div>
-                    <div className="text-sm font-bold text-slate-700 dark:text-slate-300" suppressHydrationWarning>
-                      {content.scheduledFor ? format(new Date(content.scheduledFor), 'MMM d, h:mm a') : 'Not Scheduled'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Text Area */}
-              <div className="relative group">
-                <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-2 rounded-xl bg-white/90 backdrop-blur-sm px-4 py-2 text-xs font-bold text-slate-700 shadow-lg hover:bg-white transition-all dark:bg-slate-800/90 dark:text-white"
+          {/* Target Channels */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 font-mono">
+              Target Channels
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {content.platforms.map((platform) => {
+                const Icon = PLATFORM_ICONS[platform] || Sparkles;
+                return (
+                  <div
+                    key={platform}
+                    className="flex items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-1.5 shadow-xs"
                   >
-                    {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                    {copied ? 'Copied' : 'Copy Text'}
-                  </button>
-                </div>
-                <div className="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
-                  <p className="whitespace-pre-wrap text-lg leading-relaxed text-slate-700 dark:text-slate-300">
-                    {typeof content.generatedContent === 'string'
-                      ? content.generatedContent
-                      : (content.generatedContent as any)?.text || JSON.stringify(content.generatedContent, null, 2)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Platforms */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Target Platforms</h4>
-                <div className="flex flex-wrap gap-3">
-                  {content.platforms.map(platform => {
-                    const Icon = icons[platform] || Sparkles;
-                    return (
-                      <div key={platform} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900 shadow-sm">
-                        <Icon className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{platform}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                    <Icon className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-xs font-semibold text-foreground">{platform}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
+        </div>
 
-          {/* Footer Actions */}
-          <div className="border-t border-slate-100 p-8 dark:border-slate-800 flex gap-4">
-            <button
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('edit-content', { detail: { content: JSON.parse(JSON.stringify(content)) } }));
-                onClose();
-              }}
-              className="flex-1 rounded-2xl border border-slate-200 py-4 font-bold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-white dark:hover:bg-slate-800"
-            >
-              Edit Content
-            </button>
-            <button
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('open-scheduler', { detail: { content } }));
-                onClose();
-              }}
-              className="flex-[2] rounded-2xl bg-blue-600 py-4 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 active:scale-95"
-            >
-              Schedule Publication
-            </button>
-          </div>
+        {/* Footer Actions */}
+        <div className="p-4 sm:p-5 border-t border-border/60 bg-card/50 flex items-center justify-between shrink-0 relative z-10">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('edit-content', { detail: { content: JSON.parse(JSON.stringify(content)) } }));
+              onClose();
+            }}
+            className="h-9 px-4 text-xs rounded-xl gap-1.5"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+            <span>Edit Copy</span>
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open-scheduler', { detail: { content } }));
+              onClose();
+            }}
+            className="h-9 px-5 text-xs font-semibold rounded-xl gap-1.5 shadow-sm active:scale-95"
+          >
+            <Clock className="h-3.5 w-3.5" />
+            <span>Schedule Publication</span>
+          </Button>
         </div>
       </motion.div>
     </div>

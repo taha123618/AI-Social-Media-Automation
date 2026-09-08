@@ -134,6 +134,8 @@ export type UserRow = {
   name: string;
   email: string;
   createdAt: string | Date;
+  plan?: string;
+  billingStatus?: string;
   _count?: {
     memberships: number;
     workflows: number;
@@ -158,6 +160,39 @@ export const userColumns = (
           </div>
         </div>
       )
+    },
+    {
+      accessorKey: "plan",
+      header: "Plan Tier",
+      cell: ({ row }) => {
+        const plan = (row.original.plan || "free").toLowerCase();
+        const status = row.original.billingStatus || "ACTIVE";
+        const getBadgeStyles = () => {
+          switch (plan) {
+            case "enterprise":
+              return "bg-purple-500/10 text-purple-500 border-purple-500/20";
+            case "pro":
+              return "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
+            case "starter":
+              return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+            default:
+              return "bg-muted text-muted-foreground border-border";
+          }
+        };
+
+        return (
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={`font-mono font-bold uppercase text-[10px] px-2.5 py-0.5 rounded-lg border ${getBadgeStyles()}`}>
+              {plan}
+            </Badge>
+            {status !== "ACTIVE" && (
+              <Badge variant="destructive" className="text-[9px] font-mono uppercase px-1.5 py-0.2">
+                {status}
+              </Badge>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "createdAt",

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { verifyAdminToken } from "@/lib/admin-auth";
 
@@ -12,7 +11,6 @@ async function getMaintenanceStatus(origin: string, cookieHeader: string, ipHead
         cookie: cookieHeader,
         "x-forwarded-for": ipHeader,
       },
-      // Explicitly opt-out of the fetch cache so Next.js never serves a stale response
       cache: "no-store",
     });
 
@@ -50,7 +48,10 @@ export async function proxy(request: NextRequest) {
 
   if (!isBypassedPrefix) {
     const cookieHeader = request.headers.get("cookie") || "";
-    const ipHeader = request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip") || "127.0.0.1";
+    const ipHeader =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
     const status = await getMaintenanceStatus(origin, cookieHeader, ipHeader);
 
     if (status.isEnabled && !status.bypassed) {
@@ -88,89 +89,88 @@ export async function proxy(request: NextRequest) {
   // Handle /maintenance page logic separately if it's hit directly
   if (pathname === "/maintenance") {
     const cookieHeader = request.headers.get("cookie") || "";
-    const ipHeader = request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip") || "127.0.0.1";
+    const ipHeader =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "127.0.0.1";
     const status = await getMaintenanceStatus(origin, cookieHeader, ipHeader);
 
     if (!status.isEnabled || status.bypassed) {
       return NextResponse.redirect(new URL("/", request.url));
     }
-    // Maintenance page itself must not be cached
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // 2. Authentication & Route Protection Checks
-  // Admin route protection
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  // 2. Admin Route Protection (Web & API)
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
+  const isAdminLogin = pathname === "/admin/login" || pathname === "/api/admin/login";
+
+  if (isAdminRoute && !isAdminLogin) {
     const adminToken = request.cookies.get("admin_token")?.value;
     const adminSession = adminToken ? await verifyAdminToken(adminToken) : null;
 
     if (!adminSession) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Unauthorized: Admin session required" }, { status: 401 });
+      }
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
     if (pathname.startsWith("/admin/admins") && adminSession.role !== "super_admin") {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Forbidden: Super admin privilege required" }, { status: 403 });
+      }
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
 
-    // Admin routes must also never be cached so they always reflect live data
     return withNoCacheHeaders(NextResponse.next());
   }
 
-  // Protected User Routes check
-  const PROTECTED_PREFIXES = [
-    "/dashboard/:path*",
-    "/contents/:path*",
-    "/schedule/:path*",
-    "/settings/:path*",
-    "/team/:path*",
-    "/workflow/:path*",
-    "/videos/:path*",
-    "/image/:path*",
-    "/gallery/:path*",
-    "/reviews/:path*",
-    "/analytics/:path*",
-    "/knowledge/:path*",
-    "/posts/:path*",
-    "/post-schedule/:path*",
-    "/social/:path*",
-    "/api/dashboard/:path*",
-    "/api/user/:path*",
-    "/api/contents/:path*",
-    "/api/schedule/:path*",
-    "/api/settings/:path*",
-    "/api/team/:path*",
-    "/api/workflow/:path*",
-    "/api/videos/:path*",
-    "/api/image/:path*",
-    "/api/gallery/:path*",
+  // 3. Exempt Public Routes, Webhooks & Health Probes
+  const PUBLIC_PREFIXES = [
+    "/api/auth",
+    "/api/admin/login",
+    "/api/billing/webhooks",
+    "/api/system/alerts",
+    "/api/maintenance/status",
+    "/api/cron",
+    "/api/health",
+    "/api/metrics",
+    "/api/reviews/submit",
+    "/api/talk-to-sales/leads",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/terms",
+    "/privacy",
+    "/review",
   ];
 
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
-  );
+  const isPublic =
+    pathname === "/" ||
+    PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
-  if (isProtected) {
+  if (isPublic) {
+    return withNoCacheHeaders(NextResponse.next());
+  }
+
+  // 4. API Routes Security — Deny by Default
+  // Any API route not explicitly declared public in PUBLIC_PREFIXES MUST require an authenticated session
+  if (pathname.startsWith("/api/")) {
     const session = await auth.api.getSession({
-      headers: await headers(),
+      headers: request.headers,
     });
 
-    if (!session) {
-      if (pathname.startsWith("/api")) {
-        return NextResponse.json(
-          { error: "Authentication required" },
-          { status: 401 }
-        );
-      }
-
-      const loginUrl = new URL("/login", request.url);
-      // Prevent open-redirect vulnerabilities by validating the redirect path
-      const safeRedirect = pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/dashboard";
-      loginUrl.searchParams.set("redirect", safeRedirect);
-      return NextResponse.redirect(loginUrl);
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
-    // Add user info to request headers for downstream use
+    // Forward authenticated user identity to downstream route handlers
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-user-id", session.user.id);
     requestHeaders.set("x-user-email", session.user.email);
@@ -181,9 +181,64 @@ export async function proxy(request: NextRequest) {
     return withNoCacheHeaders(protectedRes);
   }
 
-  // Default pass-through — still prevent browser caching for all HTML pages
+  // 5. Protected User Web Pages
+  const PROTECTED_PAGE_PREFIXES = [
+    "/dashboard",
+    "/contents",
+    "/schedule",
+    "/settings",
+    "/team",
+    "/workflow",
+    "/workflows",
+    "/videos",
+    "/image",
+    "/gallery",
+    "/reviews",
+    "/analytics",
+    "/knowledge",
+    "/posts",
+    "/post-schedule",
+    "/social",
+    "/blog",
+    "/ad-campaigns",
+    "/competitors",
+    "/trends",
+    "/activity",
+  ];
+
+  const isProtectedPage = PROTECTED_PAGE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  if (isProtectedPage) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session?.user) {
+      const loginUrl = new URL("/login", request.url);
+      const safeRedirect =
+        pathname.startsWith("/") && !pathname.startsWith("//") ? pathname : "/dashboard";
+      loginUrl.searchParams.set("redirect", safeRedirect);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-user-id", session.user.id);
+    requestHeaders.set("x-user-email", session.user.email);
+
+    const protectedRes = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+    return withNoCacheHeaders(protectedRes);
+  }
+
+  // Default pass-through for unlisted static/marketing pages — no-store cache control
   return withNoCacheHeaders(NextResponse.next());
 }
+
+export const middleware = proxy;
+export default proxy;
 
 export const config = {
   matcher: [
@@ -194,6 +249,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - uploads (uploaded files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|uploads).*)',
+    "/((?!_next/static|_next/image|favicon.ico|uploads).*)",
   ],
 };

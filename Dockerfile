@@ -75,5 +75,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 USER workeruser
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD /bin/sh /app/scripts/worker-healthcheck.sh || exit 1
+
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["npx", "tsx", "./scripts/start-scheduler.ts"]

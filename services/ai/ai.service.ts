@@ -1,26 +1,7 @@
 import { ChatOpenAI, DallEAPIWrapper } from "@langchain/openai";
 import { SystemLogger } from "@/features/system/services/logger.service";
-
-export interface AIMessage {
-  role: "system" | "user" | "assistant";
-  content: string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
-}
-
-export interface AIRequest {
-  model?: string;
-  messages: AIMessage[];
-  temperature?: number;
-  maxTokens?: number;
-}
-
-export interface AIResponse {
-  content: string;
-  usage?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
+import { AIMessage, AIRequest, AIResponse } from "./types";
+export type { AIMessage, AIRequest, AIResponse };
 
 /**
  * Dynamic AI Service that switches between OpenRouter (development) and OpenAI (production)
@@ -62,6 +43,25 @@ export class AIService {
   }
 
   /**
+   * Direct text generation using OpenAI
+   */
+  static async generateWithOpenAI(aiRequest: {
+    prompt: string;
+    model?: string;
+    maxTokens?: number;
+    temperature?: number;
+  }): Promise<string> {
+    const request: AIRequest = {
+      model: aiRequest.model,
+      messages: [{ role: "user", content: aiRequest.prompt }],
+      temperature: aiRequest.temperature || 0.7,
+      maxTokens: aiRequest.maxTokens || 1000,
+    };
+    const response = await this.callOpenAI(request);
+    return response.content;
+  }
+
+  /**
    * Legacy generateText method for backward compatibility
    */
   static async generateText(aiRequest: {
@@ -81,16 +81,36 @@ export class AIService {
    */
   private static getModel(model?: string): string {
     if (model) {
-      // if (this.isDevelopment) {
-      //   // If we are using OpenRouter and the model ID is missing a provider prefix
-      //   if (!model.includes('/')) {
-      //     if (model.startsWith("dall-e")) return `openai/${model}`;
-      //     if (model.startsWith("gpt-")) return `openai/${model}`;
-      //     if (model.startsWith("claude-")) return `anthropic/${model}`;
-      //     if (model.startsWith("gemini-")) return `google/${model}`;
-      //     if (model.startsWith("llama-")) return `meta-llama/${model}`;
-      //   }
-      // }
+      if (this.isDevelopment) {
+        // Map common aliases and arena model identifiers to exact OpenRouter model paths
+        const modelMap: Record<string, string> = {
+          'gpt-4o': 'openai/gpt-4o',
+          'gpt-4o-mini': 'openai/gpt-4o-mini',
+          'gpt-4': 'openai/gpt-4',
+          'gpt-3.5-turbo': 'openai/gpt-3.5-turbo',
+          'claude-3-5-sonnet': 'anthropic/claude-3.5-sonnet',
+          'claude-3.5-sonnet': 'anthropic/claude-3.5-sonnet',
+          'claude-3-haiku': 'anthropic/claude-3-haiku',
+          'deepseek-r1': 'deepseek/deepseek-r1',
+          'deepseek-chat': 'deepseek/deepseek-chat',
+          'gemini-2-0-flash': 'google/gemini-2.5-flash-lite',
+          'gemini-2.0-flash': 'google/gemini-2.5-flash-lite',
+          'gemini-2.5-flash-lite': 'google/gemini-2.5-flash-lite',
+          'gemini-flash': 'google/gemini-2.5-flash-lite',
+        };
+
+        if (modelMap[model]) {
+          return modelMap[model];
+        }
+
+        if (!model.includes('/')) {
+          if (model.startsWith('gpt-')) return `openai/${model}`;
+          if (model.startsWith('claude-')) return `anthropic/${model}`;
+          if (model.startsWith('gemini-')) return `google/${model}`;
+          if (model.startsWith('deepseek-')) return `deepseek/${model}`;
+          if (model.startsWith('llama-')) return `meta-llama/${model}`;
+        }
+      }
       return model;
     }
 
@@ -281,6 +301,13 @@ export class AIService {
       });
       throw error;
     }
+  }
+
+  /**
+   * Alias for generateCompletion
+   */
+  static async generateResponse(request: AIRequest): Promise<AIResponse> {
+    return this.generateCompletion(request);
   }
 
   /**

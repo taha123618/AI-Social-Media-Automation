@@ -1,7 +1,7 @@
 # Comprehensive DevOps, Kubernetes & Observability Assessment Report
 
 **Project**: AI Social Media & Content Marketing Automation SaaS  
-**Architecture**: Dual-Engine Next.js 16 (App Router) + Mastra Multi-Agent Orchestration + BullMQ Background Queues + PostgreSQL 18 / pgvector + Redis 7  
+**Architecture**: Next.js 16 (App Router) + Custom AI Multi-Agent Engine (`services/ai/*`) + BullMQ Background Queues + PostgreSQL 18 / pgvector + Redis 7  
 **Version**: 0.1.0  
 **Date**: August 2026  
 **Author**: Senior DevOps & Site Reliability Engineer  

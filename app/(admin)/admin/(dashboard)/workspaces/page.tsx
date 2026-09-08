@@ -17,8 +17,6 @@ import { Building2, RefreshCw, Shield, Search, Loader2, Trash2, Plus } from "luc
 import Link from "next/link";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
 
 export default function WorkspaceManagementPage() {
@@ -43,24 +41,6 @@ export default function WorkspaceManagementPage() {
    useEffect(() => {
       fetchBusinesses();
    }, []);
-
-   useGSAP(() => {
-      if (!isLoading) {
-         gsap.from(".header-section", {
-            y: -20,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.out"
-         });
-         gsap.from(".table-section", {
-            y: 30,
-            opacity: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            delay: 0.2
-         });
-      }
-   }, [isLoading]);
 
    async function handleDelete() {
       if (!deleteId) return;

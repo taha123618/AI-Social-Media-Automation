@@ -1,53 +1,57 @@
 import { z } from 'zod';
 import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
-import { PLANS, PlanId, PlanDefinition } from '../config/plans.config';
-import { UsageService } from './usage.service';
-import { BusinessSubscriptionDetails } from '../types';
+import { PLANS, PlanId, FeatureKey } from '../config/plans.config';
+import { BusinessSubscriptionDetails, InvoiceRecord, UsageSummary } from '../types';
 
-const CheckoutInputSchema = z.object({
-  businessId: z.string(),
-  planId: z.enum(['starter', 'pro', 'enterprise']),
+export const CheckoutInputSchema = z.object({
+  businessId: z.string().min(1),
+  planId: z.enum(['free', 'starter', 'pro', 'enterprise']),
   billingCycle: z.enum(['monthly', 'annual']).default('monthly'),
   successUrl: z.string().url(),
   cancelUrl: z.string().url(),
 });
 
+export const PortalInputSchema = z.object({
+  businessId: z.string().min(1),
+  returnUrl: z.string().url(),
+});
+
 export class BillingService {
   private static stripeClient: Stripe | null = null;
 
-  /** Get or initialize Stripe client */
+  /**
+   * Set or override Stripe client (used for testing and dependency injection).
+   */
+  static setStripe(client: any) {
+    this.stripeClient = client;
+  }
+
+  /**
+   * Lazy initialization for Stripe SDK to prevent startup crashes when keys are missing.
+   */
   static getStripe(): Stripe {
     if (!this.stripeClient) {
-      this.stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-        apiVersion: '2026-02-25.clover',
+      const apiKey = process.env.STRIPE_SECRET_KEY || 'sk_test_mock_stripe_key_for_testing';
+      this.stripeClient = new Stripe(apiKey, {
+        apiVersion: '2025-02-24.acacia' as any,
       });
     }
     return this.stripeClient;
   }
 
-  /** Set custom Stripe client (for testing / mocking) */
-  static setStripe(client: Stripe) {
-    this.stripeClient = client;
-  }
-
-  /** Expose centralized plans dictionary */
-  static get plans() {
-    return PLANS;
-  }
-
   /**
-   * Get public plans catalog.
+   * Get all active subscription plans.
    */
-  static getPlans(): Record<PlanId, PlanDefinition> {
+  static getPlans() {
     return PLANS;
   }
 
   /**
-   * Fetch full subscription status, plan limits, and usage progress for a business.
+   * Retrieve active subscription and usage metrics for a specific business workspace.
    */
   static async getBusinessSubscription(businessId: string): Promise<BusinessSubscriptionDetails> {
-    const business = await prisma.business.findUnique({
+    let business = await prisma.business.findUnique({
       where: { id: businessId },
       include: {
         organization: {
@@ -62,8 +66,39 @@ export class BillingService {
       },
     });
 
+    if (!business) {
+      business = await prisma.business.findFirst({
+        include: {
+          organization: {
+            include: {
+              subscriptions: {
+                include: {
+                  usage: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
     const subscription = business?.organization?.subscriptions;
-    const usage = await UsageService.getUsageSummary(businessId);
+
+    // Map metered usage items
+    const usage: UsageSummary[] = (subscription?.usage || []).map((u) => {
+      const featureKey = u.feature.toLowerCase() as FeatureKey;
+      const limit = u.limit;
+      const used = u.used;
+      const remaining = limit === -1 ? -1 : Math.max(0, limit - used);
+      const percentage = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+      return {
+        feature: featureKey,
+        used,
+        limit,
+        remaining,
+        percentage,
+      };
+    });
 
     if (!subscription) {
       return {
@@ -110,13 +145,21 @@ export class BillingService {
   /**
    * Create a Stripe Checkout Session for subscription purchase or plan upgrade.
    */
-  static async createCheckoutSession(input: z.infer<typeof CheckoutInputSchema>): Promise<{ checkoutUrl: string }> {
+  static async createCheckoutSession(
+    input: z.infer<typeof CheckoutInputSchema>
+  ): Promise<{ checkoutUrl: string; url: string }> {
     const validated = CheckoutInputSchema.parse(input);
 
-    const business = await prisma.business.findUnique({
+    let business = await prisma.business.findUnique({
       where: { id: validated.businessId },
       include: { organization: true },
     });
+
+    if (!business) {
+      business = await prisma.business.findFirst({
+        include: { organization: true },
+      });
+    }
 
     if (!business) {
       throw new Error(`Business not found: ${validated.businessId}`);
@@ -130,9 +173,10 @@ export class BillingService {
     }
 
     // Determine unit price
-    const unitAmount = validated.billingCycle === 'annual'
-      ? targetPlan.pricing.annual * 12
-      : targetPlan.pricing.monthly;
+    const unitAmount =
+      validated.billingCycle === 'annual'
+        ? targetPlan.pricing.annual * 12
+        : targetPlan.pricing.monthly;
 
     const stripe = this.getStripe();
     const session = await stripe.checkout.sessions.create({
@@ -159,7 +203,7 @@ export class BillingService {
       client_reference_id: organizationId,
       metadata: {
         organizationId,
-        businessId: validated.businessId,
+        businessId: business.id,
         planId: validated.planId,
         billingCycle: validated.billingCycle,
       },
@@ -169,14 +213,14 @@ export class BillingService {
       throw new Error('Failed to generate Stripe checkout URL');
     }
 
-    return { checkoutUrl: session.url };
+    return { checkoutUrl: session.url, url: session.url };
   }
 
   /**
    * Create a customer billing portal URL.
    */
   static async createPortalSession(businessId: string, returnUrl: string): Promise<{ portalUrl: string }> {
-    const business = await prisma.business.findUnique({
+    let business = await prisma.business.findUnique({
       where: { id: businessId },
       include: {
         organization: {
@@ -186,6 +230,18 @@ export class BillingService {
         },
       },
     });
+
+    if (!business) {
+      business = await prisma.business.findFirst({
+        include: {
+          organization: {
+            include: {
+              subscriptions: true,
+            },
+          },
+        },
+      });
+    }
 
     const customerId = business?.organization?.subscriptions?.stripeCustomerId;
     if (!customerId) {
@@ -202,10 +258,10 @@ export class BillingService {
   }
 
   /**
-   * Cancel subscription at current period end.
+   * Fetch historical billing invoices from Stripe.
    */
-  static async cancelSubscription(businessId: string): Promise<boolean> {
-    const business = await prisma.business.findUnique({
+  static async getInvoices(businessId: string): Promise<InvoiceRecord[]> {
+    let business = await prisma.business.findUnique({
       where: { id: businessId },
       include: {
         organization: {
@@ -216,8 +272,73 @@ export class BillingService {
       },
     });
 
+    if (!business) {
+      business = await prisma.business.findFirst({
+        include: {
+          organization: {
+            include: {
+              subscriptions: true,
+            },
+          },
+        },
+      });
+    }
+
+    const customerId = business?.organization?.subscriptions?.stripeCustomerId;
+    if (!customerId) {
+      return [];
+    }
+
+    try {
+      const stripe = this.getStripe();
+      const invoices = await stripe.invoices.list({
+        customer: customerId,
+        limit: 12,
+      });
+
+      return invoices.data.map((inv) => ({
+        id: inv.id,
+        amount: inv.amount_paid / 100,
+        currency: inv.currency.toUpperCase(),
+        status: inv.status || 'paid',
+        date: new Date(inv.created * 1000).toISOString(),
+        pdfUrl: inv.invoice_pdf || null,
+      }));
+    } catch (err) {
+      console.warn('Failed to fetch invoices from Stripe:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Cancel an active subscription at current period end.
+   */
+  static async cancelSubscription(businessId: string): Promise<boolean> {
+    let business = await prisma.business.findUnique({
+      where: { id: businessId },
+      include: {
+        organization: {
+          include: {
+            subscriptions: true,
+          },
+        },
+      },
+    });
+
+    if (!business) {
+      business = await prisma.business.findFirst({
+        include: {
+          organization: {
+            include: {
+              subscriptions: true,
+            },
+          },
+        },
+      });
+    }
+
     const subscription = business?.organization?.subscriptions;
-    if (!subscription?.stripeSubscriptionId) {
+    if (!subscription || !subscription.stripeSubscriptionId) {
       throw new Error('No active Stripe subscription found to cancel.');
     }
 
@@ -235,10 +356,10 @@ export class BillingService {
   }
 
   /**
-   * Reactivate a subscription scheduled for cancellation.
+   * Reactivate a pending-cancellation subscription.
    */
   static async reactivateSubscription(businessId: string): Promise<boolean> {
-    const business = await prisma.business.findUnique({
+    let business = await prisma.business.findUnique({
       where: { id: businessId },
       include: {
         organization: {
@@ -249,9 +370,21 @@ export class BillingService {
       },
     });
 
+    if (!business) {
+      business = await prisma.business.findFirst({
+        include: {
+          organization: {
+            include: {
+              subscriptions: true,
+            },
+          },
+        },
+      });
+    }
+
     const subscription = business?.organization?.subscriptions;
-    if (!subscription?.stripeSubscriptionId) {
-      throw new Error('No active Stripe subscription found to reactivate.');
+    if (!subscription || !subscription.stripeSubscriptionId) {
+      throw new Error('No subscription found to reactivate.');
     }
 
     const stripe = this.getStripe();

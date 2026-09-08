@@ -17,16 +17,54 @@ export class EntitlementService {
               subscriptions: true,
             },
           },
+          members: {
+            where: { role: 'OWNER' },
+            include: {
+              user: {
+                include: {
+                  ownedOrganizations: {
+                    include: {
+                      subscriptions: true,
+                    },
+                  },
+                  organizationMemberships: {
+                    include: {
+                      organization: {
+                        include: {
+                          subscriptions: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
 
-      const subscription = business?.organization?.subscriptions;
+      if (!business) return 'free';
 
-      if (!subscription || subscription.status !== 'ACTIVE') {
+      // 1. Direct workspace organization subscription
+      let subscription = business.organization?.subscriptions;
+
+      // 2. Owner user organization fallback
+      if (!subscription || (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIALING')) {
+        const owner = business.members[0]?.user;
+        const ownerOrg =
+          owner?.ownedOrganizations?.find((o) => o.subscriptions) ||
+          owner?.organizationMemberships?.find((m) => m.organization.subscriptions)?.organization;
+
+        if (ownerOrg?.subscriptions) {
+          subscription = ownerOrg.subscriptions;
+        }
+      }
+
+      if (!subscription || (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIALING')) {
         return 'free';
       }
 
-      const planKey = subscription.planId.toLowerCase() as PlanId;
+      const planKey = (subscription.planId || 'free').toLowerCase() as PlanId;
       return PLANS[planKey] ? planKey : 'free';
     } catch {
       return 'free';

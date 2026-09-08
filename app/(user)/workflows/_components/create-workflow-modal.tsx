@@ -1,12 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Plus, Zap, Trash2, Loader, Save, Upload, Camera, Image as ImageIcon } from 'lucide-react';
+import { X, Plus, Zap, Trash2, Loader2, Save, Camera, Image as ImageIcon, Workflow as WorkflowIcon, ChevronDown, Clock, Webhook, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createWorkflow, updateWorkflow } from '../actions/mutations';
 import { toast } from 'sonner';
 import { Workflow, WorkflowTemplate } from '@/features/workflow/types';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 interface CreateWorkflowModalProps {
   onClose: () => void;
@@ -22,26 +26,39 @@ interface WorkflowStepInput {
 }
 
 const UPLOAD_CATEGORIES = [
-  { id: 'JOB_PHOTO', label: 'Job Photo', icon: Camera, desc: 'Work-in-progress or completed job photos' },
-  { id: 'BEFORE_AFTER', label: 'Before & After', icon: ImageIcon, desc: 'Transformation and result comparisons' },
-  { id: 'PRODUCT', label: 'Product', icon: ImageIcon, desc: 'Product showcases and features' },
+  { id: 'JOB_PHOTO', label: 'Job Asset', icon: Camera, desc: 'Work-in-progress or project showcase photos' },
+  { id: 'BEFORE_AFTER', label: 'Transformation', icon: ImageIcon, desc: 'Before/after visual split comparisons' },
+  { id: 'PRODUCT', label: 'Product Hero', icon: ImageIcon, desc: 'E-commerce and feature demonstrations' },
 ];
 
-const TRIGGER_TYPES = ['MANUAL', 'SCHEDULED', 'EVENT_BASED', 'PHOTO_UPLOAD', 'BEFORE_AFTER_UPLOAD'];
+const TRIGGER_OPTIONS = [
+  { id: 'MANUAL', label: 'Manual Trigger', icon: Play, desc: 'Run on-demand from dashboard' },
+  { id: 'SCHEDULED', label: 'Cron Interval', icon: Clock, desc: 'Recurring timetable execution' },
+  { id: 'EVENT_BASED', label: 'Webhook Event', icon: Webhook, desc: 'Triggered by external webhooks' },
+  { id: 'PHOTO_UPLOAD', label: 'Media Ingestion', icon: Camera, desc: 'Auto-triggers upon file upload' },
+  { id: 'BEFORE_AFTER_UPLOAD', label: 'Transformation Drop', icon: ImageIcon, desc: 'Auto-triggers on pair upload' },
+];
+
+const STEP_TYPE_MAP: Record<string, { label: string; badgeColor: string }> = {
+  CONTENT_GENERATION: { label: 'AI Copy Generation', badgeColor: 'bg-primary/10 text-primary border-primary/30' },
+  IMAGE_GENERATION: { label: 'Media Synthesis', badgeColor: 'bg-violet-500/10 text-violet-400 border-violet-500/30' },
+  CONTENT_REVIEW: { label: 'Human-in-the-Loop', badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30' },
+  AUTO_POST: { label: 'Auto-Publish', badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
+  NOTIFICATION: { label: 'Alert Dispatch', badgeColor: 'bg-sky-500/10 text-sky-400 border-sky-500/30' },
+};
 
 export function CreateWorkflowModal({ onClose, businessId, initialData }: CreateWorkflowModalProps) {
   const isEditingWorkflow = initialData && 'businessId' in initialData;
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState(initialData?.name || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [trigger, setTrigger] = useState(
     isEditingWorkflow
-      ? (initialData as Workflow).trigger 
+      ? (initialData as Workflow).trigger
       : { type: 'MANUAL', config: {} }
   );
 
-  // Upload config state
   const [uploadCategory, setUploadCategory] = useState<'JOB_PHOTO' | 'BEFORE_AFTER' | 'PRODUCT'>('JOB_PHOTO');
   const [autoCaption, setAutoCaption] = useState(true);
   const [autoSchedule, setAutoSchedule] = useState(false);
@@ -56,11 +73,14 @@ export function CreateWorkflowModal({ onClose, businessId, initialData }: Create
       type: step.type,
       config: step.config || {},
       order: step.order ?? idx,
-    })) || [{ name: 'Generate Content', type: 'CONTENT_GENERATION', config: {} }]
+    })) || [
+      { name: 'Analyze Context & Audience', type: 'CONTENT_GENERATION', config: {} },
+      { name: 'Generate Multi-Channel Variants', type: 'CONTENT_GENERATION', config: {} }
+    ]
   );
 
   const addStep = () => {
-    setSteps([...steps, { name: 'New Step', type: 'NOTIFICATION', config: {} }]);
+    setSteps([...steps, { name: `Pipeline Step ${steps.length + 1}`, type: 'NOTIFICATION', config: {} }]);
   };
 
   const removeStep = (index: number) => {
@@ -73,7 +93,7 @@ export function CreateWorkflowModal({ onClose, businessId, initialData }: Create
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return toast.error('Workflow name is required');
+    if (!name.trim()) return toast.error('Workflow name is required');
     if (!isUploadTrigger && steps.length === 0) return toast.error('At least one step is required');
 
     setIsSubmitting(true);
@@ -107,7 +127,7 @@ export function CreateWorkflowModal({ onClose, businessId, initialData }: Create
         toast.success('Workflow created successfully');
       }
       onClose();
-    } catch (error) {
+    } catch {
       toast.error('Failed to save workflow');
     } finally {
       setIsSubmitting(false);
@@ -115,236 +135,262 @@ export function CreateWorkflowModal({ onClose, businessId, initialData }: Create
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white p-8 shadow-2xl dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 12 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl bg-card border border-border/80 shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {initialData ? 'Edit' : 'Create'} Workflow
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              {initialData ? 'Update your automation flow' : 'Design your automation flow'}
-            </p>
+        {/* Ambient Top Glow */}
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Header */}
+        <div className="p-5 sm:p-6 pb-4 border-b border-border/60 flex items-center justify-between shrink-0 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
+              <WorkflowIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
+                {initialData ? 'Edit Automation Workflow' : 'Create Agent Workflow'}
+                <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                  Orchestrator
+                </Badge>
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {initialData ? 'Update your autonomous execution graph' : 'Build multi-step agent pipelines with conditional triggers'}
+              </p>
+            </div>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
-            <X className="h-6 w-6" />
+          <button
+            onClick={onClose}
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Workflow Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Daily Engagement Flow"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="What does this workflow do?"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Trigger Type</label>
-              <select
-                value={trigger.type}
-                onChange={(e) => setTrigger({ ...trigger, type: e.target.value })}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 dark:border-slate-800 dark:bg-slate-950"
-              >
-                <option value="MANUAL">Manual</option>
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="EVENT_BASED">Event Based</option>
-                <option value="PHOTO_UPLOAD">Photo Upload</option>
-                <option value="BEFORE_AFTER_UPLOAD">Before/After Upload</option>
-              </select>
-              {isUploadTrigger && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1.5 font-medium">
-                  This workflow triggers when images are uploaded via drag-and-drop
-                </p>
-              )}
+        {/* Form Body */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 relative z-10 custom-scrollbar">
+          <form id="workflow-modal-form" onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Workflow Name</label>
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Autonomous Viral Repurposing"
+                  className="h-10 text-xs rounded-xl bg-secondary/30 border-border/70 focus-visible:ring-primary/30"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-foreground mb-1.5">Trigger Condition</label>
+                <select
+                  value={trigger.type}
+                  onChange={(e) => setTrigger({ ...trigger, type: e.target.value })}
+                  className="w-full h-10 rounded-xl border border-border/70 bg-card px-3 text-xs font-medium text-foreground outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer"
+                >
+                  {TRIGGER_OPTIONS.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Upload automation config */}
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5">Pipeline Objective & Notes</label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe what agents are involved and the intended business outcome..."
+                rows={2}
+                className="text-xs rounded-xl bg-secondary/30 border-border/70 resize-none focus-visible:ring-primary/30"
+              />
+            </div>
+
+            {/* Ingestion Automation Config Card */}
             {isUploadTrigger && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="space-y-4 p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700"
+                className="p-4 rounded-xl bg-secondary/40 border border-border/70 space-y-3"
               >
-                <div className="flex items-center gap-2">
-                  <Upload className="h-4 w-4 text-blue-600" />
-                  <span className="text-xs font-black uppercase tracking-widest text-blue-600">Upload Configuration</span>
-                </div>
-
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Upload Category</label>
+                  <label className="block text-xs font-semibold text-foreground mb-2">Ingestion Asset Classification</label>
                   <div className="grid grid-cols-3 gap-2">
-                    {UPLOAD_CATEGORIES.map(cat => (
+                    {UPLOAD_CATEGORIES.map((cat) => (
                       <button
                         key={cat.id}
                         type="button"
-                        onClick={() => setUploadCategory(cat.id as typeof uploadCategory)}
+                        onClick={() => setUploadCategory(cat.id as any)}
                         className={cn(
-                          'flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all',
+                          'flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all',
                           uploadCategory === cat.id
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                            ? 'border-primary bg-primary/10 text-primary ring-1 ring-primary/30 shadow-xs'
+                            : 'border-border/70 bg-card text-muted-foreground hover:text-foreground'
                         )}
                       >
-                        <cat.icon className={cn(
-                          'h-5 w-5',
-                          uploadCategory === cat.id ? 'text-blue-600' : 'text-slate-400'
-                        )} />
-                        <span className={cn(
-                          'text-xs font-bold',
-                          uploadCategory === cat.id ? 'text-blue-700 dark:text-blue-300' : 'text-slate-500'
-                        )}>
-                          {cat.label}
-                        </span>
+                        <cat.icon className="h-4 w-4" />
+                        <span className="text-[11px] font-semibold">{cat.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <label className="flex items-center gap-2.5 p-3 rounded-xl border border-border/70 bg-card cursor-pointer hover:bg-secondary/50 transition-colors">
                     <input
                       type="checkbox"
                       checked={autoCaption}
                       onChange={(e) => setAutoCaption(e.target.checked)}
-                      className="rounded border-slate-300"
+                      className="rounded border-border"
                     />
                     <div>
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Auto-caption</span>
-                      <p className="text-xs text-slate-400">AI generates caption from image</p>
+                      <span className="text-xs font-semibold text-foreground">Auto-Vision Caption</span>
+                      <p className="text-[10px] text-muted-foreground">LLM synthesizes visual context</p>
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                  <label className="flex items-center gap-2.5 p-3 rounded-xl border border-border/70 bg-card cursor-pointer hover:bg-secondary/50 transition-colors">
                     <input
                       type="checkbox"
                       checked={autoSchedule}
                       onChange={(e) => setAutoSchedule(e.target.checked)}
-                      className="rounded border-slate-300"
+                      className="rounded border-border"
                     />
                     <div>
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Auto-schedule</span>
-                      <p className="text-xs text-slate-400">Queue for best time slot</p>
+                      <span className="text-xs font-semibold text-foreground">Auto-Schedule Queue</span>
+                      <p className="text-[10px] text-muted-foreground">Places into peak traffic window</p>
                     </div>
                   </label>
                 </div>
-
-                {autoSchedule && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Platform</label>
-                      <select
-                        value={uploadPlatform}
-                        onChange={(e) => setUploadPlatform(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                      >
-                        <option value="INSTAGRAM">Instagram</option>
-                        <option value="FACEBOOK">Facebook</option>
-                        <option value="LINKEDIN">LinkedIn</option>
-                        <option value="TIKTOK">TikTok</option>
-                        <option value="GOOGLE_BUSINESS">Google Business</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Offset (min)</label>
-                      <input
-                        type="number"
-                        value={scheduleOffset}
-                        onChange={(e) => setScheduleOffset(Number(e.target.value))}
-                        min={0}
-                        max={1440}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                      />
-                    </div>
-                  </div>
-                )}
               </motion.div>
             )}
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">Workflow Steps</h3>
-              <button
-                type="button"
-                onClick={addStep}
-                className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
-              >
-                <Plus className="h-3 w-3" /> Add Step
-              </button>
+            {/* Pipeline Step Graph */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 font-mono">
+                  <span>Execution Pipeline Nodes</span>
+                  <Badge variant="secondary" className="text-[10px] font-normal">
+                    {steps.length} nodes
+                  </Badge>
+                </h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addStep}
+                  className="h-7 px-2.5 text-xs rounded-lg gap-1.5 text-primary border-primary/30 hover:bg-primary/10"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Add Node</span>
+                </Button>
+              </div>
+
+              <div className="space-y-2.5">
+                {steps.map((step: WorkflowStepInput, idx: number) => {
+                  const stepMeta = STEP_TYPE_MAP[step.type] || { label: step.type, badgeColor: 'bg-secondary text-foreground' };
+                  return (
+                    <div key={idx} className="relative flex flex-col gap-2">
+                      <div className="group rounded-xl border border-border/80 bg-secondary/20 p-3.5 flex flex-col gap-2.5 shadow-xs hover:border-primary/40 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-mono font-bold">
+                              {idx + 1}
+                            </span>
+                            <span className="text-xs font-bold text-foreground">
+                              {step.name || `Node ${idx + 1}`}
+                            </span>
+                            <Badge variant="outline" className={cn('text-[10px] font-mono py-0', stepMeta.badgeColor)}>
+                              {stepMeta.label}
+                            </Badge>
+                          </div>
+
+                          {steps.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeStep(idx)}
+                              className="text-muted-foreground hover:text-destructive p-1 rounded-md transition-colors"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <Input
+                            type="text"
+                            value={step.name}
+                            onChange={(e) => updateStep(idx, { name: e.target.value })}
+                            placeholder="Step Action Name"
+                            className="h-8 text-xs rounded-lg bg-card border-border/70"
+                          />
+                          <select
+                            value={step.type}
+                            onChange={(e) => updateStep(idx, { type: e.target.value })}
+                            className="h-8 rounded-lg border border-border/70 bg-card px-2 text-xs font-medium text-foreground outline-none"
+                          >
+                            <option value="CONTENT_GENERATION">AI Copy Generation</option>
+                            <option value="IMAGE_GENERATION">Media Synthesis</option>
+                            <option value="CONTENT_REVIEW">Human-in-the-Loop Review</option>
+                            <option value="AUTO_POST">Auto Publish</option>
+                            <option value="NOTIFICATION">Alert Notification</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {idx < steps.length - 1 && (
+                        <div className="flex justify-center -my-1 text-muted-foreground/40">
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+          </form>
+        </div>
 
-            <div className="space-y-3">
-              {steps.map((step: WorkflowStepInput, idx: number) => (
-                <div key={idx} className="group relative rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-blue-600">Step {idx + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeStep(idx)}
-                      className="text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      value={step.name}
-                      onChange={(e) => updateStep(idx, { name: e.target.value })}
-                      placeholder="Step Name"
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
-                    />
-                    <select
-                      value={step.type}
-                      onChange={(e) => updateStep(idx, { type: e.target.value })}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900"
-                    >
-                      <option value="CONTENT_GENERATION">Generation</option>
-                      <option value="CONTENT_REVIEW">Review</option>
-                      <option value="NOTIFICATION">Notification</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="p-4 sm:p-5 border-t border-border/60 bg-card/50 flex items-center justify-between shrink-0 relative z-10">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-9 px-4 text-xs rounded-xl text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </Button>
 
-          <div className="flex gap-3 pt-6 border-t border-slate-100 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-2xl border border-slate-200 py-3 font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 rounded-2xl bg-blue-600 py-3 font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? <Loader className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
-              Save Workflow
-            </button>
-          </div>
-        </form>
+          <Button
+            type="submit"
+            form="workflow-modal-form"
+            disabled={isSubmitting}
+            size="sm"
+            className="h-9 px-5 text-xs font-semibold rounded-xl gap-1.5 shadow-sm active:scale-95"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <span>Saving Pipeline...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-3.5 w-3.5" />
+                <span>{initialData ? 'Update Workflow' : 'Save Workflow'}</span>
+              </>
+            )}
+          </Button>
+        </div>
       </motion.div>
     </div>
   );

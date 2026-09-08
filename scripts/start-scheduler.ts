@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import fs from 'fs';
 import '@/features/scheduler/workers/posting.worker'; // Import to start the post worker
 import '@/features/workflow/workers/workflow-execution.worker';
 import { SchedulerService } from '@/features/scheduler/services/scheduler.service';
@@ -109,10 +110,27 @@ async function main() {
       }
     }, 300000); // 5 minutes
 
+    // Periodically touch heartbeat file for Docker and K8s health checks
+    const heartbeatPath = process.env.HEARTBEAT_FILE || '/tmp/worker-heartbeat';
+    const touchHeartbeat = () => {
+      try {
+        fs.writeFileSync(heartbeatPath, new Date().toISOString(), 'utf-8');
+      } catch (err) {
+        // Fallback silently if /tmp is restricted
+      }
+    };
+    touchHeartbeat();
+    const heartbeatInterval = setInterval(touchHeartbeat, 15000);
+
     // Graceful shutdown — closes all workers cleanly
     const gracefulShutdown = async (signal: string) => {
       console.log(`\n🛑 Received ${signal}. Shutting down gracefully...`);
       await SystemLogger.logCron("SERVICE_SHUTDOWN", "START", { message: `Shutdown signal: ${signal}` });
+
+      clearInterval(heartbeatInterval);
+      try {
+        if (fs.existsSync(heartbeatPath)) fs.unlinkSync(heartbeatPath);
+      } catch {}
 
       await contentWorker.close();
       // await videoWorker.close();

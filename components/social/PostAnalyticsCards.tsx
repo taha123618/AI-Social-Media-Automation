@@ -3,17 +3,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  TrendingUp, TrendingDown, Users, 
+  TrendingUp, Users, 
   MousePointer2, Share2, Calendar
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 
 interface Stat {
   label: string;
   value: string | number;
   change: number;
-  icon: any;
-  color: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 interface PostAnalyticsCardsProps {
@@ -32,62 +30,57 @@ export function PostAnalyticsCards({ stats }: PostAnalyticsCardsProps) {
       value: stats.totalReach.toLocaleString(), 
       change: stats.growth, 
       icon: Users,
-      color: 'blue'
     },
     { 
       label: 'Engagement Rate', 
       value: `${stats.engagementRate}%`, 
       change: 2.1, 
       icon: MousePointer2,
-      color: 'purple'
     },
     { 
-      label: 'Scheduled', 
+      label: 'Scheduled Queue', 
       value: stats.scheduledCount, 
       change: 0, 
       icon: Calendar,
-      color: 'orange'
     },
     { 
-      label: 'Overall Growth', 
+      label: 'Organic Growth', 
       value: `+${stats.growth}%`, 
       change: stats.growth, 
       icon: Share2,
-      color: 'green'
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {items.map((stat, i) => (
-        <motion.div
-          key={stat.label}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-        >
-          <Card className="border-none shadow-[0_8px_24px_rgba(0,0,0,0.02)] bg-white dark:bg-slate-900 rounded-3xl overflow-hidden group hover:shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-all">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-2xl bg-${stat.color}-50 dark:bg-${stat.color}-900/10 text-${stat.color}-600 dark:text-${stat.color}-400 group-hover:scale-110 transition-transform`}>
-                  <stat.icon className="h-5 w-5" />
-                </div>
-                {stat.change !== 0 && (
-                  <div className={`flex items-center gap-1 text-xs font-bold ${stat.change > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {stat.change > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {Math.abs(stat.change)}%
-                  </div>
-                )}
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {items.map((item, idx) => {
+        const Icon = item.icon;
+        return (
+          <motion.div
+            key={item.label}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            className="p-4 rounded-xl border border-border/80 bg-card hover:border-primary/40 transition-all duration-200 shadow-xs"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center text-primary">
+                <Icon className="h-4 w-4" />
               </div>
-              <div className="space-y-1">
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{stat.value}</h3>
-              </div>
-            </CardContent>
-            <div className={`h-1 w-full bg-gradient-to-r from-${stat.color}-500 to-transparent opacity-10 group-hover:opacity-100 transition-opacity`} />
-          </Card>
-        </motion.div>
-      ))}
+              <span className="text-[10px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                <span>+{item.change}%</span>
+              </span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold font-mono text-foreground mb-0.5" suppressHydrationWarning>
+              {item.value}
+            </div>
+            <div className="text-xs text-muted-foreground font-medium">
+              {item.label}
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

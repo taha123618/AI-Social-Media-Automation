@@ -142,9 +142,9 @@ REDIS_URL="redis://127.0.0.1:6379"
 
 # Email Configuration (Nodemailer)
 EMAIL_HOST=gmail
-EMAIL_USER=saad@devteampro.com
-EMAIL_PASSWORD=efkcvxwxghikaoyg
-EMAIL_FROM="AI Social Media Automation <saad@devteampro.com>"
+EMAIL_USER=
+EMAIL_PASSWORD=
+EMAIL_FROM="AI Social Media Automation <>"
 
 # Better Auth Configuration (32+ Character Secret)
 BETTER_AUTH_SECRET="your-better-auth-secret-here-32-chars-minimum"

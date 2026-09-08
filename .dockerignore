@@ -28,9 +28,7 @@ dist
 .idea
 .vscode
 
-# Mastra local databases & logs
-mastra.db*
-mastra.duckdb*
+# local databases & logs
 logs
 *.log
 npm-debug.log*

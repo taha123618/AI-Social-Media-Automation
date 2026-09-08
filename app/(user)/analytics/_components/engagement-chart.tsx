@@ -1,11 +1,8 @@
 'use client';
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { motion } from 'framer-motion';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 export function EngagementChart({ data }: { data: any[] }) {
-  // Map data for chart - in real app would be grouped by date
-  // Here we use the latest 7 posts or simulate dates
   const chartData = data.slice(0, 7).reverse().map((p, idx) => ({
     name: `Post ${idx + 1}`,
     impressions: p.metrics.impressions,
@@ -13,74 +10,87 @@ export function EngagementChart({ data }: { data: any[] }) {
     clicks: p.metrics.clicks
   }));
 
-  // Fallback if no data
   if (chartData.length === 0) {
-      for(let i=0; i<7; i++) {
-          chartData.push({ name: `Day ${i+1}`, impressions: 100 + i*20, engagement: 10 + i*2, clicks: 5 + i });
-      }
+    for (let i = 0; i < 7; i++) {
+      chartData.push({ name: `Day ${i + 1}`, impressions: 120 + i * 25, engagement: 15 + i * 4, clicks: 8 + i * 2 });
+    }
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900/50 shadow-sm"
-    >
-      <div className="mb-8">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Engagement Trends</h3>
-        <p className="text-sm text-slate-500">Performance across your last 7 posts</p>
+    <div className="rounded-xl border border-border/80 bg-card p-6 shadow-xs">
+      <div className="flex items-center justify-between mb-6 pb-3 border-b border-border/50">
+        <div>
+          <h3 className="text-base font-bold text-foreground">Engagement & Impression Trajectory</h3>
+          <p className="text-xs text-muted-foreground">Historical telemetry across recent dispatch cycles</p>
+        </div>
+        <div className="flex items-center gap-4 text-xs font-medium">
+          <div className="flex items-center gap-1.5 text-primary">
+            <span className="w-2 h-2 rounded-full bg-primary" />
+            <span>Impressions</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-accent">
+            <span className="w-2 h-2 rounded-full bg-accent" />
+            <span>Engagement</span>
+          </div>
+        </div>
       </div>
 
-      <div className="h-[300px] w-full">
+      <div className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorImp" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorEng" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6366F1" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border) / 0.6)" />
             <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{fontSize: 10, fill: '#64748b'}}
-                dy={10}
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+              dy={8}
             />
             <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{fontSize: 10, fill: '#64748b'}}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
             />
             <Tooltip
-                contentStyle={{
-                    borderRadius: '16px',
-                    border: 'none',
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                    backgroundColor: '#1e293b',
-                    color: '#fff'
-                }}
-                itemStyle={{ color: '#fff' }}
+              contentStyle={{
+                borderRadius: '0.5rem',
+                border: '1px solid hsl(var(--border))',
+                backgroundColor: 'hsl(var(--card))',
+                color: 'hsl(var(--foreground))',
+                fontSize: '12px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
             />
             <Area
-                type="monotone"
-                dataKey="impressions"
-                stroke="#3b82f6"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorImp)"
+              type="monotone"
+              dataKey="impressions"
+              stroke="#8B5CF6"
+              strokeWidth={2.5}
+              fillOpacity={1}
+              fill="url(#colorImp)"
             />
             <Area
-                type="monotone"
-                dataKey="engagement"
-                stroke="#10b981"
-                strokeWidth={3}
-                fillOpacity={0}
+              type="monotone"
+              dataKey="engagement"
+              stroke="#6366F1"
+              strokeWidth={2}
+              fillOpacity={1}
+              fill="url(#colorEng)"
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </motion.div>
+    </div>
   );
 }

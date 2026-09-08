@@ -83,35 +83,83 @@ export function WorkflowTemplates() {
       isPopular: false
     },
     {
-      id: '4',
-      name: 'Content Approval Workflow',
-      description: 'Multi-step content review and approval process',
-      category: 'Approval',
+      id: 'ai-blog-workflow',
+      name: 'AI SEO Blog Pipeline',
+      description: 'Autonomous multi-step blog writing, outline drafting, and SEO meta score optimization',
+      category: 'AI Engine',
       steps: [
         {
-          name: 'Generate Content',
+          name: 'Generate Outline',
           type: 'CONTENT_GENERATION',
-          config: { intent: 'BRAND_AWARENESS' },
+          config: { step: 'outline' },
           order: 1,
           conditions: []
         },
         {
-          name: 'Review Content',
-          type: 'CONTENT_REVIEW',
-          config: { requireApproval: true },
+          name: 'Draft Article Content',
+          type: 'CONTENT_GENERATION',
+          config: { step: 'article' },
           order: 2,
           conditions: []
         },
         {
-          name: 'Schedule Posting',
-          type: 'CONTENT_SCHEDULING',
-          config: { scheduleInHours: 48 },
+          name: 'Optimize SEO & Meta',
+          type: 'CUSTOM',
+          config: { step: 'seo' },
           order: 3,
           conditions: []
         }
       ],
-      icon: 'Clock',
-      isPopular: false
+      icon: 'Zap',
+      isPopular: true
+    },
+    {
+      id: 'ai-weather-workflow',
+      name: 'Weather Contextual Marketing',
+      description: 'Fetch live weather forecasts and automatically craft high-conversion promotional posts',
+      category: 'AI Engine',
+      steps: [
+        {
+          name: 'Fetch Weather Condition',
+          type: 'CUSTOM',
+          config: { tool: 'weatherTool' },
+          order: 1,
+          conditions: []
+        },
+        {
+          name: 'Generate Contextual Promo',
+          type: 'CONTENT_GENERATION',
+          config: { intent: 'ENGAGEMENT' },
+          order: 2,
+          conditions: []
+        }
+      ],
+      icon: 'Activity',
+      isPopular: true
+    },
+    {
+      id: 'ai-post-publishing-workflow',
+      name: 'Multi-Channel Auto Publisher',
+      description: 'Format, validate platform constraints, and publish simultaneously to all connected accounts',
+      category: 'AI Engine',
+      steps: [
+        {
+          name: 'Format Platform Copy',
+          type: 'CONTENT_GENERATION',
+          config: { multiPlatform: true },
+          order: 1,
+          conditions: []
+        },
+        {
+          name: 'Dispatch to Social Accounts',
+          type: 'CONTENT_SCHEDULING',
+          config: { publishNow: true },
+          order: 2,
+          conditions: []
+        }
+      ],
+      icon: 'Calendar',
+      isPopular: true
     }
   ];
 

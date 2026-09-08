@@ -36,8 +36,6 @@ import {
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 type JobLog = {
   id: string;
@@ -188,30 +186,6 @@ export default function JobQueuePage() {
   }, []);
 
   const handleRefresh = () => qc.invalidateQueries({ queryKey: ["system", "jobs"] });
-
-  useGSAP(() => {
-    gsap.from(".jobs-header", {
-      y: -24,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    });
-    gsap.from(".stat-card", {
-      y: 32,
-      opacity: 0,
-      stagger: 0.09,
-      duration: 0.75,
-      delay: 0.15,
-      ease: "power3.out",
-    });
-    gsap.from(".log-table", {
-      opacity: 0,
-      y: 24,
-      duration: 0.9,
-      delay: 0.4,
-      ease: "power2.out",
-    });
-  }, { scope: containerRef });
 
   return (
     <div ref={containerRef} className="space-y-10 pb-10">

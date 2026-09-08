@@ -1,14 +1,16 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { FeatureKey } from '@/features/billing/config/plans.config';
+import { ArrowUpRight } from 'lucide-react';
 
 interface UsageLimitIndicatorProps {
   feature: FeatureKey;
   label: string;
   used: number;
-  limit: number; // -1 for unlimited
-  showWarningThreshold?: number; // default 80%
+  limit: number;
+  showWarningThreshold?: number;
 }
 
 export function UsageLimitIndicator({
@@ -23,12 +25,12 @@ export function UsageLimitIndicator({
   const isExhausted = !isUnlimited && used >= limit;
 
   return (
-    <div className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-sm">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
-        <span className="text-neutral-500 dark:text-neutral-400 font-mono">
+    <div className="rounded-xl border border-border/80 bg-card p-4 shadow-xs">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-semibold text-foreground">{label}</span>
+        <span className="text-muted-foreground font-mono font-medium">
           {isUnlimited ? (
-            <span className="text-emerald-500 font-semibold">Unlimited</span>
+            <span className="text-primary font-semibold">Unlimited</span>
           ) : (
             `${used} / ${limit}`
           )}
@@ -36,14 +38,14 @@ export function UsageLimitIndicator({
       </div>
 
       {!isUnlimited && (
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+        <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
           <div
-            className={`h-full transition-all duration-300 ${
+            className={`h-full rounded-full transition-all duration-300 ${
               isExhausted
-                ? 'bg-rose-500'
+                ? 'bg-destructive'
                 : isNearLimit
                 ? 'bg-amber-500'
-                : 'bg-indigo-600'
+                : 'bg-primary'
             }`}
             style={{ width: `${percentage}%` }}
           />
@@ -51,9 +53,18 @@ export function UsageLimitIndicator({
       )}
 
       {isExhausted && (
-        <p className="mt-1 text-xs text-rose-500 font-medium">
-          Quota exhausted. Upgrade plan to generate more.
-        </p>
+        <div className="mt-2.5 flex items-center justify-between">
+          <p className="text-[11px] text-destructive font-medium">
+            Quota exhausted
+          </p>
+          <Link
+            href="/settings/billing"
+            className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-primary hover:underline"
+          >
+            <span>Upgrade</span>
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
       )}
     </div>
   );

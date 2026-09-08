@@ -12,4 +12,4 @@ This repo's canonical project skill lives at:
 
 **`.cursor/skills/saas-core/SKILL.md`**
 
-Load that skill for backend, frontend, worker, and Mastra work. Global rules are in `.cursor/.cursorrules`; file-scoped rules are in `.cursor/rules/saas-core/*.mdc`.
+Load that skill for backend, frontend, worker, and AI work. Global rules are in `.cursor/.cursorrules`; file-scoped rules are in `.cursor/rules/saas-core/*.mdc`.

@@ -62,8 +62,10 @@ export async function generatePresignedUploadUrl(
 - Track upload status (`PENDING`, `COMPLETED`, `FAILED`).
 - Clean up orphaned assets when deleting associated draft posts or knowledge documents.
 
-## Storage Best Practices
+## Storage Best Practices & Upload Security
 - **Never expose AWS Secret Keys** on client side components.
-- Validate MIME types and maximum file sizes before creating presigned URLs.
-- Organize bucket keys by tenant: `businesses/{businessId}/{category}/{timestamp}-{filename}`.
-- Use CDN caching for static public media (e.g. blog header images and social media assets).
+- **Path Traversal Defense**: Always sanitize user-provided filenames via `SecurityService.sanitizeFilename(filename)` before generating S3 keys.
+- **Binary Magic Byte Inspection**: Verify file magic bytes (`SecurityService.validateMagicBytes(buffer, mimeType)`) to prevent MIME spoofing and malicious script uploads.
+- **Tenant Isolation**: Always verify caller belongs to `businessId` via `prisma.businessMember` before granting presigned upload URLs or listing stored assets.
+- **Key Partitioning**: Organize bucket keys strictly by tenant: `businesses/{businessId}/{category}/{timestamp}-{safeFilename}`.
+- **Private by Default**: Keep S3 buckets private. Serve read assets through CloudFront CDN or presigned read URLs with restricted TTL.

@@ -20,27 +20,14 @@ Create migration for new models:
 npm run prisma:migrate add_post_publishing_models
 ```
 
-### Step 3: Update Mastra Configuration
+### Step 3: Register Custom AI Agents and Workflows
 
-In `mastra/index.ts`, add new agents and workflows:
+In `services/ai/index.ts`, all agents and workflows are registered and exported:
 
 ```typescript
-import { postCreationAgent, postPublisherAgent, analyticsAgent } from './agents/post-creation-agent';
-import { postPublishingWorkflow, analyticsWorkflow, scheduledPostingWorkflow } from './workflows/post-publishing-workflow';
-
-export const mastra = new Mastra({
-  workflows: {
-    postPublishingWorkflow,
-    analyticsWorkflow,
-    scheduledPostingWorkflow,
-  },
-  agents: {
-    postCreationAgent,
-    postPublisherAgent,
-    analyticsAgent,
-  },
-  // ... rest of config
-});
+export * from './agents';
+export * from './tools';
+export * from './workflows';
 ```
 
 ### Step 4: Test OAuth Flow
@@ -114,7 +101,7 @@ curl -X POST http://localhost:3000/api/posts/create \
   - [ ] Historical tracking
   - [ ] Report generation
 
-### Backend - Mastra Integration
+### Backend - AI/Workflows Integration
 - [ ] Post creation agent
 - [ ] Post publisher agent
 - [ ] Analytics agent
@@ -233,11 +220,12 @@ curl -X POST http://localhost:3000/api/posts/create \
 │       └── workers/
 │           └── posting.worker.ts        (TODO)
 │
-├── mastra/
-│   ├── agents/
-│   │   └── post-creation-agent.ts       ✅ DONE
-│   ├── workflows/
-│   │   └── post-publishing-workflow.ts  ✅ DONE
+├── services/
+│   └── ai/
+│       ├── agents/
+│       ├── tools/
+│       ├── workflows/
+│       └── index.tsDONE
 │   └── tools/
 │       └── publishing-tools.ts          (TODO)
 │
@@ -382,7 +370,7 @@ Once fully implemented, you should be able to:
 
 ## 📞 Support & Resources
 
-- [Mastra Documentation](https://mastra.ai)
+- [Custom AI Engine Documentation](file:///Users/taha/projects/ai_social_media_automation/services/ai)
 - [Meta Graph API](https://developers.facebook.com/docs/graph-api)
 - [Instagram Graph API](https://developers.facebook.com/docs/instagram-api)
 - [React Query Docs](https://tanstack.com/query/latest)

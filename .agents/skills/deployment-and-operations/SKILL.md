@@ -58,14 +58,14 @@ docker-compose -f docker-compose.monitoring.yml up -d
 # Build production web container
 docker build --target runner -t social-automation-app .
 
-# Build background worker container
+# Build background worker container with health probe
 docker build --target worker -t social-automation-worker .
 
-# Start full production stack
-docker-compose up -d
+# Start full production stack (includes automatic database migration runner)
+docker compose up -d
 
 # Start local development dependencies only (PostgreSQL + Redis)
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 ---
@@ -74,11 +74,13 @@ docker-compose -f docker-compose.dev.yml up -d
 
 - `GET /api/health`: General system health, memory usage, uptime, and database connection status.
 - `GET /api/health/ready`: Kubernetes/ECS readiness probe verifying PostgreSQL and critical services.
-- `GET /api/metrics`: Prometheus metric exposition.
+- `GET /api/metrics`: Prometheus metric exposition including BullMQ queue counts (`bullmq_jobs_waiting`, `bullmq_jobs_active`, `bullmq_jobs_failed`).
+- `scripts/worker-healthcheck.sh`: Worker container heartbeat probe checking active event-loop ticks.
 
 Run CLI health check:
 ```bash
 ./scripts/healthcheck.sh
+./scripts/worker-healthcheck.sh
 ```
 
 ---
@@ -86,7 +88,7 @@ Run CLI health check:
 ## 5. Database Backup & Disaster Recovery
 
 ```bash
-# 1. Run database backup (gzip compressed, with 7-day retention cleanup)
+# 1. Run database backup (gzip compressed with integrity verification & optional S3 sync)
 ./scripts/backup-db.sh ./backups/postgres
 
 # 2. Restore database from backup
@@ -97,6 +99,8 @@ Run CLI health check:
 
 ## 6. CI/CD Pipeline (`.github/workflows/`)
 
-- **`ci.yml`**: Triggers on push and pull requests. Runs linting, TypeScript 8GB typechecking, 28 Jest & Bun test suites (97 tests), Prisma migration deploy check, and Docker build test.
-- **`deploy.yml`**: Continuous deployment to VPS via SSH with migration deployment, Next.js standalone build, PM2 zero-downtime reload, and post-deploy health check probe.
+- **`ci.yml`**: Triggers on push and pull requests. Runs ESLint, TypeScript 8GB typecheck, 57 Jest test suites (264 tests), Prisma migration deploy check, and Docker multi-stage build check.
+- **`deploy.yml`**: Continuous deployment to VPS via SSH with automated pre-migration database snapshot, Next.js standalone build, PM2 zero-downtime reload, and post-deploy health check probe.
 - **`security.yml`**: Scheduled weekly and PR vulnerability scan using Trivy, TruffleHog secrets detection, and npm audit.
+- **`k8s-deploy.yml`**: Kustomize Kubernetes deployment with automated rollout verification.
+

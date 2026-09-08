@@ -5,15 +5,12 @@ import { AIService } from '@/services/ai/ai.service';
 
 /**
  * Direct Multi-Location Service
- * Handles aggregated analytics and cross-location settings using Mastra agents
+ * Handles aggregated analytics and cross-location settings using AI services
  */
 export class MultiLocationService {
   /**
-   * Get all business locations for an organization
+   * Helper to retrieve organizationId; falls back to businessId if missing
    */
-  /**
-  * Helper to retrieve organizationId; falls back to businessId if missing
-  */
   private static async getOrgId(businessId: string): Promise<string> {
     const biz = await prisma.business.findUnique({
       where: { id: businessId },
@@ -109,7 +106,7 @@ export class MultiLocationService {
   }
 
   /**
-   * Use direct AI integration to provide strategic advice for the multi-location business
+   * Use custom AI agent to provide strategic advice for the multi-location business
    */
   static async getStrategicAdvice(businessId: string, query: string) {
     try {
@@ -119,14 +116,14 @@ export class MultiLocationService {
         select: { name: true }
       });
 
-      const prompt = `
-        The user is asking for strategic advice for their multi-location business "${business?.name}".
-        Query: ${query}
-        
-        Please provide a detailed strategic recommendation based on the current business context.
-      `;
-
-      const text = await AIService.generateWithOpenRouter({ prompt });
+      const { multiLocationAgent } = await import('@/services/ai/agents/multi-location.agent');
+      const text = await multiLocationAgent.generateResponse?.(query, {
+        businessId,
+        organizationId,
+        businessName: business?.name,
+      }) || await AIService.generateWithOpenRouter({
+        prompt: `Multi-location business "${business?.name}" strategic advice: ${query}`
+      });
 
       return { success: true, data: text };
     } catch (error) {
@@ -138,30 +135,29 @@ export class MultiLocationService {
   /**
    * Add a new location to the organization
    */
-    static async addLocation(businessId: string, locationData: { name: string, address: string, type: BusinessType }) {
-      try {
-        const orgId = await this.getOrgId(businessId);
-        // Prepare data for new location
-        const newLocationData: any = {
-          name: locationData.name,
-          location: locationData.address,
-          businessType: locationData.type,
-          slug: locationData.name.toLowerCase().replace(/\s+/g, '-'),
-          organizationId: orgId,
-        };
-        const newLocation = await prisma.business.create({
-          data: newLocationData,
-        });
-        return { success: true, data: newLocation };
-      } catch (error) {
-        SystemLogger.error('MultiLocationService.addLocation', error);
-        return { success: false, error: String(error) };
-      }
+  static async addLocation(businessId: string, locationData: { name: string, address: string, type: BusinessType }) {
+    try {
+      const orgId = await this.getOrgId(businessId);
+      const newLocationData: any = {
+        name: locationData.name,
+        location: locationData.address,
+        businessType: locationData.type,
+        slug: locationData.name.toLowerCase().replace(/\s+/g, '-'),
+        organizationId: orgId,
+      };
+      const newLocation = await prisma.business.create({
+        data: newLocationData,
+      });
+      return { success: true, data: newLocation };
+    } catch (error) {
+      SystemLogger.error('MultiLocationService.addLocation', error);
+      return { success: false, error: String(error) };
     }
+  }
 
   /**
    * Direct AI Implementation for location-based customization
-   * Uses AI directly to adapt content for specific local nuances
+   * Uses AI agent or tool to adapt content for specific local nuances
    */
   static async customizeContentForLocation(locationId: string, baseContent: string) {
     try {
@@ -177,19 +173,19 @@ export class MultiLocationService {
 
       if (!business) return { success: false, error: 'Location not found' };
 
-      const prompt = `
-        Adapt the following social media content for a specific business location.
-        
-        Location Name: ${business.name}
-        Address: ${business.location}
-        Business Type: ${business.businessType}
-        
-        Content to adapt:
-        ${baseContent}
-        
-        Make it sound local and relevant to this specific branch while maintaining the overall message.
-      `;
+      const { multiLocationTool } = await import('@/services/ai/tools/multi-location.tool');
+      const result = await multiLocationTool.execute({
+        organizationId: business.organizationId || locationId,
+        action: 'CUSTOMIZE_FOR_LOCATION',
+        settings: { baseContent },
+        locationId,
+      });
 
+      if (result.success && result.data) {
+        return { success: true, data: result.data };
+      }
+
+      const prompt = `Adapt this social media content for "${business.name}" (${business.location}, ${business.businessType}):\n\n${baseContent}`;
       const text = await AIService.generateWithOpenRouter({ prompt });
 
       return { success: true, data: text };

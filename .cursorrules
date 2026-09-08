@@ -59,7 +59,7 @@ Load the relevant skill file when working in a specific domain. Each skill conta
   📂 `.agents/skills/cloud-storage/SKILL.md`
 
 ### 🤖 AI & Agents
-- **Mastra agents, tools, workflows:**
+- **AI agents, tools, workflows:**
   📂 `.agents/skills/ai-agent-development/SKILL.md`
 - **AI provider config, OpenRouter, OpenAI, LangChain:**
   📂 `.agents/skills/ai-provider-development/SKILL.md`

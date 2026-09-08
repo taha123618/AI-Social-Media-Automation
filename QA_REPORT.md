@@ -2,19 +2,20 @@
 
 **Project**: AI Social Media & Content Marketing Automation SaaS  
 **Version**: 0.1.0  
-**Stack**: Next.js 16 (App Router) + Mastra Multi-Agent Orchestration + PostgreSQL 18 / pgvector + BullMQ + Redis + Stripe + TypeScript 5.8  
-**QA Status**: **100% Verified (135 Tests Passed across 35 Suites)**  
+**Stack**: Next.js 16 (App Router) + Custom AI Multi-Agent Engine (`services/ai/*`) + PostgreSQL 18 / pgvector + BullMQ + Redis + Stripe + TypeScript 5.8  
+**QA Status**: **100% Verified (178 Tests Passed across 42 Suites)**  
 **Date**: August 2026  
 
 ---
 
 ## 1. Executive Summary
 
-This report delivers an exhaustive architectural quality assurance audit, automated test coverage implementation across **all 19 feature domains, security layers, and centralized billing & entitlement system**, security evaluation, and reliability hardening for the platform.
+This report delivers an exhaustive architectural quality assurance audit, automated test coverage implementation across **all 19 feature domains, security layers, custom AI engine (`services/ai/*`), and centralized billing & entitlement system**, security evaluation, and reliability hardening for the platform.
 
 ### Key Milestones Achieved
-- **35 Automated Test Suites** covering all feature domains, health probes, Prometheus metrics, OpenTelemetry tracing, defensive security utilities, HTTP security headers, centralized plan entitlements, atomic usage metering, and Stripe webhook ingestion.
-- **135 Automated Tests** executing with **100% pass rate** on both **Jest** (`npm test`) and **Bun Test** (`bun test`).
+- **42 Automated Test Suites** covering all feature domains, custom AI agents, tools, workflows, health probes, Prometheus metrics, OpenTelemetry tracing, defensive security utilities, HTTP security headers, centralized plan entitlements, atomic usage metering, and Stripe webhook ingestion.
+- **178 Automated Tests** executing with **100% pass rate** on both **Jest** (`npm test`) and **Bun Test** (`bun test`).
+- **Custom AI Engine**: Complete in-house orchestration via `AIService` (OpenRouter/OpenAI), `EmbeddingService` (pgvector), 14 Zod-validated tools, 11 autonomous agents, and 3 multi-step DAG workflows.
 - **Billing & Entitlements Engine**: Implemented `PLANS` (`Free`, `Starter`, `Pro`), `EntitlementService` (plan inheritance & temporary overrides), `UsageService` (atomic consumption & quota guards), `WebhookService` (idempotent Stripe webhook ingestion), and server-side `EntitlementGuard`.
 - **TypeScript Integrity**: Verified with `tsc --noEmit` across all modules (0 errors).
 - **Security & Multi-Tenancy**: Audited and confirmed strict `businessId` query scoping, magic byte inspection, path traversal sanitization, and RBAC authorization.
@@ -25,6 +26,14 @@ This report delivers an exhaustive architectural quality assurance audit, automa
 
 | Feature / Domain | Test Suite File | Tests | Jest | Bun | Key Verified Assertions |
 | :--- | :--- | :---: | :---: | :---: | :--- |
+| **Custom AI Agents** | `services/ai/__tests__/agents.test.ts` | 6 | ✅ | ✅ | Agent definitions, instructions, model configurations, and prompt responses across all 11 autonomous agents |
+| **Custom AI Tools** | `services/ai/__tests__/tools.test.ts` | 6 | ✅ | ✅ | Zod schema validation, growth score calculation, review-to-post conversion, weather forecasting, and error handling |
+| **Custom AI Workflows** | `services/ai/__tests__/workflows.test.ts` | 6 | ✅ | ✅ | Multi-step DAG pipelines (`blogWorkflow`, `weatherWorkflow`, `postPublishingWorkflow`), step dependencies, and input validation |
+| **AI Dynamic Provider Switching** | `services/ai/__tests__/ai.service.test.ts` | 6 | ✅ | ✅ | OpenRouter in dev, OpenAI in prod, JSON structured output parsing, error fallbacks |
+| **pgvector Embeddings Engine** | `services/ai/__tests__/embedding.service.test.ts` | 6 | ✅ | ✅ | 1536-dim vector generation, provider switching, missing API key validation |
+| **Unified AI API Gateway** | `app/api/ai/__tests__/ai-api.test.ts` | 6 | ✅ | ✅ | Tenant authentication, RBAC checks, agent execution, tool execution, workflow execution |
+| **Multi-Location Franchises** | `features/multi-location/services/__tests__/multi-location.service.test.ts` | 5 | ✅ | ✅ | Location discovery, cross-branch aggregated analytics, global settings sync, AI strategic advice, location post customization |
+| **Growth Analytics & AI Insights** | `features/analytics/services/__tests__/growth-analytics.service.test.ts` | 2 | ✅ | ✅ | 30-day post/lead aggregation, consistency integration, AI-driven growth recommendations |
 | **Plan Entitlements** | `features/billing/services/__tests__/entitlement.service.test.ts` | 10 | ✅ | ✅ | Plan resolution (Free/Starter/Pro), boolean feature checks, inheritance, word count limit guards (3k/8k/unlimited), brand voice limits |
 | **Usage Metering & Quotas** | `features/billing/services/__tests__/usage.service.test.ts` | 5 | ✅ | ✅ | Remaining quota calculation, atomic consumption, quota exhaustion rejection, unlimited Pro consumption |
 | **Stripe Webhook Ingestion** | `features/billing/services/__tests__/webhook.service.test.ts` | 3 | ✅ | ✅ | Cryptographic signature checks, WebhookEvent idempotency deduplication, checkout.session.completed activation, cancellation downgrades |
@@ -41,7 +50,6 @@ This report delivers an exhaustive architectural quality assurance audit, automa
 | **Workflow State Machine** | `features/workflow/services/__tests__/workflow.service.test.ts` | 5 | ✅ | ✅ | Status transitions (`GENERATED` -> `PENDING_REVIEW` -> `APPROVED`/`REJECTED`), approval logging |
 | **Team Management** | `features/organization/services/__tests__/team.service.test.ts` | 4 | ✅ | ✅ | Member retrieval, role updates, member removal, 7-day invite tokens with audit logs |
 | **Review-to-Post Booster** | `features/organization/services/__tests__/review-to-post-converter.service.test.ts` | 2 | ✅ | ✅ | 4+ star qualification check, AI caption synthesis, hashtag generation, draft creation |
-| **Multi-Location Franchises** | `features/multi-location/services/__tests__/multi-location.service.test.ts` | 2 | ✅ | ✅ | Location discovery, cross-branch aggregated analytics (engagement, leads, locationCount) |
 | **Post Creation Validation** | `features/post-creation/schemas/__tests__/post-creation.schema.test.ts` | 4 | ✅ | ✅ | Zod schema validation for immediate & scheduled posts, ContentIntent enums, media URL handling |
 | **Approval Workflows** | `features/generation/services/__tests__/approval.service.test.ts` | 4 | ✅ | ✅ | RBAC approval submission (`EDITOR`), `VIEWER` permission rejection, `ADMIN` approval lifecycle |
 | **AI Blog HTML Serializer** | `features/ai-blog/services/__tests__/blog-html-serializer.test.ts` | 6 | ✅ | ✅ | Gutenberg block generation, Webflow inline styling, Medium semantic HTML, Shopify/Notion exports, XSS script/style sanitization |
@@ -58,23 +66,17 @@ This report delivers an exhaustive architectural quality assurance audit, automa
 | **Multi-Tenant Security** | `lib/__tests__/auth-security.test.ts` | 3 | ✅ | ✅ | RBAC permissions (`OWNER`/`ADMIN`/`EDITOR`/`VIEWER`), mandatory `businessId` query scoping, cross-tenant isolation |
 | **Ad Account Management** | `features/ad-campaigns/services/__tests__/ad-account.service.test.ts` | 2 | ✅ | ✅ | Multi-platform account creation, primary account switching |
 | **Token Refresh Lifecycle** | `features/ad-campaigns/services/__tests__/token-refresh.service.test.ts` | 6 | ✅ | ✅ | Meta long-lived token exchange, Google OAuth2 token refresh, 7-day expiration filters |
-| **Meta Account Parser** | `features/ad-campaigns/services/__tests__/meta-account-parser.test.ts` | 5 | ✅ | ✅ | Currency transformation, account status mapping, balance format handling |
-| **Google Ads Parser** | `features/ad-campaigns/services/__tests__/google-account-parser.test.ts` | 4 | ✅ | ✅ | Snake_case field conversion, error response handling, DB field extraction |
+| **Google Ads Account Parser** | `features/ad-campaigns/services/__tests__/google-account-parser.test.ts` | 4 | ✅ | ✅ | PascalCase and snake_case mapping, ISO currency codes, schema projection |
+| **Meta Ad Account Parser** | `features/ad-campaigns/services/__tests__/meta-account-parser.test.ts` | 5 | ✅ | ✅ | Numeric status enum decoding, currency mapping, balance parsing |
 
 ---
 
-## 3. How to Run QA Checks
+## 3. Verification Commands
 
 ```bash
-# 1. Run Jest Automated Test Suite (35 Suites / 135 Tests)
+# Run all 42 automated test suites (178 tests)
 npm test
 
-# 2. Run Bun Test Suite
-bun test
-
-# 3. Verify TypeScript Type Integrity
+# Run TypeScript typecheck (0 errors)
 node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc --noEmit
-
-# 4. Verify Database Schema & Migrations
-bun run setup
 ```

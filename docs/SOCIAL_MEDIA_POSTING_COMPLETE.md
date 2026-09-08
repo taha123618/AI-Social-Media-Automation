@@ -4,7 +4,7 @@
 1. [Architecture Overview](#architecture-overview)
 2. [Database Schema](#database-schema)
 3. [API Endpoints](#api-endpoints)
-4. [Mastra Agents & Workflows](#mastra-agents--workflows)
+4. [Custom AI Agents & Workflows](#custom-ai-agents--workflows)
 5. [React Components](#react-components)
 6. [Meta API Integration](#meta-api-integration)
 7. [Permissions & Scopes](#permissions--scopes)
@@ -40,7 +40,7 @@
          │                            │                      │
          ▼                            ▼                      ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    Mastra Agents & Workflows                         │
+│                    Custom AI Agents & Workflows                      │
 ├─────────────────────────────────────────────────────────────────────┤
 │  PostCreationAgent - Handles content generation                      │
 │  PostPublishingWorkflow - Orchestrates publishing to multiple        │
@@ -396,78 +396,40 @@ interface PostAnalyticsResponse {
 
 ---
 
-## Mastra Agents & Workflows
+## Custom AI Agents & Workflows
 
 ### 1. PostCreation Agent
 
-**File:** `src/mastra/agents/post-creation-agent.ts`
+**File:** `services/ai/agents/post-creation.agent.ts`
 
 ```typescript
-import { Agent } from '@mastra/core/agent';
-import { z } from 'zod';
+import { AgentDefinition } from '../types';
+import { AIService } from '../ai.service';
+import { generateContentTool } from '../tools';
 
-const PostCreationSchema = z.object({
-  platforms: z.array(z.enum(['FACEBOOK', 'INSTAGRAM', 'TIKTOK'])),
-  intent: z.enum(['SALES', 'EDUCATION', 'EVENT', 'ENGAGEMENT']),
-  businessContext: z.string(),
-  customPrompt: z.string().optional(),
-});
-
-export const postCreationAgent = new Agent({
-  name: 'postCreationAgent',
-  instructions: `You are an expert social media content creator specializing in multi-platform posting.
-
-Your responsibilities:
-1. Generate compelling post content for various platforms
-2. Adapt content tone and format for each platform's audience
-3. Optimize hashtags and mentions for maximum engagement
-4. Suggest call-to-action statements
-5. Provide platform-specific recommendations (e.g., Reel length for Instagram, tweet threading for X)
-
-Always consider:
-- Character limits per platform
-- Platform-specific features (Stories, Reels, TikTok sounds)
-- Audience demographics
-- Brand voice and guidelines
-- Engagement patterns`,
-
-  model: {
-    provider: 'openrouter',
-    name: 'openai/gpt-4-turbo',
-  },
-  tools: [
-    {
-      id: 'generatePostContent',
-      description: 'Generate optimized post content for selected platforms',
-      inputSchema: PostCreationSchema,
-      execute: async (input) => {
-        // Implementation: Generate content using AI
-        return {
-          content: '...',
-          variants: ['...', '...'],
-          recommendations: {},
-        };
-      },
-    },
-  ],
-});
+export const postCreationAgent: AgentDefinition = {
+  name: 'Creative Content Producer',
+  instructions: `You are an elite Social Media Copywriter and Creative Director...`,
+  model: 'gpt-4o',
+  tools: { generateContentTool },
+};
 ```
 
 ### 2. Post Publishing Workflow
 
-**File:** `src/mastra/workflows/post-publishing-workflow.ts`
+**File:** `services/ai/workflows/post-publishing.workflow.ts`
 
 ```typescript
-import { Workflow } from '@mastra/core/workflow';
+import { WorkflowDefinition } from '../types';
 
-export const postPublishingWorkflow = new Workflow({
-  name: 'postPublishingWorkflow',
-  definition: {
-    type: 'dag',
-    steps: [
-      {
-        id: 'validateContent',
-        type: 'action',
+export const postPublishingWorkflow: WorkflowDefinition = {
+  id: 'post-publishing-workflow',
+  name: 'Multi-Platform Post Publishing Pipeline',
+  steps: [
+    // Validation -> Platform Formatting -> Dispatch -> Logs
+  ],
+};
+```
         action: {
           type: 'worker',
           work: async (input) => {
@@ -623,7 +585,7 @@ interface TokenRefreshStrategy {
 - [ ] Extend Prisma schema with new models
 - [ ] Create TypeScript types and interfaces
 - [ ] Build Meta API integration service
-- [ ] Create Mastra agents and workflows
+- [ ] Create Custom AI agents and workflows (`services/ai/*`)
 - [ ] Implement API endpoints
 - [ ] Build React UI components
 - [ ] Add analytics dashboard

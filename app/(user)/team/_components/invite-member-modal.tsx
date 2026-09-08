@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Loader, Send, Mail, Shield, UserPlus } from 'lucide-react';
+import { X, Loader2, Send, Mail, Shield, UserPlus, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { inviteTeamMember, updateInvitation } from '../actions/mutations';
 import { toast } from 'sonner';
 import { UserRole } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface InviteMemberModalProps {
    onClose: () => void;
@@ -20,7 +24,7 @@ export function InviteMemberModal({ onClose, businessId, initialData }: InviteMe
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!email) return toast.error('Email is required');
+      if (!email.trim()) return toast.error('Email is required');
       if (!email.includes('@')) return toast.error('Invalid email address');
 
       setIsSubmitting(true);
@@ -45,100 +49,137 @@ export function InviteMemberModal({ onClose, businessId, initialData }: InviteMe
    };
 
    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-md">
          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="w-full max-w-lg rounded-[3rem] bg-white/80 p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] dark:bg-slate-900/80 border border-white dark:border-slate-800 backdrop-blur-2xl"
+            exit={{ opacity: 0, scale: 0.95, y: 12 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="relative w-full max-w-md flex flex-col rounded-2xl bg-card border border-border/80 shadow-2xl overflow-hidden"
          >
-            <div className="flex items-center justify-between mb-10">
-               <div className="flex items-center gap-5">
-                  <div className="h-16 w-16 rounded-[1.5rem] bg-blue-600 text-white flex items-center justify-center shadow-2xl shadow-blue-500/40 relative overflow-hidden group">
-                     <div className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent" />
-                     <UserPlus className="h-8 w-8 relative z-10" />
+            {/* Ambient Top Glow */}
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-28 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header */}
+            <div className="p-5 sm:p-6 pb-4 border-b border-border/60 flex items-center justify-between shrink-0 relative z-10">
+               <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
+                     <UserPlus className="h-5 w-5" />
                   </div>
                   <div>
-                     <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                        {initialData ? 'Edit Access' : 'New Member'}
+                     <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
+                        {initialData ? 'Update Member Access' : 'Invite Workspace Member'}
                      </h2>
-                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                        {initialData ? 'Update role or email details' : 'Invite a collaborator to your team'}
+                     <p className="text-xs text-muted-foreground mt-0.5">
+                        {initialData ? 'Adjust workspace permissions' : 'Collaborate on AI campaigns and content pipelines'}
                      </p>
                   </div>
                </div>
                <button
                   onClick={onClose}
-                  className="h-12 w-12 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                >
-                  <X className="h-6 w-6 stroke-[2.5px]" />
+                  <X className="h-4 w-4" />
                </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-               <div className="space-y-6">
-                  <div className="group">
-                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 ml-2">Email Identity</label>
-                     <div className="relative">
-                        <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                        <input
-                           type="email"
-                           value={email}
-                           onChange={(e) => setEmail(e.target.value)}
-                           placeholder="partner@company.com"
-                           className="w-full h-16 rounded-2xl border border-slate-200/60 bg-white/50 pl-14 pr-6 py-2.5 dark:border-slate-800/60 dark:bg-slate-950/50 focus:ring-8 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white outline-none transition-all font-bold text-slate-900 dark:text-white"
-                        />
-                     </div>
-                  </div>
-
-                  <div>
-                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3 ml-2">Assigned Workspace Role</label>
-                     <div className="grid grid-cols-2 gap-4">
-                        <button
-                           type="button"
-                           onClick={() => setRole('EDITOR')}
-                           className={`group relative flex flex-col items-center justify-center gap-3 rounded-[2rem] border-2 p-6 transition-all duration-500 ${role === 'EDITOR'
-                              ? 'bg-blue-600 border-blue-600 text-white shadow-2xl shadow-blue-500/30 ring-4 ring-blue-500/10'
-                              : 'border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-900/50'
-                              }`}
-                        >
-                           <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${role === 'EDITOR' ? 'bg-white/20' : 'bg-white dark:bg-slate-800 shadow-sm'}`}>
-                              <Shield className={`h-6 w-6 ${role === 'EDITOR' ? 'text-white' : 'text-slate-400'}`} />
-                           </div>
-                           <span className={`text-sm tracking-tight ${role === 'EDITOR' ? 'font-black' : 'font-bold'}`}>Editor</span>
-                        </button>
-                        <button
-                           type="button"
-                           onClick={() => setRole('ADMIN')}
-                           className={`group relative flex flex-col items-center justify-center gap-3 rounded-[2rem] border-2 p-6 transition-all duration-500 ${role === 'ADMIN'
-                              ? 'bg-purple-600 border-purple-600 text-white shadow-2xl shadow-purple-500/30 ring-4 ring-purple-500/10'
-                              : 'border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 dark:border-slate-800 dark:bg-slate-900/50'
-                              }`}
-                        >
-                           <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${role === 'ADMIN' ? 'bg-white/20' : 'bg-white dark:bg-slate-800 shadow-sm'}`}>
-                              <Shield className={`h-6 w-6 ${role === 'ADMIN' ? 'text-white' : 'text-slate-400'}`} />
-                           </div>
-                           <span className={`text-sm tracking-tight ${role === 'ADMIN' ? 'font-black' : 'font-bold'}`}>Admin</span>
-                        </button>
-                     </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 relative z-10">
+               <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">Email Identity</label>
+                  <div className="relative">
+                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                     <Input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="colleague@company.com"
+                        className="pl-10 h-10 text-xs rounded-xl bg-secondary/30 border-border/70 text-foreground focus-visible:ring-primary/30"
+                     />
                   </div>
                </div>
 
-               <div className="flex gap-4 pt-4">
-                  <button
+               <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1.5">Access Role Tier</label>
+                  <div className="grid grid-cols-2 gap-3">
+                     <button
+                        type="button"
+                        onClick={() => setRole('EDITOR')}
+                        className={cn(
+                           'flex flex-col items-start gap-2 p-3.5 rounded-xl border text-left transition-all relative overflow-hidden',
+                           role === 'EDITOR'
+                              ? 'border-primary bg-primary/10 text-foreground ring-1 ring-primary/30 shadow-xs'
+                              : 'border-border/70 bg-secondary/30 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        )}
+                     >
+                        <div className="flex items-center justify-between w-full">
+                           <div className="h-7 w-7 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                              <Shield className="h-3.5 w-3.5" />
+                           </div>
+                           {role === 'EDITOR' && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                        </div>
+                        <div>
+                           <div className="text-xs font-bold text-foreground">Editor</div>
+                           <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                              Draft, generate, and edit social campaigns.
+                           </div>
+                        </div>
+                     </button>
+
+                     <button
+                        type="button"
+                        onClick={() => setRole('ADMIN')}
+                        className={cn(
+                           'flex flex-col items-start gap-2 p-3.5 rounded-xl border text-left transition-all relative overflow-hidden',
+                           role === 'ADMIN'
+                              ? 'border-accent bg-accent/10 text-foreground ring-1 ring-accent/30 shadow-xs'
+                              : 'border-border/70 bg-secondary/30 text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        )}
+                     >
+                        <div className="flex items-center justify-between w-full">
+                           <div className="h-7 w-7 rounded-lg bg-accent/15 text-accent-foreground flex items-center justify-center">
+                              <Shield className="h-3.5 w-3.5 text-accent" />
+                           </div>
+                           {role === 'ADMIN' && <CheckCircle2 className="h-4 w-4 text-accent" />}
+                        </div>
+                        <div>
+                           <div className="text-xs font-bold text-foreground">Admin</div>
+                           <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                              Full access, billing, and member governance.
+                           </div>
+                        </div>
+                     </button>
+                  </div>
+               </div>
+
+               <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/60">
+                  <Button
                      type="button"
+                     variant="ghost"
+                     size="sm"
                      onClick={onClose}
-                     className="flex-1 h-16 rounded-2xl font-black uppercase tracking-widest text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95"
+                     className="h-9 px-4 text-xs rounded-xl text-muted-foreground hover:text-foreground"
                   >
-                     Dismiss
-                  </button>
-                  <button
+                     Cancel
+                  </Button>
+                  <Button
                      type="submit"
+                     size="sm"
                      disabled={isSubmitting}
-                     className="flex-1 h-16 rounded-2xl bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-black uppercase tracking-widest text-xs shadow-2xl shadow-slate-500/20 hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 transition-all"
+                     className="h-9 px-5 text-xs font-semibold rounded-xl gap-1.5 shadow-sm active:scale-95"
                   >
-                     {isSubmitting ? <Loader className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                     <span>{initialData ? 'Update' : 'Invite'}</span>
-                  </button>
+                     {isSubmitting ? (
+                        <>
+                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                           <span>Inviting...</span>
+                        </>
+                     ) : (
+                        <>
+                           <Send className="h-3.5 w-3.5" />
+                           <span>{initialData ? 'Update Access' : 'Send Invitation'}</span>
+                        </>
+                     )}
+                  </Button>
                </div>
             </form>
          </motion.div>

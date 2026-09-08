@@ -50,17 +50,3 @@ export class AdBoosterService {
   }
 }
 
-/* 
-// MASTRA ALTERNATIVE (Commented out as requested)
-// This uses the Mastra Ad Booster Tool to get AI-powered budget and targeting recommendations
-
-import { analyticsAgent } from '@/mastra/agents/analytics-agent';
-
-export async function runMastraAdSuggestion(businessId: string) {
-  const result = await analyticsAgent.execute({
-    input: "Which of my recent posts should I boost as an ad, and what budget should I use?",
-    context: { businessId }
-  });
-  return result;
-}
-*/

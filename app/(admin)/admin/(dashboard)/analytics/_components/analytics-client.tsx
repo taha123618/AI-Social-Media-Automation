@@ -7,8 +7,6 @@ import {
   LineChart, Line, PieChart, Pie, Cell, AreaChart, Area
 } from "recharts";
 import { motion } from "framer-motion";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { Users, MousePointer2, Share2, Eye, TrendingUp, Filter, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAnalyticsTotals, usePostEngagement } from "@/features/admin/hooks/use-admin";
@@ -40,16 +38,6 @@ export default function AnalyticsClient({
     shares: liveTotals.shares,
     users: initialTotals.users,
   } : initialTotals;
-
-  useGSAP(() => {
-    gsap.from(".analytics-card", {
-      y: 40,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.8,
-      ease: "power3.out"
-    });
-  }, { scope: containerRef });
 
   const summaryCards = [
     { title: "Total Impressions", value: totals.views, icon: Eye, color: "text-indigo-500", bg: "bg-indigo-500/10" },

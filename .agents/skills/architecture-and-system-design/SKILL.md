@@ -30,9 +30,9 @@ graph TD
         Knowledge["RAG & Knowledge Base"]
     end
     
-    subgraph "AI Engines"
-        DirectAI["Direct AI SDK / LangChain (LLMs & Vision)"]
-        MastraEngine["Mastra AI Framework (mastra/*)"]
+    subgraph "AI Engines (services/ai/*)"
+        DirectAI["Dynamic AIService (OpenRouter dev / OpenAI prod)"]
+        CustomEngine["Custom AI Agents, Tools & Workflows"]
     end
     
     subgraph "Background & Data Services"
@@ -50,7 +50,7 @@ graph TD
     API --> Feature
     
     Feature --> DirectAI
-    Feature --> MastraEngine
+    Feature --> CustomEngine
     Feature --> Redis
     Feature --> Postgres
     Feature --> S3
@@ -60,9 +60,9 @@ graph TD
 
 ### 1) Presentation & Routing (`app/`)
 - `app/(marketing)`: High-conversion animated marketing pages (GSAP, Framer Motion, Lenis scroll).
-- `app/(auth)`: Auth.js / NextAuth login, registration, password recovery, verification.
-- `app/(user)`: Multi-tenant SaaS workspace for social scheduling, content drafting, campaign management, knowledge base RAG, and review booster.
-- `app/(admin)`: System health, real-time metrics, AI blog templates, and user administration.
+- `app/(auth)`: Better Auth login, registration with automatic organization/subscription provisioning, password recovery, verification.
+- `app/(user)`: Multi-tenant SaaS workspace for social scheduling, content drafting, campaign management, knowledge base RAG, review booster, and reactive `<FeatureGate />` component access.
+- `app/(admin)`: Dedicated Admin Command Center with Billing Operations (`/admin/billing`), user plan overrides with audit logging, system health, real-time metrics, AI blog templates, and queue telemetry.
 - `app/api`: Edge and Node.js REST API endpoints, webhook receivers (Stripe, Meta, LinkedIn, X, TikTok, YouTube).
 
 ### 2) Feature Domain Modules (`features/*`)
@@ -72,8 +72,8 @@ features/
   ad-campaigns/        # Ad generation, campaign launch, sync workers
   admin/               # Admin panel state and service layer
   ai-blog/             # AI blog writer, TipTap editor, serializers, workers
-  analytics/           # Social and business analytics aggregation
-  billing/             # Stripe checkout, subscription lifecycle
+  analytics/           # Social and business analytics aggregation & gated Growth Engine
+  billing/             # Stripe checkout, subscription lifecycle, EntitlementService, UsageService
   compliance/          # Content safety, prohibited term checks
   crm/                 # Lead pipeline, demo bookings
   generation/          # Core AI prompt synthesis
@@ -90,10 +90,10 @@ features/
   workflow/            # Automated multi-step business pipelines
 ```
 
-### 3) Mastra Agent Engine (`mastra/`)
-- Multi-agent orchestration located at the project root (`mastra/index.ts`).
+### 3) Custom AI Engine (`services/ai/`)
+- Unified multi-agent orchestration and tool execution located at `services/ai/index.ts`.
 - 13 autonomous agents coordinating research, competitor analysis, weather hooks, YouTube transcription, and multi-location sync.
-- Dual storage with LibSQL for relational state and DuckDB for observability spans.
+- Pure TypeScript workflows chaining multi-step generation, verification, and SEO optimization.
 
 ### 4) Asynchronous & Background Processing
 - BullMQ workers connected via Redis to handle heavy async workloads (video rendering, batch post publishing, embedding generation, metrics sync).
