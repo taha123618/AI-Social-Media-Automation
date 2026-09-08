@@ -64,7 +64,7 @@ export function RegisterForm() {
 
   // Expiry & Resend cooldown timers when in OTP step
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (step === "OTP_VERIFY") {
       interval = setInterval(() => {
         setExpiresInSeconds((prev) => (prev > 0 ? prev - 1 : 0));

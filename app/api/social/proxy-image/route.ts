@@ -11,9 +11,13 @@ export async function GET(req: NextRequest) {
 
   // Unwrap accidentally double-proxied URLs
   while (imageUrl && imageUrl.includes('/api/social/proxy-image?url=')) {
-    const rawNested = new URL(imageUrl, 'http://localhost').searchParams.get('url');
+    const rawNested: string | null = new URL(imageUrl, 'http://localhost').searchParams.get('url');
     if (rawNested) imageUrl = rawNested;
     else break;
+  }
+
+  if (!imageUrl) {
+    return new NextResponse('Missing image URL', { status: 400 });
   }
 
   if (imageUrl.startsWith('pending://')) {

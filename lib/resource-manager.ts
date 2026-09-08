@@ -64,7 +64,7 @@ export class ResourceManager {
    * Register a timeout/interval for cleanup
    */
   static registerTimer(
-    timerId: NodeJS.Timeout,
+    timerId: any,
     description: string
   ): void {
     this.registerCleanup(
@@ -252,7 +252,7 @@ export function createTimer(
   callback: () => void,
   delay: number,
   description?: string
-): NodeJS.Timeout {
+): ReturnType<typeof setTimeout> {
   const timerId = setTimeout(callback, delay);
   ResourceManager.registerTimer(timerId, description || `Timer: ${delay}ms`);
   return timerId;
@@ -263,7 +263,7 @@ export function createInterval(
   callback: () => void,
   interval: number,
   description?: string
-): NodeJS.Timeout {
+): ReturnType<typeof setInterval> {
   const intervalId = setInterval(callback, interval);
   ResourceManager.registerTimer(intervalId, description || `Interval: ${interval}ms`);
   return intervalId;

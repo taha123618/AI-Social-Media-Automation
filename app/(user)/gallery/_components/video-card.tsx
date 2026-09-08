@@ -57,7 +57,7 @@ export default function VideoCard({ video }: VideoCardProps) {
   const [hasAutoRefreshed, setHasAutoRefreshed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // Update currentVideoUrl when video prop changes (e.g., after refresh)
   useEffect(() => {
