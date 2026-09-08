@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { FaLinkedin, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import {
@@ -22,6 +23,8 @@ import {
   ArrowUpRight,
   Cpu,
   Flame,
+  Search,
+  X,
 } from "lucide-react";
 
 // ============================================================================
@@ -35,6 +38,7 @@ interface ToolItem {
   icon: React.ReactNode;
   telemetry: string;
   badge: string;
+  href: string;
 }
 
 const toolsData: ToolItem[] = [
@@ -46,6 +50,7 @@ const toolsData: ToolItem[] = [
     icon: <Layers className="w-4 h-4 text-primary" />,
     telemetry: "6 THEMES • PDF/PNG",
     badge: "CAROUSEL",
+    href: "/carousels",
   },
   {
     name: "AI Voice Cloning Studio",
@@ -55,6 +60,7 @@ const toolsData: ToolItem[] = [
     icon: <Mic className="w-4 h-4 text-purple-400" />,
     telemetry: "6 VOICES • HD AUDIO",
     badge: "VOICE",
+    href: "/voice",
   },
   {
     name: "Brand Voice Guardian",
@@ -64,6 +70,7 @@ const toolsData: ToolItem[] = [
     icon: <ShieldCheck className="w-4 h-4 text-emerald-500" />,
     telemetry: "REAL-TIME LINTER",
     badge: "GUARDIAN",
+    href: "/knowledge",
   },
   {
     name: "24/7 DM Lead Qualifier Bot",
@@ -73,6 +80,7 @@ const toolsData: ToolItem[] = [
     icon: <Bot className="w-4 h-4 text-blue-400" />,
     telemetry: "24/7 AUTONOMOUS",
     badge: "LEAD BOT",
+    href: "/dm-automation",
   },
   {
     name: "Competitor Sentiment Radar",
@@ -82,6 +90,7 @@ const toolsData: ToolItem[] = [
     icon: <Radar className="w-4 h-4 text-amber-500" />,
     telemetry: "X • REDDIT • LINKEDIN",
     badge: "RADAR",
+    href: "/listening",
   },
   {
     name: "Multi-Model Comparison Arena",
@@ -91,6 +100,7 @@ const toolsData: ToolItem[] = [
     icon: <Swords className="w-4 h-4 text-primary" />,
     telemetry: "LIVE TOKEN TELEMETRY",
     badge: "ARENA",
+    href: "/arena",
   },
   {
     name: "Enterprise Webhooks Gateway",
@@ -100,6 +110,7 @@ const toolsData: ToolItem[] = [
     icon: <Webhook className="w-4 h-4 text-purple-400" />,
     telemetry: "HMAC SHA-256",
     badge: "GATEWAY",
+    href: "/settings",
   },
   {
     name: "Viral X Thread Engine",
@@ -109,6 +120,7 @@ const toolsData: ToolItem[] = [
     icon: <FaXTwitter className="w-4 h-4 text-foreground" />,
     telemetry: "ALGO-OPTIMIZED",
     badge: "THREADS",
+    href: "/posts",
   },
   {
     name: "LinkedIn Post Formatter",
@@ -118,6 +130,7 @@ const toolsData: ToolItem[] = [
     icon: <FaLinkedin className="w-4 h-4 text-accent" />,
     telemetry: "B2B ENGAGEMENT",
     badge: "FORMATTER",
+    href: "/posts",
   },
   {
     name: "YouTube Script Generator",
@@ -127,6 +140,7 @@ const toolsData: ToolItem[] = [
     icon: <FaYoutube className="w-4 h-4 text-red-500" />,
     telemetry: "RETENTION CURVES",
     badge: "SCRIPTS",
+    href: "/videos",
   },
   {
     name: "Hashtag Semantic Miner",
@@ -136,6 +150,7 @@ const toolsData: ToolItem[] = [
     icon: <Hash className="w-4 h-4 text-primary" />,
     telemetry: "SEMANTIC CLUSTERS",
     badge: "TAGS",
+    href: "/trends",
   },
   {
     name: "Shorts & Reels Hook Crafter",
@@ -145,6 +160,7 @@ const toolsData: ToolItem[] = [
     icon: <Zap className="w-4 h-4 text-amber-500" />,
     telemetry: "3S INTERRUPTS",
     badge: "HOOKS",
+    href: "/videos",
   },
   {
     name: "Topical Content Multiplier",
@@ -154,6 +170,7 @@ const toolsData: ToolItem[] = [
     icon: <Target className="w-4 h-4 text-primary" />,
     telemetry: "1-TO-24 MULTIPLIER",
     badge: "SCALE",
+    href: "/workflows",
   },
   {
     name: "SEO Metadata & Schema Tuner",
@@ -163,6 +180,7 @@ const toolsData: ToolItem[] = [
     icon: <Globe className="w-4 h-4 text-emerald-500" />,
     telemetry: "JSON-LD SCHEMA",
     badge: "SCHEMA",
+    href: "/blog",
   },
   {
     name: "High-CTR Ad Copy Variants",
@@ -172,6 +190,7 @@ const toolsData: ToolItem[] = [
     icon: <PenTool className="w-4 h-4 text-purple-400" />,
     telemetry: "AIDA / PAS COPY",
     badge: "ADS",
+    href: "/ad-campaigns",
   },
   {
     name: "Gutenberg Long-Form Blog Writer",
@@ -181,6 +200,7 @@ const toolsData: ToolItem[] = [
     icon: <FileText className="w-4 h-4 text-accent" />,
     telemetry: "GUTENBERG READY",
     badge: "BLOG",
+    href: "/blog",
   },
 ];
 
@@ -251,7 +271,7 @@ export default function ToolsShowcase() {
           </motion.div>
 
           {/* Filter Bar & Fast Search */}
-          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mt-6 sm:mt-8 flex flex-col items-center justify-center gap-3.5">
             {/* Category Filter Pills */}
             <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-2xl bg-muted/50 border border-border/80 backdrop-blur-md">
               {filterCategories.map((category) => {
@@ -278,6 +298,27 @@ export default function ToolsShowcase() {
                 );
               })}
             </div>
+
+            {/* Interactive Search Input */}
+            <div className="relative w-full max-w-sm px-2">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Quick search 16 AI modules..."
+                className="w-full pl-8.5 pr-8 py-1.5 rounded-xl bg-muted/40 border border-border/80 text-foreground placeholder:text-muted-foreground/60 text-xs focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-mono"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded-full hover:bg-muted transition-colors cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -296,46 +337,72 @@ export default function ToolsShowcase() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2, delay: index * 0.02 }}
                 whileHover={{ y: -4 }}
-                className="group relative p-5 rounded-2xl border border-border/80 bg-card hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                className="group relative rounded-2xl border border-border/80 bg-card hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
-                {/* Subtle top hover glow border */}
-                <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Link href={tool.href} className="p-5 flex flex-col justify-between h-full group/link cursor-pointer">
+                  {/* Subtle top hover glow border */}
+                  <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                {/* Card Top */}
-                <div>
-                  <div className="flex items-center justify-between mb-3.5">
-                    <div className="w-9 h-9 rounded-xl bg-muted border border-border/70 flex items-center justify-center group-hover:bg-primary/15 group-hover:border-primary/30 group-hover:text-primary transition-all duration-300 shadow-2xs">
-                      {tool.icon}
+                  {/* Card Top */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3.5">
+                      <div className="w-9 h-9 rounded-xl bg-muted border border-border/70 flex items-center justify-center group-hover:bg-primary/15 group-hover:border-primary/30 group-hover:text-primary transition-all duration-300 shadow-2xs">
+                        {tool.icon}
+                      </div>
+
+                      <span className="text-[8px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 tracking-wider">
+                        {tool.badge}
+                      </span>
                     </div>
 
-                    <span className="text-[8px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 tracking-wider">
-                      {tool.badge}
+                    <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors tracking-tight mb-1.5 flex items-center justify-between">
+                      <span>{tool.name}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 text-primary transition-all duration-200" />
+                    </h3>
+
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                      {tool.description}
+                    </p>
+                  </div>
+
+                  {/* Card Footer Telemetry */}
+                  <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[8px] font-mono text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                      <span>{tool.telemetry}</span>
+                    </div>
+                    <span className="text-foreground/40 font-bold group-hover:text-primary transition-colors">
+                      OPEN TOOL
                     </span>
                   </div>
-
-                  <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors tracking-tight mb-1.5 flex items-center justify-between">
-                    <span>{tool.name}</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 text-primary transition-all duration-200" />
-                  </h3>
-
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                    {tool.description}
-                  </p>
-                </div>
-
-                {/* Card Footer Telemetry */}
-                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[8px] font-mono text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                    <span>{tool.telemetry}</span>
-                  </div>
-                  <span className="text-foreground/40 font-bold group-hover:text-primary transition-colors">
-                    ACTIVE
-                  </span>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </AnimatePresence>
+
+          {/* Empty Search State */}
+          {filteredTools.length === 0 && (
+            <div className="col-span-full py-14 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-muted/60 border border-border/80 flex items-center justify-center mx-auto mb-3 text-muted-foreground">
+                <Search className="w-5 h-5" />
+              </div>
+              <div className="text-sm font-semibold text-foreground mb-1 font-mono">
+                NO MATCHING MODULES FOUND
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
+                No tools match filter &quot;{activeFilter}&quot; and search &quot;{searchQuery}&quot;.
+              </p>
+              <button
+                onClick={() => {
+                  setActiveFilter("All");
+                  setSearchQuery("");
+                }}
+                className="text-xs font-semibold text-primary underline underline-offset-4 hover:text-primary/80 cursor-pointer"
+              >
+                Reset Filters &amp; Search
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Bottom Platform Metrics Banner */}
