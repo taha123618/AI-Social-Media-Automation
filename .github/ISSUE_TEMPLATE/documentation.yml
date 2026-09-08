@@ -1,0 +1,33 @@
+name: 📖 Documentation Improvement
+description: Report a typo, broken link, outdated instruction, or propose a new guide
+title: "[DOCS]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Accurate documentation empowers every contributor! Thank you for helping keep SocialAI docs clear and correct.
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: Documentation Issue Description
+      description: What is wrong, outdated, or missing in the documentation?
+      placeholder: The deployment runbook specifies an outdated environment variable...
+    validations:
+      required: true
+
+  - type: input
+    id: file_location
+    attributes:
+      label: Relevant Document / Path
+      description: Link or path to the affected markdown file.
+      placeholder: docs/ops/DEVOPS_RUNBOOK.md or README.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: Suggested Correction or Improvement
+      description: What should the documentation say instead?

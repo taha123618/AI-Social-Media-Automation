@@ -1,7 +1,30 @@
 {
-  "name": "ai_social_media_automation",
+  "name": "ai-social-media-automation",
   "version": "0.1.0",
-  "private": true,
+  "description": "Autonomous multi-agent AI social media automation, content scheduling, and campaign generation enterprise SaaS platform.",
+  "license": "MIT",
+  "homepage": "https://github.com/taha123618/AI-Social-Media-Automation#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taha123618/AI-Social-Media-Automation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/taha123618/AI-Social-Media-Automation/issues"
+  },
+  "keywords": [
+    "open-source",
+    "ai",
+    "saas",
+    "social-media",
+    "automation",
+    "workflow",
+    "typescript",
+    "nextjs",
+    "bullmq",
+    "prisma",
+    "pgvector",
+    "agents"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=8192' next build",

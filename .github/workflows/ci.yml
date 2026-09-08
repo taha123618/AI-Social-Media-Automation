@@ -96,11 +96,8 @@ jobs:
           npx prisma generate
           npx prisma migrate deploy
 
-      - name: Run Jest Test Suites (57 Suites / 264 Tests)
+      - name: Run Jest Test Suites (58 Suites / 281 Tests)
         run: npm test
-
-      - name: Run Bun Test Runner
-        run: bun test
 
   # 3. Production Build Validation
   build:

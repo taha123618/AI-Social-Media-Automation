@@ -1,0 +1,54 @@
+name: 💡 Feature Request
+description: Propose a new feature, AI agent capability, or enhancement
+title: "[FEATURE]: "
+labels: ["enhancement", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement to **SocialAI**! Please describe your proposal clearly.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Use Case
+      description: Is your feature request related to a problem or limitation? Please describe it.
+      placeholder: I currently have to manually create threads because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: A clear and concise description of what you want to happen.
+      placeholder: Introduce a new Threads agent in services/ai/agents/ that...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      options:
+        - "New AI Agent / Multi-Agent Workflow"
+        - "Social Channel Integration (Meta, LinkedIn, X, TikTok, YouTube, Threads)"
+        - "UI / UX Engineering & Dashboard"
+        - "Analytics & Performance Telemetry"
+        - "Knowledge Base & RAG Ingestion"
+        - "Creative Studio (Image/Video Synthesis)"
+        - "Developer Experience / CLI / Tooling"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or workarounds you've evaluated.
+
+  - type: textarea
+    id: technical_considerations
+    attributes:
+      label: Technical & Security Considerations
+      description: Does this impact database schemas, BullMQ queue load, multi-tenant isolation, or AI token consumption?
