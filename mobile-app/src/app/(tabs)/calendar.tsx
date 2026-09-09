@@ -14,8 +14,7 @@ import { Badge, SocialPlatform } from '@/components/ui/badge';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
-import { useQuery } from '@tanstack/react-query';
-import { calendarApi } from '@/api/calendar';
+import { useCalendarQuery } from '@/hooks/queries/use-calendar-query';
 import { CalendarSlot } from '@/types/api';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -24,10 +23,7 @@ export default function CalendarScreen() {
   const theme = useTheme();
   const [selectedDay, setSelectedDay] = useState<number>(new Date().getDay());
 
-  const { data: slots = [], isLoading } = useQuery({
-    queryKey: ['calendar-slots'],
-    queryFn: () => calendarApi.getCalendarSlots(),
-  });
+  const { data: slots = [], isLoading, refetch } = useCalendarQuery();
 
   const handleDaySelect = (dayIndex: number) => {
     if (Platform.OS !== 'web') {

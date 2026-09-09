@@ -3,25 +3,20 @@ import {
   View,
   StyleSheet,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { GlassCard } from '@/components/ui/glass-card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
-import { useQuery } from '@tanstack/react-query';
-import { analyticsApi } from '@/api/analytics';
+import { useAnalyticsQuery } from '@/hooks/queries/use-analytics-query';
 
 export default function AnalyticsScreen() {
   const theme = useTheme();
-
-  const { data: analytics } = useQuery({
-    queryKey: ['analytics'],
-    queryFn: () => analyticsApi.getAnalytics(),
-  });
-
-  if (!analytics) return null;
+  const { data: analytics, isLoading, refetch } = useAnalyticsQuery();
 
   const renderProgressBar = (used: number, limit: number, label: string) => {
     const percent = Math.min(100, Math.round((used / limit) * 100));
@@ -48,7 +43,11 @@ export default function AnalyticsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={theme.primary} />}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <View>
@@ -64,120 +63,135 @@ export default function AnalyticsScreen() {
           </View>
         </View>
 
-        {/* 4 Metric Cards Grid */}
-        <View style={styles.metricsGrid}>
-          {/* Follower Velocity */}
-          <GlassCard style={styles.metricCard}>
-            <View style={styles.metricCardHeader}>
-              <ThemedText type="caption" style={{ color: theme.textMuted }}>
-                Follower Velocity
-              </ThemedText>
-              <Icons.User size={16} color={theme.primary} />
+        {isLoading || !analytics ? (
+          <View style={styles.loadingContainer}>
+            <View style={styles.metricsGrid}>
+              <Skeleton width="48%" height={110} style={{ borderRadius: Radii.xl }} />
+              <Skeleton width="48%" height={110} style={{ borderRadius: Radii.xl }} />
+              <Skeleton width="48%" height={110} style={{ borderRadius: Radii.xl }} />
+              <Skeleton width="48%" height={110} style={{ borderRadius: Radii.xl }} />
             </View>
-            <ThemedText type="title" style={styles.metricBigNumber}>
-              {analytics.followerVelocity}
+            <Skeleton width="100%" height={160} style={{ borderRadius: Radii.xl, marginTop: Spacing.four }} />
+            <Skeleton width="100%" height={140} style={{ borderRadius: Radii.xl, marginTop: Spacing.four }} />
+          </View>
+        ) : (
+          <>
+            {/* 4 Metric Cards Grid */}
+            <View style={styles.metricsGrid}>
+              {/* Follower Velocity */}
+              <GlassCard style={styles.metricCard}>
+                <View style={styles.metricCardHeader}>
+                  <ThemedText type="caption" style={{ color: theme.textMuted }}>
+                    Follower Velocity
+                  </ThemedText>
+                  <Icons.User size={16} color={theme.primary} />
+                </View>
+                <ThemedText type="title" style={styles.metricBigNumber}>
+                  {analytics.followerVelocity}
+                </ThemedText>
+                <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
+                  <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
+                    {analytics.followerGrowthPercent} this month
+                  </ThemedText>
+                </View>
+              </GlassCard>
+
+              {/* Total Impressions */}
+              <GlassCard style={styles.metricCard}>
+                <View style={styles.metricCardHeader}>
+                  <ThemedText type="caption" style={{ color: theme.textMuted }}>
+                    Total Impressions
+                  </ThemedText>
+                  <Icons.Share2 size={16} color={theme.info} />
+                </View>
+                <ThemedText type="title" style={styles.metricBigNumber}>
+                  {analytics.totalImpressions}
+                </ThemedText>
+                <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
+                  <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
+                    {analytics.impressionsGrowthPercent} reach
+                  </ThemedText>
+                </View>
+              </GlassCard>
+
+              {/* Avg Engagement Rate */}
+              <GlassCard style={styles.metricCard}>
+                <View style={styles.metricCardHeader}>
+                  <ThemedText type="caption" style={{ color: theme.textMuted }}>
+                    Engagement Rate
+                  </ThemedText>
+                  <Icons.Heart size={16} color={theme.warning} />
+                </View>
+                <ThemedText type="title" style={styles.metricBigNumber}>
+                  {analytics.avgEngagementRate}
+                </ThemedText>
+                <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
+                  <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
+                    {analytics.engagementGrowthPercent} vs benchmark
+                  </ThemedText>
+                </View>
+              </GlassCard>
+
+              {/* Attributed Leads */}
+              <GlassCard style={styles.metricCard}>
+                <View style={styles.metricCardHeader}>
+                  <ThemedText type="caption" style={{ color: theme.textMuted }}>
+                    Attributed Leads
+                  </ThemedText>
+                  <Icons.Zap size={16} color={theme.success} />
+                </View>
+                <ThemedText type="title" style={styles.metricBigNumber}>
+                  {analytics.attributedLeads}
+                </ThemedText>
+                <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
+                  <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
+                    {analytics.leadsGrowthPercent} pipeline
+                  </ThemedText>
+                </View>
+              </GlassCard>
+            </View>
+
+            {/* Plan Quotas Progress Section */}
+            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+              Monthly Quota Telemetry
             </ThemedText>
-            <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
-              <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
-                {analytics.followerGrowthPercent} this month
-              </ThemedText>
-            </View>
-          </GlassCard>
+            <GlassCard style={styles.quotasCard}>
+              {renderProgressBar(analytics.quotas.posts.used, analytics.quotas.posts.limit, analytics.quotas.posts.label)}
+              {renderProgressBar(
+                analytics.quotas.articles.used,
+                analytics.quotas.articles.limit,
+                analytics.quotas.articles.label
+              )}
+              {renderProgressBar(
+                analytics.quotas.storage.used,
+                analytics.quotas.storage.limit,
+                analytics.quotas.storage.label
+              )}
+            </GlassCard>
 
-          {/* Total Impressions */}
-          <GlassCard style={styles.metricCard}>
-            <View style={styles.metricCardHeader}>
-              <ThemedText type="caption" style={{ color: theme.textMuted }}>
-                Total Impressions
-              </ThemedText>
-              <Icons.Share2 size={16} color={theme.info} />
-            </View>
-            <ThemedText type="title" style={styles.metricBigNumber}>
-              {analytics.totalImpressions}
+            {/* AI Recommendations */}
+            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+              AI Strategic Growth Directives
             </ThemedText>
-            <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
-              <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
-                {analytics.impressionsGrowthPercent} reach
-              </ThemedText>
-            </View>
-          </GlassCard>
-
-          {/* Avg Engagement Rate */}
-          <GlassCard style={styles.metricCard}>
-            <View style={styles.metricCardHeader}>
-              <ThemedText type="caption" style={{ color: theme.textMuted }}>
-                Engagement Rate
-              </ThemedText>
-              <Icons.Heart size={16} color={theme.warning} />
-            </View>
-            <ThemedText type="title" style={styles.metricBigNumber}>
-              {analytics.avgEngagementRate}
-            </ThemedText>
-            <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
-              <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
-                {analytics.engagementGrowthPercent} vs benchmark
-              </ThemedText>
-            </View>
-          </GlassCard>
-
-          {/* Attributed Leads */}
-          <GlassCard style={styles.metricCard}>
-            <View style={styles.metricCardHeader}>
-              <ThemedText type="caption" style={{ color: theme.textMuted }}>
-                Attributed Leads
-              </ThemedText>
-              <Icons.Zap size={16} color={theme.success} />
-            </View>
-            <ThemedText type="title" style={styles.metricBigNumber}>
-              {analytics.attributedLeads}
-            </ThemedText>
-            <View style={[styles.deltaPill, { backgroundColor: theme.successBg }]}>
-              <ThemedText type="caption" style={{ color: theme.success, fontWeight: '700' }}>
-                {analytics.leadsGrowthPercent} pipeline
-              </ThemedText>
-            </View>
-          </GlassCard>
-        </View>
-
-        {/* Plan Quotas Progress Section */}
-        <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-          Monthly Quota Telemetry
-        </ThemedText>
-        <GlassCard style={styles.quotasCard}>
-          {renderProgressBar(analytics.quotas.posts.used, analytics.quotas.posts.limit, analytics.quotas.posts.label)}
-          {renderProgressBar(
-            analytics.quotas.articles.used,
-            analytics.quotas.articles.limit,
-            analytics.quotas.articles.label
-          )}
-          {renderProgressBar(
-            analytics.quotas.storage.used,
-            analytics.quotas.storage.limit,
-            analytics.quotas.storage.label
-          )}
-        </GlassCard>
-
-        {/* AI Recommendations */}
-        <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-          AI Strategic Growth Directives
-        </ThemedText>
-        <GlassCard style={styles.recommendationsCard}>
-          {analytics.aiRecommendations.map((rec: string, index: number) => (
-            <View
-              key={index}
-              style={[
-                styles.recRow,
-                index < analytics.aiRecommendations.length - 1 && {
-                  borderBottomWidth: 1,
-                  borderBottomColor: theme.borderSubtle,
-                },
-              ]}
-            >
-              <Icons.Sparkles size={16} color={theme.primary} />
-              <ThemedText style={styles.recText}>{rec}</ThemedText>
-            </View>
-          ))}
-        </GlassCard>
+            <GlassCard style={styles.recommendationsCard}>
+              {analytics.aiRecommendations.map((rec: string, index: number) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.recRow,
+                    index < analytics.aiRecommendations.length - 1 && {
+                      borderBottomWidth: 1,
+                      borderBottomColor: theme.borderSubtle,
+                    },
+                  ]}
+                >
+                  <Icons.Sparkles size={16} color={theme.primary} />
+                  <ThemedText style={styles.recText}>{rec}</ThemedText>
+                </View>
+              ))}
+            </GlassCard>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -199,74 +213,79 @@ const styles = StyleSheet.create({
   },
   planBadge: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: 4,
+    paddingVertical: Spacing.half,
     borderRadius: Radii.full,
+  },
+  loadingContainer: {
+    gap: Spacing.two,
   },
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.three,
+    justifyContent: 'space-between',
+    gap: Spacing.two,
     marginBottom: Spacing.four,
   },
   metricCard: {
-    width: '47.5%',
+    width: '48%',
     padding: Spacing.three,
   },
   metricCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: Spacing.one,
+    marginBottom: Spacing.two,
   },
   metricBigNumber: {
-    fontSize: 24,
-    lineHeight: 30,
-    marginBottom: Spacing.one,
+    fontSize: 22,
+    marginBottom: Spacing.two,
   },
   deltaPill: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 6,
+    paddingHorizontal: Spacing.two,
     paddingVertical: 2,
     borderRadius: Radii.sm,
   },
   sectionTitle: {
     marginBottom: Spacing.two,
-    marginTop: Spacing.three,
+    marginTop: Spacing.two,
+    fontSize: 15,
   },
   quotasCard: {
-    gap: Spacing.three,
+    padding: Spacing.four,
     marginBottom: Spacing.four,
+    gap: Spacing.three,
   },
   quotaItem: {
-    gap: 6,
+    gap: Spacing.one,
   },
   quotaHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   progressTrack: {
     height: 8,
-    borderRadius: Radii.full,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: Radii.full,
+    borderRadius: 4,
   },
   recommendationsCard: {
-    padding: 0,
-    marginBottom: Spacing.four,
+    padding: Spacing.three,
+    gap: Spacing.two,
   },
   recRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: Spacing.two,
-    padding: Spacing.three,
+    paddingVertical: Spacing.two,
   },
   recText: {
-    flex: 1,
     fontSize: 13,
     lineHeight: 18,
+    flex: 1,
   },
 });

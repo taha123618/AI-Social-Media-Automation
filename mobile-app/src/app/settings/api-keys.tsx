@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
-import { settingsApi } from '@/api/settings';
+import { useSettingsQuery } from '@/hooks/queries/use-settings-query';
 
 interface WebhookEndpoint {
   id: string;
@@ -49,6 +49,7 @@ const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
 
 export default function ApiKeysScreen() {
   const theme = useTheme();
+  const { data, isLoading } = useSettingsQuery();
 
   const [showLiveKey, setShowLiveKey] = useState(false);
   const [showSandboxKey, setShowSandboxKey] = useState(false);
@@ -56,36 +57,31 @@ export default function ApiKeysScreen() {
 
   const [liveKey, setLiveKey] = useState('sai_live_8fbc290e44a19b023de9187');
   const [sandboxKey] = useState('sai_test_901c2ba439129841fce9822');
-  const [signingSecret] = useState('sai_whsec_9a87d6051726a297fc091a18274d');
+  const [signingSecret, setSigningSecret] = useState('sai_whsec_9a87d6051726a297fc091a18274d');
 
   const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>(INITIAL_WEBHOOKS);
   const [testingId, setTestingId] = useState<string | null>(null);
 
   React.useEffect(() => {
-    async function loadRealData() {
-      try {
-        const data = await settingsApi.getApiKeysAndWebhooks();
-        if (data.apiKeys && Array.isArray(data.apiKeys) && data.apiKeys.length > 0) {
-          const live = data.apiKeys.find((k) => k.type === 'PRODUCTION' || !k.name?.toLowerCase().includes('sandbox'));
-          if (live?.fullKey || live?.keyMasked) setLiveKey(live.fullKey || live.keyMasked);
-        }
-        if (data.webhooks && Array.isArray(data.webhooks) && data.webhooks.length > 0) {
-          const mappedHooks: WebhookEndpoint[] = data.webhooks.map((h) => ({
-            id: h.id,
-            url: h.url,
-            status: h.status === 'ACTIVE' ? 'ACTIVE' : 'PAUSED',
-            lastPingStatus: 200,
-            latencyMs: h.latencyMs || Math.floor(Math.random() * 30) + 30,
-            events: h.eventTypes || ['post.published'],
-          }));
-          setWebhooks(mappedHooks);
-        }
-      } catch (err) {
-        console.warn('Could not fetch real API keys/webhooks:', err);
-      }
+    if (data?.apiKeys && data.apiKeys.length > 0) {
+      const live = data.apiKeys.find((k) => k.type === 'PRODUCTION' || !k.name?.toLowerCase().includes('sandbox'));
+      if (live?.fullKey || live?.keyMasked) setLiveKey(live.fullKey || live.keyMasked);
     }
-    loadRealData();
-  }, []);
+    if (data?.webhooks && data.webhooks.length > 0) {
+      const mappedHooks: WebhookEndpoint[] = data.webhooks.map((h) => ({
+        id: h.id,
+        url: h.url,
+        status: h.status === 'ACTIVE' ? 'ACTIVE' : 'PAUSED',
+        lastPingStatus: 200,
+        latencyMs: h.latencyMs || 42,
+        events: h.eventTypes || ['post.published'],
+      }));
+      setWebhooks(mappedHooks);
+    }
+    if (data?.hmacSecret) {
+      setSigningSecret(data.hmacSecret);
+    }
+  }, [data]);
 
   const handleCopy = (value: string, label: string) => {
     if (Platform.OS !== 'web') {

@@ -20,17 +20,16 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { postsApi } from '@/api/posts';
+import { usePostsQuery } from '@/hooks/queries/use-posts-query';
+import { usePostMutations } from '@/hooks/mutations/use-post-mutations';
 import { Post } from '@/types/api';
 import { useAuthStore } from '@/stores/auth.store';
 
-type FilterType = 'ALL' | 'SCHEDULED' | 'DRAFT' | 'PUBLISHED' | 'FAILED';
+type FilterType = 'ALL' | 'DRAFT' | 'SCHEDULED' | 'PUBLISHED';
 
 export default function FeedScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { activeWorkspaceId, workspaces } = useAuthStore();
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('ALL');
 
@@ -39,34 +38,8 @@ export default function FeedScreen() {
     [activeWorkspaceId, workspaces]
   );
 
-  const { data: posts = [], isLoading, refetch } = useQuery({
-    queryKey: ['posts', activeWorkspaceId],
-    queryFn: () => postsApi.getPosts(),
-  });
-
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ postId, status }: { postId: string; status: PostStatus }) => {
-      if (status === 'PUBLISHED') {
-        return postsApi.publishPost(postId);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    },
-  });
-
-  const deletePostMutation = useMutation({
-    mutationFn: (postId: string) => postsApi.deletePost(postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
-    },
-  });
+  const { data: posts = [], isLoading, refetch } = usePostsQuery();
+  const { publishPostMutation, deletePostMutation } = usePostMutations();
 
   const filteredPosts = useMemo(() => {
     if (selectedFilter === 'ALL') return posts;
@@ -91,7 +64,7 @@ export default function FeedScreen() {
   };
 
   const handlePublishNow = (post: Post) => {
-    updateStatusMutation.mutate({ postId: post.id, status: 'PUBLISHED' });
+    publishPostMutation.mutate(post.id);
   };
 
   const handleDelete = (post: Post) => {
@@ -128,6 +101,12 @@ export default function FeedScreen() {
               contentFit="cover"
               transition={200}
             />
+            {item.mediaType === 'video' && (
+              <View style={styles.videoBadge}>
+                <Icons.Video size={12} color="#FFFFFF" />
+                <ThemedText style={styles.videoBadgeText}>VIDEO</ThemedText>
+              </View>
+            )}
           </View>
         )}
 
@@ -139,11 +118,11 @@ export default function FeedScreen() {
               {item.status === 'PUBLISHED'
                 ? 'Published recently'
                 : `Scheduled for ${new Date(item.scheduledFor).toLocaleDateString([], {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}`}
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}`}
             </ThemedText>
           </View>
 
@@ -444,6 +423,24 @@ const styles = StyleSheet.create({
   mediaImage: {
     width: '100%',
     height: '100%',
+  },
+  videoBadge: {
+    position: 'absolute',
+    bottom: Spacing.two,
+    right: Spacing.two,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4,
+    borderRadius: Radii.sm,
+    gap: 4,
+  },
+  videoBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   cardFooter: {
     flexDirection: 'row',
