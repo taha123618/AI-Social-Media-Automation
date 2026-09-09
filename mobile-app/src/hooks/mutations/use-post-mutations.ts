@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postsApi } from '@/api/posts';
+import { backendApi } from '@/lib/backend';
 import { CreatePostPayload, Post } from '@/types/api';
 import { queryKeys } from '@/constants/query-keys';
 import { useWorkspaceStore } from '@/stores/workspace.store';
@@ -9,7 +9,7 @@ export function usePostMutations() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
 
   const createPostMutation = useMutation({
-    mutationFn: (payload: CreatePostPayload) => postsApi.createPost(payload),
+    mutationFn: (payload: CreatePostPayload) => backendApi.createPost(payload),
     onSuccess: (newPost) => {
       // Optimistically insert new post into list cache
       queryClient.setQueriesData<Post[]>(
@@ -21,7 +21,7 @@ export function usePostMutations() {
   });
 
   const deletePostMutation = useMutation({
-    mutationFn: (postId: string) => postsApi.deletePost(postId),
+    mutationFn: (postId: string) => backendApi.deletePost(postId),
     onMutate: async (postId: string) => {
       await queryClient.cancelQueries({ queryKey: ['posts'] });
       // Optimistic delete
@@ -36,7 +36,7 @@ export function usePostMutations() {
   });
 
   const publishPostMutation = useMutation({
-    mutationFn: (postId: string) => postsApi.publishPost(postId),
+    mutationFn: (postId: string) => backendApi.publishPost(postId),
     onMutate: async (postId: string) => {
       await queryClient.cancelQueries({ queryKey: ['posts'] });
       // Optimistic publish

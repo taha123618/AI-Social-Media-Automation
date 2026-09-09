@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/constants/theme';
-import { postsApi } from '@/api/posts';
+import { backendApi } from '@/lib/backend';
 import { usePostMutations } from '@/hooks/mutations/use-post-mutations';
 import { SocialPlatform } from '@/types/api';
 import {
@@ -105,7 +105,7 @@ export default function ComposerScreen() {
     }
     setIsGenerating(true);
     try {
-      const generated = await postsApi.generateCopy(topicPrompt, selectedPlatforms[0]);
+      const generated = await backendApi.generateCopy(topicPrompt, selectedPlatforms[0]);
       setContent(generated);
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

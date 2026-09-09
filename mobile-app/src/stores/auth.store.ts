@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import { Workspace } from '@/types/api';
+import { backendApi } from '@/lib/backend';
 
 export interface User {
   id: string;
@@ -34,8 +34,6 @@ const STORAGE_KEY_AUTH = '@social_ai_session';
 const STORAGE_KEY_WORKSPACE = '@social_ai_active_workspace';
 const STORAGE_KEY_THEME = '@social_ai_theme_mode';
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
-
 /** Shared unauthenticated state reset */
 const unauthState = {
   user: null,
@@ -59,30 +57,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Login — must receive a real token from the DB; no fallbacks
   // ─────────────────────────────────────────────────────────────
   loginWithEmail: async (email: string, password: string) => {
-    const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
+    const res = await backendApi.login(email, password);
 
-    if (!res.data?.success || !res.data?.user || !res.data?.token) {
-      throw new Error(res.data?.error || 'Invalid email or password');
+    if (!res.success || !res.user || !res.token) {
+      throw new Error(res.error || 'Invalid email or password');
     }
 
     const user: User = {
-      id: res.data.user.id,
-      name: res.data.user.name,
-      email: res.data.user.email,
-      avatarUrl: res.data.user.image ?? undefined,
+      id: res.user.id,
+      name: res.user.name,
+      email: res.user.email,
+      avatarUrl: res.user.image ?? undefined,
     };
-    const token: string = res.data.token;
+    const token: string = res.token;
 
     await AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user, token }));
     set({ user, sessionToken: token, isAuthenticated: true, isLoading: false });
 
     // Fetch real workspaces from DB — required, not optional
-    const wsRes = await axios.get(`${API_BASE}/api/workspaces`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (wsRes.data?.data && Array.isArray(wsRes.data.data) && wsRes.data.data.length > 0) {
-      set({ workspaces: wsRes.data.data, activeWorkspaceId: wsRes.data.data[0].id });
-      await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, wsRes.data.data[0].id);
+    const wsList = await backendApi.getWorkspaces();
+    if (wsList.length > 0) {
+      set({ workspaces: wsList, activeWorkspaceId: wsList[0].id });
+      await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, wsList[0].id);
     }
 
     return { success: true };
@@ -92,19 +88,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Register — creates a real user record in the DB
   // ─────────────────────────────────────────────────────────────
   registerWithEmail: async (name: string, email: string, password: string) => {
-    const res = await axios.post(`${API_BASE}/api/auth/register`, { name, email, password });
+    const res = await backendApi.register(name, email, password);
 
-    if (!res.data?.success || !res.data?.user || !res.data?.token) {
-      throw new Error(res.data?.error || 'Registration failed');
+    if (!res.success || !res.user || !res.token) {
+      throw new Error(res.error || 'Registration failed');
     }
 
     const user: User = {
-      id: res.data.user.id,
-      name: res.data.user.name,
-      email: res.data.user.email,
-      avatarUrl: res.data.user.image ?? undefined,
+      id: res.user.id,
+      name: res.user.name,
+      email: res.user.email,
+      avatarUrl: res.user.image ?? undefined,
     };
-    const token: string = res.data.token;
+    const token: string = res.token;
 
     await AsyncStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify({ user, token }));
     set({ user, sessionToken: token, isAuthenticated: true, isLoading: false });
@@ -124,16 +120,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Logout — clears DB session + all local state
   // ─────────────────────────────────────────────────────────────
   logout: async () => {
-    const { sessionToken } = get();
-    try {
-      await axios.post(
-        `${API_BASE}/api/auth/logout`,
-        {},
-        { headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {} }
-      );
-    } catch {
-      // best-effort server-side invalidation; proceed regardless
-    }
+    await backendApi.logout();
     await AsyncStorage.multiRemove([STORAGE_KEY_AUTH, STORAGE_KEY_WORKSPACE]);
     set(unauthState);
   },
@@ -149,14 +136,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchWorkspaces: async () => {
     const { sessionToken } = get();
     if (!sessionToken) return;
-    const res = await axios.get(`${API_BASE}/api/workspaces`, {
-      headers: { Authorization: `Bearer ${sessionToken}` },
-    });
-    if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-      set({ workspaces: res.data.data });
+    const wsList = await backendApi.getWorkspaces();
+    if (wsList.length > 0) {
+      set({ workspaces: wsList });
       if (!get().activeWorkspaceId) {
-        set({ activeWorkspaceId: res.data.data[0].id });
-        await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, res.data.data[0].id);
+        set({ activeWorkspaceId: wsList[0].id });
+        await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, wsList[0].id);
       }
     }
   },
@@ -165,17 +150,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { sessionToken } = get();
     if (!sessionToken) throw new Error('Not authenticated');
 
-    const res = await axios.post(
-      `${API_BASE}/api/workspaces`,
-      { name, planTier },
-      { headers: { Authorization: `Bearer ${sessionToken}` } }
-    );
-
-    if (!res.data?.data) {
-      throw new Error(res.data?.error || 'Failed to create workspace');
-    }
-
-    const newWs: Workspace = res.data.data;
+    const newWs = await backendApi.createWorkspace(name, planTier);
     const updated = [newWs, ...get().workspaces];
     set({ workspaces: updated, activeWorkspaceId: newWs.id });
     await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, newWs.id);
@@ -215,20 +190,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // ── Validate token against the real DB ──────────────────
       let validatedUser: User;
       try {
-        const meRes = await axios.get(`${API_BASE}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 8000,
-        });
+        const meRes = await backendApi.getMe(token);
 
-        if (!meRes.data?.user) {
+        if (!meRes.user) {
           throw new Error('Invalid session');
         }
 
         validatedUser = {
-          id: meRes.data.user.id,
-          name: meRes.data.user.name,
-          email: meRes.data.user.email,
-          avatarUrl: meRes.data.user.image ?? undefined,
+          id: meRes.user.id,
+          name: meRes.user.name,
+          email: meRes.user.email,
+          avatarUrl: meRes.user.image ?? undefined,
         };
       } catch {
         // Token was rejected or network error — force re-login
@@ -248,14 +220,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // Sync latest workspaces from DB in the background
       try {
-        const wsRes = await axios.get(`${API_BASE}/api/workspaces`, {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 8000,
-        });
-        if (wsRes.data?.data && Array.isArray(wsRes.data.data) && wsRes.data.data.length > 0) {
+        const wsList = await backendApi.getWorkspaces();
+        if (wsList.length > 0) {
           set({
-            workspaces: wsRes.data.data,
-            activeWorkspaceId: storedWorkspace || wsRes.data.data[0].id,
+            workspaces: wsList,
+            activeWorkspaceId: storedWorkspace || wsList[0].id,
           });
         }
       } catch {

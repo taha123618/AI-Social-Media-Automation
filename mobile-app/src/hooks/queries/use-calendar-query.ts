@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { calendarApi } from '@/api/calendar';
+import { backendApi } from '@/lib/backend';
 import { queryKeys } from '@/constants/query-keys';
 import { useWorkspaceStore } from '@/stores/workspace.store';
 
@@ -8,7 +8,7 @@ export function useCalendarQuery() {
 
   return useQuery({
     queryKey: queryKeys.calendar.slots(activeWorkspaceId),
-    queryFn: () => calendarApi.getCalendarSlots(),
+    queryFn: () => backendApi.getCalendarSlots(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

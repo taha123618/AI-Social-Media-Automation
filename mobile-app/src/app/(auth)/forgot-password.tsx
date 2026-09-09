@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
-import { authApi } from '@/api/auth';
+import { backendApi } from '@/lib/backend';
 
 export default function ForgotPasswordScreen() {
   const theme = useTheme();
@@ -35,7 +35,7 @@ export default function ForgotPasswordScreen() {
     }
     setLoading(true);
     try {
-      await authApi.requestPasswordReset(email.trim());
+      await backendApi.requestPasswordReset(email.trim());
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }

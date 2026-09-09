@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { settingsApi } from '@/api/settings';
+import { backendApi } from '@/lib/backend';
 import { queryKeys } from '@/constants/query-keys';
 import { useWorkspaceStore } from '@/stores/workspace.store';
 
@@ -8,7 +8,7 @@ export function useSettingsQuery() {
 
   return useQuery({
     queryKey: queryKeys.settings.apiKeys(activeWorkspaceId),
-    queryFn: () => settingsApi.getApiKeysAndWebhooks(),
+    queryFn: () => backendApi.getApiKeysAndWebhooks(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

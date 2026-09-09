@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import { Workspace } from '@/types/api';
 import { useAuthStore } from './auth.store';
+import { backendApi } from '@/lib/backend';
 
 interface WorkspaceState {
   workspaces: Workspace[];
@@ -15,7 +15,6 @@ interface WorkspaceState {
 }
 
 const STORAGE_KEY_WORKSPACE = '@social_ai_active_workspace';
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   workspaces: [],
@@ -30,16 +29,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   fetchWorkspaces: async () => {
-    const sessionToken = useAuthStore.getState().sessionToken;
     set({ isLoading: true });
     try {
-      const res = await axios.get(`${API_BASE}/api/workspaces`, {
-        headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {},
-      });
-      if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-        set({ workspaces: res.data.data, isLoading: false });
+      const list = await backendApi.getWorkspaces();
+      if (list.length > 0) {
+        set({ workspaces: list, isLoading: false });
         if (!get().activeWorkspaceId) {
-          set({ activeWorkspaceId: res.data.data[0].id });
+          set({ activeWorkspaceId: list[0].id });
         }
         return;
       }
@@ -50,24 +46,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
 
   createWorkspace: async (name: string, planTier = 'Pro') => {
-    const sessionToken = useAuthStore.getState().sessionToken;
     set({ isLoading: true });
     try {
-      const res = await axios.post(
-        `${API_BASE}/api/workspaces`,
-        { name, planTier },
-        {
-          headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {},
-        }
-      );
-      if (res.data?.data) {
-        const newWs = res.data.data;
-        const updated = [newWs, ...get().workspaces];
-        set({ workspaces: updated, activeWorkspaceId: newWs.id, isLoading: false });
-        await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, newWs.id);
-        useAuthStore.getState().setActiveWorkspace(newWs.id);
-        return newWs;
-      }
+      const newWs = await backendApi.createWorkspace(name, planTier);
+      const updated = [newWs, ...get().workspaces];
+      set({ workspaces: updated, activeWorkspaceId: newWs.id, isLoading: false });
+      await AsyncStorage.setItem(STORAGE_KEY_WORKSPACE, newWs.id);
+      useAuthStore.getState().setActiveWorkspace(newWs.id);
+      return newWs;
     } catch (err) {
       console.warn('[WorkspaceStore] Create workspace API error, fallback locally:', err);
     }

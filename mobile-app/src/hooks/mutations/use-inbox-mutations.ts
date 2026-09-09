@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { inboxApi } from '@/api/inbox';
+import { backendApi } from '@/lib/backend';
 import { Conversation } from '@/types/api';
 
 export function useInboxMutations() {
@@ -7,7 +7,7 @@ export function useInboxMutations() {
 
   const sendReplyMutation = useMutation({
     mutationFn: ({ conversationId, replyText }: { conversationId: string; replyText: string }) =>
-      inboxApi.sendReply(conversationId, replyText),
+      backendApi.sendReply(conversationId, replyText),
     onMutate: async ({ conversationId }) => {
       await queryClient.cancelQueries({ queryKey: ['inbox'] });
       // Optimistic update: mark conversation resolved

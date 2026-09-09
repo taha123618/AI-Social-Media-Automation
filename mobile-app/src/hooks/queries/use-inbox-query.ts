@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { inboxApi } from '@/api/inbox';
+import { backendApi } from '@/lib/backend';
 import { queryKeys } from '@/constants/query-keys';
 import { useWorkspaceStore } from '@/stores/workspace.store';
 
@@ -8,7 +8,7 @@ export function useInboxQuery() {
 
   return useQuery({
     queryKey: queryKeys.inbox.conversations(activeWorkspaceId),
-    queryFn: () => inboxApi.getConversations(),
+    queryFn: () => backendApi.getConversations(),
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
