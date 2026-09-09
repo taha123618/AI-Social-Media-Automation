@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, TouchableOpacity, StyleProp } from 'react-native';
+import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 import { Radii, Spacing } from '@/constants/theme';
+import { AnimatedPressable } from './animated-pressable';
 
 export interface GlassCardProps {
   children: React.ReactNode;
@@ -28,13 +29,12 @@ export function GlassCard({
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        activeOpacity={0.85}
+      <AnimatedPressable
         onPress={onPress}
         style={[styles.card, containerStyle, style]}
       >
         {children}
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 

@@ -31,7 +31,7 @@ export const Colors = {
     glassBorder: 'rgba(228, 228, 231, 0.6)',
   },
   dark: {
-    primary: '#8B5CF6',
+    primary: '#8B5CF6', //oklch(0.65 0.22 275) #8B5CF6
     primaryLight: '#311F5A',
     primaryGlow: 'rgba(139, 92, 246, 0.25)',
     secondary: '#818CF8',

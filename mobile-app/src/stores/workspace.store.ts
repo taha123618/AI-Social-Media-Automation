@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Workspace } from '@/types/api';
 import { useAuthStore } from './auth.store';
 import { backendApi } from '@/lib/backend';
+import { sessionContext } from '@/lib/session-context';
 
 interface WorkspaceState {
   workspaces: Workspace[];
@@ -71,3 +72,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     return fallbackWs;
   },
 }));
+
+sessionContext.setWorkspaceGetter(
+  () => useWorkspaceStore.getState().activeWorkspaceId || useAuthStore.getState().activeWorkspaceId
+);
+

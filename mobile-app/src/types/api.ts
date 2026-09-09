@@ -78,34 +78,6 @@ export interface Workspace {
   memberCount?: number;
 }
 
-export interface AnalyticsOverview {
-  totalImpressions: number;
-  impressionsChange: number;
-  engagementRate: number;
-  engagementChange: number;
-  totalLikes: number;
-  likesChange: number;
-  totalComments: number;
-  commentsChange: number;
-}
-
-export interface PlanQuotas {
-  postsUsed: number;
-  postsTotal: number;
-  articlesUsed: number;
-  articlesTotal: number;
-  storageUsedGb: number;
-  storageTotalGb: number;
-}
-
-export interface StrategicRecommendation {
-  id: string;
-  title: string;
-  description: string;
-  expectedImpact: string;
-  urgency: 'HIGH' | 'MEDIUM' | 'LOW';
-}
-
 export interface QuotaProgress {
   used: number;
   limit: number;
@@ -170,3 +142,219 @@ export interface AuthResponse {
   token: string;
   businessId?: string;
 }
+
+// ─────────────────────────── AI Arena ───────────────────────────
+export interface ArenaModelResponse {
+  modelId: string;
+  name: string;
+  provider: string;
+  output: string;
+  latencyMs: number;
+  tokenCount: number;
+  estimatedCost: string;
+  qualityScore: number;
+}
+
+export interface ArenaComparisonResult {
+  prompt: string;
+  intent: string;
+  results: ArenaModelResponse[];
+  recommendedModelId: string;
+}
+
+// ─────────────────────────── Competitor Intelligence ───────────────────────────
+export interface CompetitorItem {
+  id: string;
+  domain: string;
+  name: string;
+  logoUrl?: string;
+  estimatedTraffic: string;
+  topKeywords: string[];
+  strengths: string[];
+  weaknesses: string[];
+  marketSharePercent: number;
+  lastScannedAt: string;
+}
+
+// ─────────────────────────── Blog Articles ───────────────────────────
+export interface BlogArticle {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  seoScore: number;
+  wordCount: number;
+  targetKeyword: string;
+  publishedAt?: string;
+  createdAt: string;
+}
+
+// ─────────────────────────── Ad Campaigns ───────────────────────────
+export interface AdCampaign {
+  id: string;
+  name: string;
+  platform: 'META' | 'GOOGLE' | 'TIKTOK' | 'LINKEDIN';
+  status: 'ACTIVE' | 'PAUSED' | 'DRAFT';
+  dailyBudget: number;
+  spent: number;
+  roas: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  variantsCount: number;
+}
+
+// ─────────────────────────── Social Listening Radar ───────────────────────────
+export interface SocialMention {
+  id: string;
+  author: string;
+  platform: SocialPlatform;
+  content: string;
+  sentiment: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+  sentimentScore: number;
+  reach: number;
+  timestamp: string;
+  engagement: number;
+}
+
+// ─────────────────────────── Reviews Booster ───────────────────────────
+export interface ReviewItem {
+  id: string;
+  author: string;
+  rating: number;
+  source: 'GOOGLE' | 'TRUSTPILOT' | 'YELP' | 'FACEBOOK';
+  comment: string;
+  timestamp: string;
+  replyStatus: 'PENDING' | 'REPLIED' | 'DISMISSED';
+  replyText?: string;
+}
+
+// ─────────────────────────── Multi-Location ───────────────────────────
+export interface LocationItem {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  activeCampaigns: number;
+  localEngagementRate: string;
+  isSynced: boolean;
+}
+
+// ─────────────────────────── Knowledge Base ───────────────────────────
+export interface KnowledgeProfile {
+  brandVoice: string;
+  targetAudience: string;
+  industry: string;
+  keyProducts: string[];
+  documentsCount: number;
+  lastTrainedAt: string;
+}
+
+// ─────────────────────────── Viral Trends & Events ───────────────────────────
+export interface TrendEvent {
+  id: string;
+  title: string;
+  category: string;
+  velocityScore: number;
+  suggestedHook: string;
+  relevanceScore: number;
+  peakWindow: string;
+}
+
+// ─────────────────────────── Connected Social Accounts ───────────────────────────
+export interface ConnectedAccount {
+  id: string;
+  platform: SocialPlatform;
+  username: string;
+  displayName: string;
+  avatarUrl?: string;
+  followersCount: number;
+  isConnected: boolean;
+  tokenExpiresAt?: string;
+}
+
+// ─────────────────────────── Team Members ───────────────────────────
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: WorkspaceRole;
+  avatarUrl?: string;
+  joinedAt: string;
+}
+
+// ─────────────────────────── Billing & Subscriptions ───────────────────────────
+export interface BillingDetails {
+  planTier: PlanTier;
+  amount: number;
+  interval: 'monthly' | 'yearly';
+  renewsAt: string;
+  paymentMethodMasked: string;
+  usage: {
+    postsUsed: number;
+    postsLimit: number;
+    aiTokensUsed: number;
+    aiTokensLimit: number;
+    storageGbUsed: number;
+    storageGbLimit: number;
+  };
+}
+
+// ─────────────────────────── Media Gallery Asset ───────────────────────────
+export interface MediaAsset {
+  id: string;
+  url: string;
+  type: 'image' | 'video';
+  aspectRatio: string;
+  filename: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+// ─────────────────────────── Image & Video Generation ───────────────────────────
+export interface GeneratedImageResult {
+  id: string;
+  imageUrl: string;
+  prompt: string;
+  aspectRatio: '1:1' | '16:9' | '9:16' | '4:5';
+  style: string;
+  seed?: number;
+  createdAt: string;
+}
+
+export interface GeneratedVideoScene {
+  sceneNumber: number;
+  title: string;
+  script: string;
+  visualPrompt: string;
+  durationSeconds: number;
+}
+
+export interface GeneratedVideoResult {
+  id: string;
+  title: string;
+  concept: string;
+  totalDurationSeconds: number;
+  voiceStyle: string;
+  scenes: GeneratedVideoScene[];
+  videoUrl?: string;
+  status: 'GENERATING' | 'READY' | 'FAILED';
+  createdAt: string;
+}
+
+// ─────────────────────────── Review & Approval Workflows ───────────────────────────
+export interface WorkflowDraft {
+  id: string;
+  title: string;
+  author: string;
+  step: string;
+  platforms: string[];
+  riskScore: string;
+  status: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'SCHEDULED' | 'PUBLISHED';
+  content?: string;
+  createdAt: string;
+}
+

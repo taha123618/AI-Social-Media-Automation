@@ -1,17 +1,15 @@
 import React from 'react';
 import {
-  TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
   ViewStyle,
   TextStyle,
-  Platform,
   StyleProp,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { ThemedText } from '../themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import { Radii, Spacing } from '@/constants/theme';
+import { AnimatedPressable } from './animated-pressable';
 
 export interface ButtonProps {
   title?: string;
@@ -43,9 +41,6 @@ export function Button({
 
   const handlePress = () => {
     if (disabled || loading) return;
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
     onPress();
   };
 
@@ -93,10 +88,11 @@ export function Button({
   const paddingHorizontal = size === 'sm' ? Spacing.three : size === 'lg' ? Spacing.six : Spacing.four;
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <AnimatedPressable
       onPress={handlePress}
       disabled={disabled || loading}
+      scaleTo={disabled || loading ? 1 : 0.96}
+      hapticFeedback={!disabled && !loading}
       style={[
         styles.base,
         {
@@ -132,7 +128,7 @@ export function Button({
           </ThemedText>
         </>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

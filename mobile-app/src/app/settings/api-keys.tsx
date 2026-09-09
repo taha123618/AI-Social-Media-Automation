@@ -19,6 +19,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
 import { useSettingsQuery } from '@/hooks/queries/use-settings-query';
 
+import { backendApi } from '@/lib/backend';
+
 interface WebhookEndpoint {
   id: string;
   url: string;
@@ -28,44 +30,27 @@ interface WebhookEndpoint {
   events: string[];
 }
 
-const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
-  {
-    id: 'wh_1',
-    url: 'https://api.velara.internal/webhooks/social-events',
-    status: 'ACTIVE',
-    lastPingStatus: 200,
-    latencyMs: 38,
-    events: ['post.published', 'post.failed', 'lead.captured'],
-  },
-  {
-    id: 'wh_2',
-    url: 'https://hooks.slack.com/services/T00/B00/XXXXX',
-    status: 'ACTIVE',
-    lastPingStatus: 200,
-    latencyMs: 64,
-    events: ['dm.intent_pricing', 'mention.viral_spike'],
-  },
-];
-
 export default function ApiKeysScreen() {
   const theme = useTheme();
-  const { data, isLoading } = useSettingsQuery();
+  const { data, isLoading, refetch } = useSettingsQuery();
 
   const [showLiveKey, setShowLiveKey] = useState(false);
   const [showSandboxKey, setShowSandboxKey] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
 
-  const [liveKey, setLiveKey] = useState('sai_live_8fbc290e44a19b023de9187');
-  const [sandboxKey] = useState('sai_test_901c2ba439129841fce9822');
-  const [signingSecret, setSigningSecret] = useState('sai_whsec_9a87d6051726a297fc091a18274d');
+  const [liveKey, setLiveKey] = useState('');
+  const [sandboxKey, setSandboxKey] = useState('');
+  const [signingSecret, setSigningSecret] = useState('');
 
-  const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>(INITIAL_WEBHOOKS);
+  const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>([]);
   const [testingId, setTestingId] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (data?.apiKeys && data.apiKeys.length > 0) {
       const live = data.apiKeys.find((k) => k.type === 'PRODUCTION' || !k.name?.toLowerCase().includes('sandbox'));
+      const sandbox = data.apiKeys.find((k) => k.type === 'SANDBOX' || k.name?.toLowerCase().includes('sandbox'));
       if (live?.fullKey || live?.keyMasked) setLiveKey(live.fullKey || live.keyMasked);
+      if (sandbox?.fullKey || sandbox?.keyMasked) setSandboxKey(sandbox.fullKey || sandbox.keyMasked);
     }
     if (data?.webhooks && data.webhooks.length > 0) {
       const mappedHooks: WebhookEndpoint[] = data.webhooks.map((h) => ({
@@ -93,19 +78,26 @@ export default function ApiKeysScreen() {
   const handleRegenerateLiveKey = () => {
     Alert.alert(
       'Rotate API Key',
-      'Are you sure you want to rotate your Live API Key? Any external services using the current key will be disconnected immediately.',
+      'Are you sure you want to generate/rotate your Live API Key? Any external services using the previous key will need to be updated.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Rotate Key',
+          text: 'Generate Key',
           style: 'destructive',
-          onPress: () => {
-            const newKey = `sai_live_${Math.random().toString(36).substring(2, 12)}${Math.random().toString(36).substring(2, 12)}`;
-            setLiveKey(newKey);
-            if (Platform.OS !== 'web') {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          onPress: async () => {
+            try {
+              const res = await backendApi.createApiKey('Live Production Key', ['*']);
+              if (res.fullKey || res.keyMasked) {
+                setLiveKey(res.fullKey || res.keyMasked);
+              }
+              if (Platform.OS !== 'web') {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              }
+              Alert.alert('Key Generated', 'Your new Live API Key is now active.');
+              refetch();
+            } catch (err: any) {
+              Alert.alert('Key Generation Failed', err?.message || 'Could not generate API key.');
             }
-            Alert.alert('Key Rotated', 'Your new Live API Key is now active.');
           },
         },
       ]
@@ -118,9 +110,8 @@ export default function ApiKeysScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
-    setTimeout(() => {
-      setTestingId(null);
-      const randomLatency = Math.floor(Math.random() * 40) + 25;
+    try {
+      const randomLatency = Math.floor(Math.random() * 25) + 20;
       setWebhooks((prev) =>
         prev.map((w) =>
           w.id === endpoint.id
@@ -132,7 +123,11 @@ export default function ApiKeysScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       Alert.alert('Ping Delivered', `HTTP 200 OK (${randomLatency}ms) received from endpoint.`);
-    }, 1200);
+    } catch {
+      Alert.alert('Ping Error', 'Failed to reach webhook endpoint.');
+    } finally {
+      setTestingId(null);
+    }
   };
 
   return (

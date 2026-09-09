@@ -50,7 +50,7 @@ export default function AnalyticsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1 }}>
             <ThemedText type="subtitle">Growth & Quotas</ThemedText>
             <ThemedText type="caption" style={{ color: theme.textMuted }}>
               30-day performance telemetry and plan credits

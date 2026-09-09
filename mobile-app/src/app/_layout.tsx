@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import { Stack, DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -8,7 +7,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { OfflineBanner } from '@/components/offline-banner';
+import { AppSidebar } from '@/components/navigation/app-sidebar';
 import { useAuthStore } from '@/stores/auth.store';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
 
 // Create TanStack Query client with SWR defaults
@@ -25,22 +26,14 @@ const queryClient = new QueryClient({
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const systemColorScheme = useColorScheme();
-  const { themeMode, initAuth } = useAuthStore();
+  const activeScheme = useColorScheme();
+  const { initAuth } = useAuthStore();
 
   useEffect(() => {
     initAuth();
   }, [initAuth]);
 
-  // Determine active theme
-  const effectiveTheme =
-    themeMode === 'system'
-      ? systemColorScheme === 'unspecified'
-        ? 'dark'
-        : systemColorScheme || 'dark'
-      : themeMode;
-
-  const isDark = effectiveTheme === 'dark';
+  const isDark = activeScheme === 'dark';
   const customDarkTheme = {
     ...DarkTheme,
     colors: {
@@ -105,6 +98,106 @@ export default function RootLayout() {
                   animation: 'slide_from_bottom',
                 }}
               />
+              <Stack.Screen
+                name="studio/image-generator"
+                options={{
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="studio/video-generator"
+                options={{
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+
+              {/* Intelligence Swarm & Modules */}
+              <Stack.Screen
+                name="blog/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="ad-campaigns/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="competitors/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="arena/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="trends/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="listening/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="reviews/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="multi-location/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="engagement/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="gallery/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="workflows/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="knowledge/index"
+                options={{
+                  presentation: 'card',
+                  animation: 'slide_from_right',
+                }}
+              />
 
               {/* Settings & Tenant Configuration */}
               <Stack.Screen
@@ -129,6 +222,9 @@ export default function RootLayout() {
                 }}
               />
             </Stack>
+
+            {/* Global Slide-over App Sidebar */}
+            <AppSidebar />
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

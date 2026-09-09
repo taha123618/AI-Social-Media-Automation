@@ -64,6 +64,15 @@ export default function ProfileSettingsScreen() {
   };
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0];
+  const roleDisplay = activeWorkspace?.role
+    ? activeWorkspace.role
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+    : 'Member';
+  const planDisplay = activeWorkspace?.planTier
+    ? activeWorkspace.planTier.charAt(0).toUpperCase() + activeWorkspace.planTier.slice(1).toLowerCase()
+    : 'Pro';
 
   const handleSignOut = () => {
     Alert.alert(
@@ -108,7 +117,7 @@ export default function ProfileSettingsScreen() {
           <Icons.ArrowLeft size={20} color={theme.text} />
         </Pressable>
         <ThemedText type="subtitle" style={styles.headerTitle}>
-          Profile & Preferences
+          Workspace Command Hub
         </ThemedText>
         <View style={{ width: 36 }} />
       </View>
@@ -119,19 +128,21 @@ export default function ProfileSettingsScreen() {
           <View style={styles.profileRow}>
             <View style={[styles.avatarCircle, { backgroundColor: theme.primary }]}>
               <ThemedText style={styles.avatarText}>
-                {user?.name ? user.name.charAt(0) : 'A'}
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </ThemedText>
             </View>
             <View style={styles.profileDetails}>
               <ThemedText type="subtitle" style={{ fontWeight: '800' }}>
-                {user?.name || 'Alex Sterling'}
+                {user?.name || 'User'}
               </ThemedText>
-              <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                {user?.email || 'alex@socialai.dev'}
-              </ThemedText>
+              {user?.email ? (
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  {user.email}
+                </ThemedText>
+              ) : null}
               <View style={styles.roleBadges}>
-                <Badge label="SUPER ADMIN" variant="platform" size="sm" style={{ backgroundColor: theme.backgroundElement }} />
-                <Badge label={activeWorkspace?.planTier || 'PRO'} variant="status" status="PUBLISHED" size="sm" />
+                <Badge label={roleDisplay} variant="platform" size="sm" style={{ backgroundColor: theme.backgroundElement }} />
+                <Badge label={planDisplay} variant="status" status="PUBLISHED" size="sm" />
               </View>
             </View>
           </View>
@@ -152,10 +163,392 @@ export default function ProfileSettingsScreen() {
               </View>
               <View>
                 <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
-                  {activeWorkspace?.name || 'Apex Digital Agency'}
+                  {activeWorkspace?.name || 'My Workspace'}
                 </ThemedText>
                 <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                  Role: {activeWorkspace?.role || 'OWNER'} • Tap to switch
+                  Role: {activeWorkspace?.role || 'MEMBER'} • Tap to switch
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+        </GlassCard>
+
+        {/* Autonomous AI Specialist Modules */}
+        <ThemedText type="caption" style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: Spacing.five }]}>
+          AI AGENT & MARKETING MODULES
+        </ThemedText>
+        <GlassCard style={styles.cardSection}>
+          <Pressable
+            onPress={() => router.push('/arena' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Sparkles size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  AI Model Arena
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Multi-LLM side-by-side benchmark & comparison
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/competitors' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.ShieldCheck size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Competitor Intelligence
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Autonomous SWOT analysis & keyword radar
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/blog' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.MessageCircle size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  AI Blog Writer & SEO Articles
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Programmatic long-form content generation
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/ad-campaigns' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.TrendingUp size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Paid Ad Campaigns
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Multi-variant copy and budget telemetry
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/listening' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Radio size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Social Listening Radar
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Real-time cross-network brand sentiment
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/reviews' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Star size={20} color={theme.warning} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Review Booster
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Smart QR invites & automated AI replies
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/multi-location' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Building size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Multi-Location Brand Sync
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Regional branches and localized queues
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/knowledge' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Bookmark size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Brand DNA & Knowledge Base
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Vectorized context grounding documents
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/trends' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Zap size={20} color={theme.warning} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Viral Trends & Events
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  High-velocity timely news and hook generator
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+        </GlassCard>
+
+        {/* Studio & Developer Tools */}
+        <ThemedText type="caption" style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: Spacing.five }]}>
+          CREATIVE STUDIOS & INTEGRATIONS
+        </ThemedText>
+        <GlassCard style={styles.cardSection}>
+          <Pressable
+            onPress={() => router.push('/studio/image-generator' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Sparkles size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  AI Image Generator Studio
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Multi-aspect diffusion visual synthesizer
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/studio/video-generator' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Video size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  RAG Video Storyboard Studio
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Multi-scene scripts and cinematic B-roll director
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/studio/carousel-preview')}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Layers size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  AI Carousel Deck Studio
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  LinkedIn PDF & Instagram swipe viewer
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/studio/voice-narrator')}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Mic size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  AI Voice Narrator Studio
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Voice cloning and reactive waveform player
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/settings/social-accounts' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Share2 size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Connected Social Accounts
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  LinkedIn, X, Instagram, TikTok, Facebook, YouTube
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/settings/team' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Users size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Team Members & RBAC
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Manage workspace collaborators and invites
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/settings/billing' as any)}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.CreditCard size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  Subscription & Quotas
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Plan tiers, AI token quotas, and invoices
+                </ThemedText>
+              </View>
+            </View>
+            <Icons.ChevronRight size={18} color={theme.textSecondary} />
+          </Pressable>
+
+          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
+
+          <Pressable
+            onPress={() => router.push('/settings/api-keys')}
+            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <View style={styles.navRowLeft}>
+              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
+                <Icons.Key size={20} color={theme.primary} />
+              </View>
+              <View>
+                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
+                  API Keys & Webhooks
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
+                  Production tokens and HMAC secrets
                 </ThemedText>
               </View>
             </View>
@@ -208,76 +601,6 @@ export default function ProfileSettingsScreen() {
               );
             })}
           </View>
-        </GlassCard>
-
-        {/* Developer & Tools */}
-        <ThemedText type="caption" style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: Spacing.five }]}>
-          DEVELOPER & CREATIVE TOOLS
-        </ThemedText>
-        <GlassCard style={styles.cardSection}>
-          <Pressable
-            onPress={() => router.push('/settings/api-keys')}
-            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
-          >
-            <View style={styles.navRowLeft}>
-              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
-                <Icons.Key size={20} color={theme.primary} />
-              </View>
-              <View>
-                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
-                  API Keys & Webhooks
-                </ThemedText>
-                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                  Production tokens and HMAC secrets
-                </ThemedText>
-              </View>
-            </View>
-            <Icons.ChevronRight size={18} color={theme.textSecondary} />
-          </Pressable>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
-
-          <Pressable
-            onPress={() => router.push('/studio/carousel-preview')}
-            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
-          >
-            <View style={styles.navRowLeft}>
-              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
-                <Icons.Layers size={20} color={theme.primary} />
-              </View>
-              <View>
-                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
-                  AI Carousel Deck Studio
-                </ThemedText>
-                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                  LinkedIn PDF & Instagram swipe viewer
-                </ThemedText>
-              </View>
-            </View>
-            <Icons.ChevronRight size={18} color={theme.textSecondary} />
-          </Pressable>
-
-          <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
-
-          <Pressable
-            onPress={() => router.push('/studio/voice-narrator')}
-            style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
-          >
-            <View style={styles.navRowLeft}>
-              <View style={[styles.iconBox, { backgroundColor: theme.primaryGlow }]}>
-                <Icons.Mic size={20} color={theme.primary} />
-              </View>
-              <View>
-                <ThemedText type="bodyMedium" style={{ fontWeight: '700' }}>
-                  AI Voice Narrator Studio
-                </ThemedText>
-                <ThemedText type="caption" style={{ color: theme.textSecondary }}>
-                  Voice cloning and reactive waveform player
-                </ThemedText>
-              </View>
-            </View>
-            <Icons.ChevronRight size={18} color={theme.textSecondary} />
-          </Pressable>
         </GlassCard>
 
         {/* Security & Preferences */}
@@ -343,7 +666,7 @@ export default function ProfileSettingsScreen() {
 
         {/* Sign Out Button */}
         <Button
-          label="Sign Out"
+          title="Sign Out"
           variant="destructive"
           icon={<Icons.LogOut size={18} color="#FFFFFF" />}
           onPress={handleSignOut}

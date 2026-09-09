@@ -8,7 +8,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function RootIndex() {
   const { isAuthenticated, isLoading } = useAuthStore();
   const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme === 'unspecified' ? 'dark' : colorScheme];
+  const theme = Colors[colorScheme];
 
   if (isLoading) {
     return (

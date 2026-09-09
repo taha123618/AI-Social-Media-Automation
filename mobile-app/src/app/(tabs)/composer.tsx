@@ -158,9 +158,11 @@ export default function ComposerScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText type="title" style={styles.header}>
-          AI Post Composer
-        </ThemedText>
+        <View style={{ marginBottom: Spacing.four }}>
+          <ThemedText type="title" style={{ fontSize: 24, fontWeight: '800' }}>
+            AI Post Composer
+          </ThemedText>
+        </View>
 
         {/* 1. Target Platforms Selector */}
         <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>

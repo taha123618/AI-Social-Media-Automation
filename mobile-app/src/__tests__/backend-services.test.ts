@@ -236,6 +236,233 @@ describe('Mobile App - Direct Backend API & Multi-Tenant State', () => {
     });
   });
 
+  describe('AI Arena & Competitors', () => {
+    it('fetches multi-model comparison results', async () => {
+      axios.post = mock(() =>
+        Promise.resolve({
+          data: {
+            success: true,
+            data: {
+              results: [
+                { modelId: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', output: 'Strategy 1', latencyMs: 380, qualityScore: 95 },
+                { modelId: 'claude-3-5', name: 'Claude 3.5', provider: 'Anthropic', output: 'Strategy 2', latencyMs: 420, qualityScore: 94 },
+              ],
+              summary: { winner: 'gpt-4o' },
+            },
+          },
+        })
+      ) as any;
+
+      const res = await backendApi.getArenaComparison('Test prompt');
+      expect(res.results.length).toBe(2);
+      expect(res.recommendedModelId).toBe('gpt-4o');
+    });
+
+    it('fetches competitor intelligence and SWOT radar', async () => {
+      axios.post = mock(() =>
+        Promise.resolve({
+          data: {
+            competitors: [
+              { id: 'c1', domain: 'buffer.com', name: 'Buffer', estimatedTraffic: '2M', topKeywords: ['scheduler'], strengths: ['UX'], weaknesses: ['No AI'], marketSharePercent: 30 },
+            ],
+          },
+        })
+      ) as any;
+
+      const comps = await backendApi.getCompetitorInsights('buffer.com');
+      expect(comps.length).toBe(1);
+      expect(comps[0].name).toBe('Buffer');
+      expect(comps[0].marketSharePercent).toBe(30);
+    });
+  });
+
+  describe('Blog & Ad Campaigns', () => {
+    it('fetches blog articles list', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            articles: [
+              { id: 'b1', title: 'SEO Guide', slug: 'seo-guide', status: 'PUBLISHED', seoScore: 92, wordCount: 1500, targetKeyword: 'seo' },
+            ],
+          },
+        })
+      ) as any;
+
+      const blogs = await backendApi.getBlogArticles();
+      expect(blogs.length).toBe(1);
+      expect(blogs[0].title).toBe('SEO Guide');
+      expect(blogs[0].seoScore).toBe(92);
+    });
+
+    it('fetches paid ad campaigns and ROAS metrics', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            campaigns: [
+              { id: 'ad1', name: 'Meta Retargeting', platform: 'META', status: 'ACTIVE', dailyBudget: 100, spent: 500, roas: 3.8, impressions: 20000, clicks: 1200, conversions: 45, variantsCount: 4 },
+            ],
+          },
+        })
+      ) as any;
+
+      const ads = await backendApi.getAdCampaigns();
+      expect(ads.length).toBe(1);
+      expect(ads[0].name).toBe('Meta Retargeting');
+      expect(ads[0].roas).toBe(3.8);
+    });
+  });
+
+  describe('Social Listening, Reviews & Multi-Location', () => {
+    it('fetches social listening radar mentions', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            mentions: [
+              { id: 'm1', author: '@growth_lead', platform: 'x', content: 'SocialAI is awesome', sentiment: 'POSITIVE', sentimentScore: 96, reach: 10000, timestamp: '5m ago', engagement: 50 },
+            ],
+          },
+        })
+      ) as any;
+
+      const mentions = await backendApi.getSocialListeningRadar();
+      expect(mentions.length).toBe(1);
+      expect(mentions[0].sentiment).toBe('POSITIVE');
+    });
+
+    it('fetches reviews and dispatches smart review requests', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            reviews: [
+              { id: 'r1', author: 'Jane Doe', rating: 5, source: 'GOOGLE', comment: 'Loved it!', timestamp: '1h ago', replyStatus: 'PENDING' },
+            ],
+          },
+        })
+      ) as any;
+
+      const reviews = await backendApi.getReviews();
+      expect(reviews.length).toBe(1);
+      expect(reviews[0].rating).toBe(5);
+
+      let postUrl = '';
+      axios.post = mock((url: string) => {
+        postUrl = url;
+        return Promise.resolve({ data: { success: true } });
+      }) as any;
+
+      await backendApi.requestReview('Jane Doe', '+15550192', 'SMS');
+      expect(postUrl).toContain('/api/reviews/request');
+    });
+
+    it('fetches multi-location branches and synchronization state', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            locations: [
+              { id: 'loc1', name: 'Austin Branch', address: '123 Main', city: 'Austin', state: 'TX', activeCampaigns: 2, localEngagementRate: '5.1%', isSynced: true },
+            ],
+          },
+        })
+      ) as any;
+
+      const locs = await backendApi.getLocations();
+      expect(locs.length).toBe(1);
+      expect(locs[0].city).toBe('Austin');
+      expect(locs[0].isSynced).toBe(true);
+    });
+  });
+
+  describe('Knowledge, Trends, Team & Billing', () => {
+    it('fetches knowledge profile brand DNA', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            profile: {
+              brandVoice: 'Authoritative B2B SaaS',
+              targetAudience: 'Founders',
+              industry: 'MarTech',
+              keyProducts: ['Agent Swarms'],
+              documentsCount: 12,
+              lastTrainedAt: 'Today',
+            },
+          },
+        })
+      ) as any;
+
+      const profile = await backendApi.getKnowledgeProfile();
+      expect(profile.brandVoice).toBe('Authoritative B2B SaaS');
+      expect(profile.documentsCount).toBe(12);
+    });
+
+    it('fetches viral trend events', async () => {
+      axios.post = mock(() =>
+        Promise.resolve({
+          data: {
+            success: true,
+            data: {
+              opportunities: [
+                { id: 't1', title: 'Agentic AI 2026', type: 'AI', velocityScore: 99, strategy: 'Hooks...', peakWindow: '24h' },
+              ],
+            },
+          },
+        })
+      ) as any;
+
+      const trends = await backendApi.getTrendEvents('San Francisco');
+      expect(trends.length).toBe(1);
+      expect(trends[0].velocityScore).toBe(99);
+    });
+
+    it('fetches team members and sends invites', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            members: [
+              { id: 'u1', name: 'Alice', email: 'alice@corp.com', role: 'ADMIN', joinedAt: '1m ago' },
+            ],
+          },
+        })
+      ) as any;
+
+      const members = await backendApi.getTeamMembers();
+      expect(members.length).toBe(1);
+      expect(members[0].name).toBe('Alice');
+
+      let invitedRole = '';
+      axios.post = mock((_url: string, body: any) => {
+        invitedRole = body.role;
+        return Promise.resolve({ data: { success: true } });
+      }) as any;
+
+      await backendApi.inviteTeamMember('bob@corp.com', 'EDITOR');
+      expect(invitedRole).toBe('EDITOR');
+    });
+
+    it('fetches billing usage details', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            success: true,
+            usage: {
+              planTier: 'Enterprise',
+              amount: 199,
+              interval: 'monthly',
+              renewsAt: 'Nov 1, 2026',
+              paymentMethodMasked: 'Mastercard ending in 9999',
+              ai_posts: { current: 50, limit: 500 },
+              ai_tokens: { current: 100000, limit: 5000000 },
+              storage_gb: { current: 5, limit: 50 },
+            },
+          },
+        })
+      ) as any;
+
+      const billing = await backendApi.getBillingDetails();
+      expect(billing.planTier).toBe('Enterprise');
+      expect(billing.usage.postsLimit).toBe(500);
+    });
+  });
+
   describe('workspaces', () => {
     it('fetches workspaces and handles tenant creation', async () => {
       axios.get = mock(() =>
@@ -303,6 +530,113 @@ describe('Mobile App - Direct Backend API & Multi-Tenant State', () => {
     });
   });
 
+  describe('Image & Video Studio Generation', () => {
+    it('generates multi-aspect diffusion images', async () => {
+      axios.post = mock(() =>
+        Promise.resolve({
+          data: {
+            success: true,
+            imageUrl: 'https://images.unsplash.com/photo-test',
+            id: 'img_test_1',
+          },
+        })
+      ) as any;
+
+      const img = await backendApi.generateImage('Test prompt', '16:9', 'Photorealistic');
+      expect(img.id).toBe('img_test_1');
+      expect(img.imageUrl).toBe('https://images.unsplash.com/photo-test');
+      expect(img.aspectRatio).toBe('16:9');
+    });
+
+    it('generates multi-scene RAG video storyboards', async () => {
+      axios.post = mock(() =>
+        Promise.resolve({
+          data: {
+            success: true,
+            result: {
+              id: 'vid_test_1',
+              title: 'Test Video',
+              scenes: [
+                { sceneNumber: 1, title: 'Scene 1', narrative: 'Script 1', visual: 'Cue 1', durationSeconds: 5 },
+                { sceneNumber: 2, title: 'Scene 2', narrative: 'Script 2', visual: 'Cue 2', durationSeconds: 6 },
+              ],
+            },
+          },
+        })
+      ) as any;
+
+      const vid = await backendApi.generateVideoStoryboard('Test Video', 'Concept...', 'Professional');
+      expect(vid.id).toBe('vid_test_1');
+      expect(vid.scenes.length).toBe(2);
+      expect(vid.totalDurationSeconds).toBe(11);
+    });
+  });
+
+  describe('Workflows & Media Gallery Endpoints', () => {
+    it('fetches live media gallery assets', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: [
+            { id: 'img_live_1', imageUrl: 'https://s3.amazonaws.com/live.jpg', prompt: 'Brand asset', size: 1024, format: 'jpg' },
+          ],
+        })
+      ) as any;
+
+      const assets = await backendApi.getMediaAssets();
+      expect(assets.length).toBe(1);
+      expect(assets[0].id).toBe('img_live_1');
+      expect(assets[0].url).toBe('https://s3.amazonaws.com/live.jpg');
+      expect(assets[0].type).toBe('image');
+    });
+
+    it('fetches and approves live workflow approval drafts', async () => {
+      axios.get = mock(() =>
+        Promise.resolve({
+          data: {
+            drafts: [
+              { id: 'wf_draft_1', title: 'Q3 Product Launch', status: 'PENDING_REVIEW', platforms: ['LINKEDIN'] },
+            ],
+          },
+        })
+      ) as any;
+
+      const drafts = await backendApi.getWorkflows();
+      expect(drafts.length).toBe(1);
+      expect(drafts[0].id).toBe('wf_draft_1');
+      expect(drafts[0].status).toBe('PENDING_REVIEW');
+
+      let approvedPayload: any = null;
+      axios.post = mock((_url: string, body: any) => {
+        approvedPayload = body;
+        return Promise.resolve({ data: { success: true } });
+      }) as any;
+
+      await backendApi.approveWorkflowDraft('wf_draft_1', 'Looks great, approved.');
+      expect(approvedPayload.action).toBe('approve');
+      expect(approvedPayload.comment).toBe('Looks great, approved.');
+    });
+
+    it('creates API key and webhook via backendApi', async () => {
+      axios.post = mock((url: string, body: any) => {
+        if (url.includes('api-keys')) {
+          return Promise.resolve({ data: { id: 'key_1', name: body.name, key: 'sai_live_key_99999' } });
+        }
+        if (url.includes('webhooks')) {
+          return Promise.resolve({ data: { id: 'wh_1', url: body.url, events: body.events } });
+        }
+        return Promise.resolve({ data: {} });
+      }) as any;
+
+      const key = await backendApi.createApiKey('My Live Key', ['*']);
+      expect(key.name).toBe('My Live Key');
+      expect(key.fullKey).toBe('sai_live_key_99999');
+
+      const hook = await backendApi.createWebhook('Slack Hook', 'https://hooks.slack.com/123', ['post.published']);
+      expect(hook.url).toBe('https://hooks.slack.com/123');
+      expect(hook.eventTypes).toEqual(['post.published']);
+    });
+  });
+
   describe('useWorkspaceStore & useAuthStore', () => {
     it('isolates active workspace tenant context', async () => {
       useWorkspaceStore.setState({
@@ -316,6 +650,19 @@ describe('Mobile App - Direct Backend API & Multi-Tenant State', () => {
       expect(useWorkspaceStore.getState().activeWorkspaceId).toBe('biz_1');
       await useWorkspaceStore.getState().setActiveWorkspace('biz_2');
       expect(useWorkspaceStore.getState().activeWorkspaceId).toBe('biz_2');
+    });
+  });
+
+  describe('Theme Mode & Dark/Light Switcher', () => {
+    it('switches between light, dark, and system modes dynamically', async () => {
+      await useAuthStore.getState().setThemeMode('light');
+      expect(useAuthStore.getState().themeMode).toBe('light');
+
+      await useAuthStore.getState().setThemeMode('dark');
+      expect(useAuthStore.getState().themeMode).toBe('dark');
+
+      await useAuthStore.getState().setThemeMode('system');
+      expect(useAuthStore.getState().themeMode).toBe('system');
     });
   });
 });

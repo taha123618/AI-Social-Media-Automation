@@ -7,7 +7,8 @@ export interface AIMessage {
 
 export interface AIRequest {
   model?: string;
-  messages: AIMessage[];
+  messages?: AIMessage[];
+  prompt?: string;
   temperature?: number;
   maxTokens?: number;
 }

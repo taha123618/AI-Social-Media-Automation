@@ -39,10 +39,12 @@ export default function CalendarScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <ThemedText type="subtitle">Publishing Calendar</ThemedText>
-          <ThemedText type="caption" style={{ color: theme.textMuted }}>
-            Audience peak hours and queue slots
-          </ThemedText>
+          <View style={{ flex: 1 }}>
+            <ThemedText type="subtitle">Publishing Calendar</ThemedText>
+            <ThemedText type="caption" style={{ color: theme.textMuted }}>
+              Audience peak hours and queue slots
+            </ThemedText>
+          </View>
         </View>
 
         {/* Weekly Day Strip */}
@@ -163,6 +165,9 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.ten,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
     marginBottom: Spacing.four,
   },
   dayStrip: {

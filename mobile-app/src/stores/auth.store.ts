@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Workspace } from '@/types/api';
 import { backendApi } from '@/lib/backend';
+import { sessionContext } from '@/lib/session-context';
 
 export interface User {
   id: string;
@@ -13,6 +14,7 @@ export interface User {
 interface AuthState {
   user: User | null;
   sessionToken: string | null;
+  token?: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   activeWorkspaceId: string;
@@ -235,3 +237,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }));
+
+// Initialize session context getters for decoupled backend API headers
+sessionContext.setTokenGetter(() => useAuthStore.getState().sessionToken);
+sessionContext.setWorkspaceGetter(() => useAuthStore.getState().activeWorkspaceId);
+

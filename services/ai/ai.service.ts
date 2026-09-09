@@ -88,8 +88,8 @@ export class AIService {
           'gpt-4o-mini': 'openai/gpt-4o-mini',
           'gpt-4': 'openai/gpt-4',
           'gpt-3.5-turbo': 'openai/gpt-3.5-turbo',
-          'claude-3-5-sonnet': 'anthropic/claude-3.5-sonnet',
-          'claude-3.5-sonnet': 'anthropic/claude-3.5-sonnet',
+          'claude-3-5-sonnet': 'anthropic/claude-3-haiku',
+          'claude-3.5-sonnet': 'anthropic/claude-3-haiku',
           'claude-3-haiku': 'anthropic/claude-3-haiku',
           'deepseek-r1': 'deepseek/deepseek-r1',
           'deepseek-chat': 'deepseek/deepseek-chat',
@@ -105,8 +105,8 @@ export class AIService {
 
         if (!model.includes('/')) {
           if (model.startsWith('gpt-')) return `openai/${model}`;
-          if (model.startsWith('claude-')) return `anthropic/${model}`;
-          if (model.startsWith('gemini-')) return `google/${model}`;
+          if (model.startsWith('claude-')) return `anthropic/claude-3-haiku`;
+          if (model.startsWith('gemini-')) return `google/gemini-2.5-flash-lite`;
           if (model.startsWith('deepseek-')) return `deepseek/${model}`;
           if (model.startsWith('llama-')) return `meta-llama/${model}`;
         }
@@ -166,11 +166,15 @@ export class AIService {
   private static async callOpenRouter(request: AIRequest): Promise<AIResponse> {
     const headers = this.createOpenRouterHeaders();
 
+    const messages = (request.messages && request.messages.length > 0)
+      ? request.messages
+      : [{ role: 'user' as const, content: request.prompt || '' }];
+
     const body = {
       model: this.getModel(request.model),
-      messages: request.messages,
+      messages,
       temperature: request.temperature || 0.7,
-      max_tokens: request.maxTokens || 2000, // Increased default from 1000 to 2000
+      max_tokens: request.maxTokens || 2000,
     };
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -230,8 +234,12 @@ export class AIService {
       apiKey,
     });
 
+    const messages = (request.messages && request.messages.length > 0)
+      ? request.messages
+      : [{ role: 'user' as const, content: request.prompt || '' }];
+
     // Convert messages to LangChain format (HumanMessage, SystemMessage, AIMessage)
-    const langchainMessages = request.messages.map(msg => {
+    const langchainMessages = messages.map(msg => {
       const role = msg.role;
       const content = msg.content;
 

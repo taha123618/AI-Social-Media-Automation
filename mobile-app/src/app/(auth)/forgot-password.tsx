@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -23,11 +24,11 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleReset = async () => {
-    if (!email.trim()) {
-      Alert.alert('Missing Email', 'Please provide your account email.');
+  const handleSubmit = async () => {
+    if (!email.trim() || !email.includes('@')) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return;
     }
     if (Platform.OS !== 'web') {
@@ -39,13 +40,12 @@ export default function ForgotPasswordScreen() {
       if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-      setSent(true);
-    } catch {
-      // Fallback for demo / offline experience
+      setIsSubmitted(true);
+    } catch (err: any) {
       if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
-      setSent(true);
+      Alert.alert('Error', err?.message || 'Failed to send reset email. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -55,69 +55,133 @@ export default function ForgotPasswordScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardContainer}
+        style={styles.flex}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Icons.ChevronRight size={20} color={theme.text} style={{ transform: [{ rotate: '180deg' }] }} />
-          <ThemedText type="caption" style={{ color: theme.text, marginLeft: 4 }}>
-            Back to Sign In
-          </ThemedText>
-        </TouchableOpacity>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Card Container */}
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: theme.backgroundElement,
+                borderColor: theme.border,
+              },
+            ]}
+          >
+            {!isSubmitted ? (
+              <View>
+                {/* Header Icon */}
+                <View style={styles.header}>
+                  <View
+                    style={[
+                      styles.iconCircle,
+                      {
+                        backgroundColor: `${theme.primary}15`,
+                        borderColor: `${theme.primary}30`,
+                      },
+                    ]}
+                  >
+                    <Icons.Mail size={24} color={theme.primary} />
+                  </View>
+                  <ThemedText type="subtitle" style={styles.title}>
+                    Reset your password
+                  </ThemedText>
+                  <ThemedText type="caption" style={[styles.subtitle, { color: theme.textMuted }]}>
+                    Enter your email address and we'll send you a recovery link
+                  </ThemedText>
+                </View>
 
-        <View style={styles.header}>
-          <ThemedText type="subtitle">Reset Password</ThemedText>
-          <ThemedText type="caption" style={{ color: theme.textMuted }}>
-            Enter your email to receive a password recovery link
-          </ThemedText>
-        </View>
+                {/* Form */}
+                <View style={styles.form}>
+                  <View style={styles.inputGroup}>
+                    <ThemedText type="caption" style={styles.label}>
+                      Email address
+                    </ThemedText>
+                    <TextInput
+                      value={email}
+                      onChangeText={setEmail}
+                      placeholder="you@example.com"
+                      placeholderTextColor={theme.textMuted}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      autoCorrect={false}
+                      style={[
+                        styles.input,
+                        {
+                          backgroundColor: theme.background,
+                          color: theme.text,
+                          borderColor: theme.border,
+                        },
+                      ]}
+                    />
+                  </View>
 
-        {sent ? (
-          <View style={styles.sentContainer}>
-            <View style={[styles.checkCircle, { backgroundColor: theme.successBg }]}>
-              <Icons.Check size={32} color={theme.success} />
-            </View>
-            <ThemedText type="heading" style={{ marginTop: Spacing.three }}>
-              Recovery Link Sent
-            </ThemedText>
-            <ThemedText type="caption" style={{ color: theme.textMuted, textAlign: 'center' }}>
-              We've dispatched password reset instructions to {email}. Check your inbox or spam folder.
-            </ThemedText>
-            <Button
-              title="Return to Login"
-              variant="primary"
-              onPress={() => router.replace('/(auth)/login')}
-              style={{ marginTop: Spacing.four, width: '100%' }}
-            />
+                  <Button
+                    title="Send reset link"
+                    onPress={handleSubmit}
+                    loading={loading}
+                    variant="primary"
+                    size="lg"
+                    style={{ marginTop: Spacing.two }}
+                  />
+
+                  <TouchableOpacity
+                    onPress={() => router.replace('/(auth)/login')}
+                    style={styles.backLink}
+                  >
+                    <Icons.ArrowLeft size={16} color={theme.textMuted} />
+                    <ThemedText type="caption" style={{ color: theme.textMuted, marginLeft: 6 }}>
+                      Back to sign in
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.successContainer}>
+                <View
+                  style={[
+                    styles.iconCircle,
+                    {
+                      backgroundColor: `${theme.success}15`,
+                      borderColor: `${theme.success}30`,
+                    },
+                  ]}
+                >
+                  <Icons.Check size={28} color={theme.success} />
+                </View>
+                <ThemedText type="subtitle" style={styles.title}>
+                  Check your inbox
+                </ThemedText>
+                <ThemedText type="caption" style={[styles.subtitle, { color: theme.textMuted }]}>
+                  We've sent a password reset link to{'\n'}
+                  <ThemedText type="caption" style={{ color: theme.text, fontWeight: '700' }}>
+                    {email}
+                  </ThemedText>
+                </ThemedText>
+
+                <View style={{ width: '100%', marginTop: Spacing.four, gap: Spacing.three }}>
+                  <Button
+                    title="Return to sign in"
+                    variant="primary"
+                    size="lg"
+                    onPress={() => router.replace('/(auth)/login')}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setIsSubmitted(false)}
+                    style={{ alignItems: 'center', paddingVertical: Spacing.two }}
+                  >
+                    <ThemedText type="caption" style={{ color: theme.textMuted }}>
+                      Didn't receive email? Click to resend
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </View>
-        ) : (
-          <View style={styles.formSection}>
-            <View style={styles.inputGroup}>
-              <ThemedText type="caption" style={styles.inputLabel}>
-                Account Email
-              </ThemedText>
-              <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="founder@agency.com"
-                placeholderTextColor={theme.textMuted}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={[
-                  styles.textInput,
-                  { backgroundColor: theme.backgroundElement, color: theme.text, borderColor: theme.border },
-                ]}
-              />
-            </View>
-
-            <Button
-              title="Send Recovery Link"
-              onPress={handleReset}
-              loading={loading}
-              size="lg"
-              style={{ marginTop: Spacing.two }}
-            />
-          </View>
-        )}
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -127,44 +191,73 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  keyboardContainer: {
+  flex: {
     flex: 1,
-    padding: Spacing.six,
-    justifyContent: 'center',
   },
-  backBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.four,
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: Spacing.six,
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: Radii.xl,
+    padding: Spacing.six,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
   header: {
+    alignItems: 'center',
     marginBottom: Spacing.six,
   },
-  formSection: {
-    gap: Spacing.three,
+  iconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.four,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  subtitle: {
+    marginTop: Spacing.one,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  form: {
+    gap: Spacing.four,
   },
   inputGroup: {
-    gap: Spacing.one,
+    gap: Spacing.two,
   },
-  inputLabel: {
+  label: {
     fontWeight: '600',
+    fontSize: 14,
   },
-  textInput: {
+  input: {
+    height: 48,
     borderWidth: 1,
     borderRadius: Radii.lg,
     paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.three,
     fontSize: 15,
   },
-  sentContainer: {
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  checkCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  backLink: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: Spacing.two,
+    marginTop: Spacing.one,
+  },
+  successContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.two,
   },
 });

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { betterAuth } from "better-auth";
+import { bearer } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma";
 import { sendRegistrationEmail } from "./email-service";
@@ -7,9 +8,24 @@ import { SystemLogger } from "@/features/system/services/logger.service";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:8081",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8081",
+    "exp://",
+    "exp://*",
+    "socialai://",
+    "socialai://*",
+    "http://192.168.*",
+    "http://10.0.*",
+    process.env.BETTER_AUTH_URL || "",
+    process.env.NEXT_PUBLIC_APP_URL || "",
+  ].filter(Boolean),
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  plugins: [bearer()],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,

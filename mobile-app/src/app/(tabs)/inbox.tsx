@@ -146,7 +146,7 @@ export default function InboxScreen() {
     <View style={styles.headerContainer}>
       {/* Title & Interactive Bot Pill */}
       <View style={styles.header}>
-        <View>
+        <View style={{ flex: 1 }}>
           <ThemedText type="subtitle">Social Inbox</ThemedText>
           <ThemedText type="caption" style={{ color: theme.textMuted }}>
             Omnichannel DMs & Autonomous Sales Bot

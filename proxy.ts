@@ -1,6 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { verifyAdminToken } from "@/lib/admin-auth";
+import prisma from "@/lib/prisma";
+
+async function resolveUserSession(request: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+    if (session?.user) return session;
+  } catch {}
+
+  const authHeader = request.headers.get("authorization");
+  if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+    const token = authHeader.substring(7).trim();
+    if (token) {
+      try {
+        const dbSession = await prisma.session.findUnique({
+          where: { token },
+          include: { user: true },
+        });
+        if (dbSession && dbSession.expiresAt > new Date() && dbSession.user) {
+          return {
+            session: {
+              id: dbSession.id,
+              userId: dbSession.userId,
+              token: dbSession.token,
+              expiresAt: dbSession.expiresAt,
+            },
+            user: {
+              id: dbSession.user.id,
+              name: dbSession.user.name,
+              email: dbSession.user.email,
+              image: dbSession.user.image,
+              emailVerified: dbSession.user.emailVerified,
+            },
+          };
+        }
+      } catch {}
+    }
+  }
+  return null;
+}
 
 // No in-memory cache — always resolve from Redis/DB via the status API so that
 // toggling maintenance mode takes effect on the very next request.
@@ -159,9 +200,7 @@ export async function proxy(request: NextRequest) {
   // 4. API Routes Security — Deny by Default
   // Any API route not explicitly declared public in PUBLIC_PREFIXES MUST require an authenticated session
   if (pathname.startsWith("/api/")) {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await resolveUserSession(request);
 
     if (!session?.user) {
       return NextResponse.json(
@@ -211,9 +250,7 @@ export async function proxy(request: NextRequest) {
   );
 
   if (isProtectedPage) {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await resolveUserSession(request);
 
     if (!session?.user) {
       const loginUrl = new URL("/login", request.url);

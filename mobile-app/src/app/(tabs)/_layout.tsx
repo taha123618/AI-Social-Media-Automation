@@ -1,13 +1,15 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, Platform, StyleSheet } from 'react-native';
+import { View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icons } from '@/components/icons';
 import { useTheme } from '@/hooks/use-theme';
+import { useSidebarStore } from '@/stores/sidebar.store';
 import { Colors } from '@/constants/theme';
 import * as Haptics from 'expo-haptics';
 
 export default function TabLayout() {
   const theme = useTheme();
+  const { open } = useSidebarStore();
 
   return (
     <Tabs
@@ -39,9 +41,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Feed',
+          title: 'Dashboard',
           tabBarIcon: ({ color, focused }) => (
-            <Icons.Feed size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+            <Icons.Dashboard size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
         }}
       />
@@ -81,6 +83,37 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Icons.Analytics size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="menu"
+        options={{
+          title: 'Menu',
+          tabBarIcon: ({ color, focused }) => (
+            <Icons.Menu size={22} color={color} strokeWidth={focused ? 2.5 : 2} />
+          ),
+          tabBarButton: (props) => (
+            <TouchableOpacity
+              {...(props as any)}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                open();
+              }}
+              accessibilityLabel="Open all pages navigation menu"
+              accessibilityRole="button"
+            />
+          ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            if (Platform.OS !== 'web') {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            open();
+          },
         }}
       />
     </Tabs>
