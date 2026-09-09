@@ -64,7 +64,7 @@ export default function GalleryScreen() {
             variant="primary"
             size="sm"
             icon={<Icons.Plus size={14} color="#FFFFFF" />}
-            onPress={() => router.push('/studio/image-generator' as any)}
+            onPress={() => router.push('/image' as any)}
           />
         </View>
 
@@ -74,7 +74,7 @@ export default function GalleryScreen() {
             title="No Media Assets Found"
             description="Your cloud storage and AI generated graphics will appear here once created."
             actionLabel="Generate AI Image"
-            onAction={() => router.push('/studio/image-generator' as any)}
+            onAction={() => router.push('/image' as any)}
           />
         ) : (
           <View style={styles.grid}>

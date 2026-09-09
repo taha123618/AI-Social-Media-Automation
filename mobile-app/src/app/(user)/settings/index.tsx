@@ -382,7 +382,7 @@ export default function ProfileSettingsScreen() {
         </ThemedText>
         <GlassCard style={styles.cardSection}>
           <Pressable
-            onPress={() => router.push('/studio/image-generator' as any)}
+            onPress={() => router.push('/image' as any)}
             style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
           >
             <View style={styles.navRowLeft}>
@@ -404,7 +404,7 @@ export default function ProfileSettingsScreen() {
           <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
 
           <Pressable
-            onPress={() => router.push('/studio/video-generator' as any)}
+            onPress={() => router.push('/videos' as any)}
             style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
           >
             <View style={styles.navRowLeft}>
@@ -426,7 +426,7 @@ export default function ProfileSettingsScreen() {
           <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
 
           <Pressable
-            onPress={() => router.push('/studio/carousel-preview')}
+            onPress={() => router.push('/carousels' as any)}
             style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
           >
             <View style={styles.navRowLeft}>
@@ -448,7 +448,7 @@ export default function ProfileSettingsScreen() {
           <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
 
           <Pressable
-            onPress={() => router.push('/studio/voice-narrator')}
+            onPress={() => router.push('/voice' as any)}
             style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
           >
             <View style={styles.navRowLeft}>
@@ -470,7 +470,7 @@ export default function ProfileSettingsScreen() {
           <View style={[styles.rowDivider, { backgroundColor: theme.border }]} />
 
           <Pressable
-            onPress={() => router.push('/settings/social-accounts' as any)}
+            onPress={() => router.push('/settings/social' as any)}
             style={({ pressed }) => [styles.navRow, { opacity: pressed ? 0.7 : 1 }]}
           >
             <View style={styles.navRowLeft}>

@@ -16,7 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
 import { useBlogQuery } from '@/hooks/queries/use-blog-query';
 
-export default function BlogScreen() {
+export default function UserBlogScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { data: articles = [], isLoading, refetch } = useBlogQuery();

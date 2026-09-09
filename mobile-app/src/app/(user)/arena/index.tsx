@@ -25,7 +25,7 @@ const SAMPLE_PROMPTS = [
   'Create a high-converting carousel hook for B2B founder personal brands',
 ];
 
-export default function AIArenaScreen() {
+export default function UserArenaScreen() {
   const theme = useTheme();
   const router = useRouter();
 

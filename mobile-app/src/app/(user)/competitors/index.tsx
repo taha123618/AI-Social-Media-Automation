@@ -17,7 +17,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
 import { useCompetitorsQuery } from '@/hooks/queries/use-competitors-query';
 
-export default function CompetitorsScreen() {
+export default function UserCompetitorsScreen() {
   const theme = useTheme();
   const router = useRouter();
   const [domainInput, setDomainInput] = useState('');

@@ -114,6 +114,7 @@ export function AppSidebar() {
       title: 'Core & Publishing',
       items: [
         { name: 'Executive Dashboard', route: '/(tabs)', icon: Icons.Dashboard },
+        { name: 'Content Library & Queue', route: '/contents', icon: Icons.FileText },
         { name: 'AI Post Composer', route: '/(tabs)/composer', icon: Icons.Sparkles, badge: 'AI' },
         { name: 'Visual Schedule & Slots', route: '/(tabs)/calendar', icon: Icons.Calendar },
         { name: 'Social & DM Inbox', route: '/(tabs)/inbox', icon: Icons.Inbox },
@@ -123,10 +124,10 @@ export function AppSidebar() {
     {
       title: 'AI Creative Studios',
       items: [
-        { name: 'Image Diffusion Studio', route: '/studio/image-generator', icon: Icons.Image, badge: 'Pro' },
-        { name: 'RAG Video Storyboard', route: '/studio/video-generator', icon: Icons.Video, badge: 'Pro' },
-        { name: 'Voice Narration & TTS', route: '/studio/voice-narrator', icon: Icons.Mic },
-        { name: 'Carousel Card Studio', route: '/studio/carousel-preview', icon: Icons.Layers },
+        { name: 'Image Diffusion Studio', route: '/image', icon: Icons.Image, badge: 'Pro' },
+        { name: 'RAG Video Storyboard', route: '/videos', icon: Icons.Video, badge: 'Pro' },
+        { name: 'Voice Narration & TTS', route: '/voice', icon: Icons.Mic },
+        { name: 'Carousel Card Studio', route: '/carousels', icon: Icons.Layers },
       ],
     },
     {
@@ -155,6 +156,9 @@ export function AppSidebar() {
       title: 'Settings & Workspace',
       items: [
         { name: 'Manage Workspaces', route: '/settings/workspaces', icon: Icons.Building },
+        { name: 'Billing & Quotas', route: '/settings/billing', icon: Icons.CreditCard },
+        { name: 'Team & Permissions', route: '/settings/team', icon: Icons.Users },
+        { name: 'Social Channels', route: '/settings/social', icon: Icons.Share2 },
         { name: 'API Keys & Webhooks', route: '/settings/api-keys', icon: Icons.Key },
         { name: 'User Profile & Security', route: '/settings/profile', icon: Icons.User },
       ],

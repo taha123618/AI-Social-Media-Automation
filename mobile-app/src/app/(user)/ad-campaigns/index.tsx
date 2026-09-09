@@ -16,7 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { Spacing, Radii } from '@/constants/theme';
 import { useAdsQuery } from '@/hooks/queries/use-ads-query';
 
-export default function AdCampaignsScreen() {
+export default function UserAdCampaignsScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { data: campaigns = [], isLoading, refetch } = useAdsQuery();
