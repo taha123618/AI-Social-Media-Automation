@@ -28,26 +28,38 @@ The official cross-platform mobile companion for the **SocialAI** enterprise soc
 mobile-app/
 ├── src/
 │   ├── app/                         # Expo Router file-based screens & layouts
-│   │   ├── _layout.tsx              # Root Provider (QueryClient, AuthGate, ThemeProvider, OfflineBanner)
+│   │   ├── _layout.tsx              # Root Provider (QueryClient, AuthGate, ThemeProvider, OfflineBanner, Global Drawer)
 │   │   ├── index.tsx                # Smart Auth Gate & Tenant Redirector
 │   │   ├── (auth)/                  # Authentication Route Group
-│   │   │   ├── login.tsx            # Email/password login, Face ID/Biometrics & Demo Explorer
+│   │   │   ├── login.tsx            # Email/password login, Face ID/Biometrics & Google OAuth
 │   │   │   ├── register.tsx         # Registration with 6-digit cryptographic numeric OTP
-│   │   │   └── forgot-password.tsx  # Password recovery request flow
+│   │   │   ├── forgot-password.tsx  # Password recovery request flow
+│   │   │   ├── reset-password.tsx   # Reset password with token
+│   │   │   ├── invite.tsx           # Accept workspace team invitation
+│   │   │   └── onboarding.tsx       # Multi-step brand onboarding flow
 │   │   ├── (tabs)/                  # Main Authenticated 5-Tab Navigation
 │   │   │   ├── _layout.tsx          # Custom blur glass tab bar with haptics
-│   │   │   ├── index.tsx            # [Tab 1: Feed & Live Queue] FlashList posts, filter chips
+│   │   │   ├── index.tsx            # [Tab 1: Executive Dashboard] KPI telemetry & live queues
 │   │   │   ├── composer.tsx         # [Tab 2: Quick AI Composer] Multi-platform creator & media picker
 │   │   │   ├── calendar.tsx         # [Tab 3: Queue Calendar] Weekly visual timeline & peak planner
 │   │   │   ├── inbox.tsx            # [Tab 4: Unified Social Inbox] Omnichannel DMs & AI intent replies
 │   │   │   └── analytics.tsx        # [Tab 5: Performance & Quotas] Growth velocity & plan credit meters
-│   │   ├── studio/                  # AI Creative Studios Modal Group
-│   │   │   ├── carousel-preview.tsx # Multi-slide LinkedIn PDF & IG swipe deck viewer
-│   │   │   └── voice-narrator.tsx   # Voice cloning script player with reactive audio waveform
-│   │   └── settings/                # Account & Workspace Settings
-│   │       ├── workspaces.tsx       # Switch or create tenant workspaces (businessId)
-│   │       ├── api-keys.tsx         # API key and HMAC webhook monitor
-│   │       └── profile.tsx          # User profile, theme switcher (Light/Dark/System), Biometrics toggle
+│   │   └── (user)/                  # 29 SaaS Domain Modules & Workspaces
+│   │       ├── _layout.tsx          # Protected Stack Layout for User Routes
+│   │       ├── dashboard/           # Executive KPI Dashboard
+│   │       ├── contents/ & posts/   # Content Library & Post Approval Queue
+│   │       ├── schedule/            # Visual Calendar Posting Slots
+│   │       ├── image/ & videos/     # Diffusion Image & RAG Video Storyboard Studios
+│   │       ├── voice/ & carousels/  # ElevenLabs Voice Narrator & Carousel Decks
+│   │       ├── blog/                # AI Long-Form SEO Article Writer
+│   │       ├── ad-campaigns/        # Paid Ads & ROAS Tracking
+│   │       ├── competitors/ & arena/# Competitor Intelligence & Multi-LLM Arena
+│   │       ├── listening/ & reviews/# Social Listening Mentions & Review Booster
+│   │       ├── trends/ & workflows/ # Viral Trend Radar & Autonomous Agent Pipelines
+│   │       ├── multi-location/      # Multi-Branch Franchise Manager
+│   │       ├── engagement/          # Smart DM Automation & Trigger Rules
+│   │       ├── gallery/ & knowledge/# Cloud Media Assets & Brand DNA Store
+│   │       └── settings/            # Profile, Workspaces, Billing, Team, Social, API Keys
 │   ├── lib/
 │   │   ├── backend.ts               # Single direct bridge to backend app/api/* routes (`backendApi`)
 │   │   └── biometrics.ts            # Biometric auth helpers (Face ID / fingerprint)
@@ -64,13 +76,15 @@ mobile-app/
 │   │   ├── themed-text.tsx          # Dynamic light/dark typography
 │   │   ├── themed-view.tsx          # Adaptive background container
 │   │   ├── animated-icon.tsx        # Motion-enhanced splash and logo
+│   │   ├── navigation/app-sidebar.tsx # Global slide-over drawer navigation
 │   │   └── ui/                      # GlassCard, Button, Badge, OtpInput, Skeleton
 │   ├── constants/
 │   │   ├── theme.ts                 # Design tokens (Electric Violet palette, Spacing, Radii)
 │   │   └── query-keys.ts            # Deterministic React Query cache keys
 │   └── stores/
 │       ├── auth.store.ts            # Zustand persistent auth store (biometrics, JWT, theme)
-│       └── workspace.store.ts       # Active tenant & businessId selector store
+│       ├── workspace.store.ts       # Active tenant & businessId selector store
+│       └── sidebar.store.ts         # Global drawer visibility store
 ├── assets/                          # App icons, splash screens, favicon
 ├── app.json                         # Expo configuration (CNG plugins, bundle IDs)
 └── package.json                     # Mobile dependencies and run scripts

@@ -27,23 +27,63 @@ You are operating as a Senior Mobile Engineer specializing in React Native, Expo
 mobile-app/
 ├── src/
 │   ├── app/                         # Expo Router file-based screens & layouts
-│   │   ├── _layout.tsx              # Root stack & tab layout provider
-│   │   ├── index.tsx                # Home / Dashboard feed screen
-│   │   └── explore.tsx              # Content explorer & discovery screen
-│   ├── components/                  # Reusable UI & themed components
-│   │   ├── themed-text.tsx          # Typography adhering to light/dark palette
-│   │   ├── themed-view.tsx          # Background view with theme support
-│   │   ├── animated-icon.tsx        # Motion-enhanced tab & action icons
-│   │   ├── app-tabs.tsx             # Bottom navigation tabs for native
-│   │   ├── app-tabs.web.tsx         # Platform-specific web navigation
-│   │   └── ui/                      # Collapsible, badges, modals
-│   ├── constants/
-│   │   └── theme.ts                 # Light & dark theme tokens, tints, neutrals
+│   │   ├── _layout.tsx              # Root Provider (QueryClient, AuthGate, ThemeProvider, OfflineBanner, Global Drawer)
+│   │   ├── index.tsx                # Smart Auth Gate & Tenant Redirector
+│   │   ├── (auth)/                  # Authentication Route Group
+│   │   │   ├── login.tsx            # Email/password login, Face ID/Biometrics & Google OAuth
+│   │   │   ├── register.tsx         # Registration with 6-digit cryptographic numeric OTP
+│   │   │   ├── forgot-password.tsx  # Password recovery request flow
+│   │   │   ├── reset-password.tsx   # Password reset with token
+│   │   │   ├── invite.tsx           # Accept workspace team invitation
+│   │   │   └── onboarding.tsx       # Multi-step brand onboarding flow
+│   │   ├── (tabs)/                  # Main Authenticated 5-Tab Navigation
+│   │   │   ├── _layout.tsx          # Custom blur glass tab bar with haptics
+│   │   │   ├── index.tsx            # [Tab 1: Executive Dashboard] KPI telemetry & live queues
+│   │   │   ├── composer.tsx         # [Tab 2: Quick AI Composer] Multi-platform creator & media picker
+│   │   │   ├── calendar.tsx         # [Tab 3: Queue Calendar] Weekly visual timeline & peak planner
+│   │   │   ├── inbox.tsx            # [Tab 4: Unified Social Inbox] Omnichannel DMs & AI intent replies
+│   │   │   └── analytics.tsx        # [Tab 5: Performance & Quotas] Growth velocity & plan credit meters
+│   │   └── (user)/                  # 29 SaaS Domain Modules & Workspaces
+│   │       ├── _layout.tsx          # Protected Stack Layout for User Routes
+│   │       ├── dashboard/           # Executive KPI Dashboard
+│   │       ├── contents/ & posts/   # Content Library & Post Approval Queue
+│   │       ├── schedule/            # Visual Calendar Posting Slots
+│   │       ├── image/ & videos/     # Diffusion Image & RAG Video Storyboard Studios
+│   │       ├── voice/ & carousels/  # ElevenLabs Voice Narrator & Carousel Decks
+│   │       ├── blog/                # AI Long-Form SEO Article Writer
+│   │       ├── ad-campaigns/        # Paid Ads & ROAS Tracking
+│   │       ├── competitors/ & arena/# Competitor Intelligence & Multi-LLM Arena
+│   │       ├── listening/ & reviews/# Social Listening Mentions & Review Booster
+│   │       ├── trends/ & workflows/ # Viral Trend Radar & Autonomous Agent Pipelines
+│   │       ├── multi-location/      # Multi-Branch Franchise Manager
+│   │       ├── engagement/          # Smart DM Automation & Trigger Rules
+│   │       ├── gallery/ & knowledge/# Cloud Media Assets & Brand DNA Store
+│   │       └── settings/            # Profile, Workspaces, Billing, Team, Social, API Keys
+│   ├── lib/
+│   │   ├── backend.ts               # Single direct bridge to backend app/api/* routes (`backendApi`)
+│   │   └── biometrics.ts            # Biometric auth helpers (Face ID / fingerprint)
 │   ├── hooks/
+│   │   ├── queries/                 # React Query v5 query hooks
+│   │   ├── mutations/               # React Query v5 optimistic mutation hooks
 │   │   ├── use-theme.ts             # Theme context & color scheme resolution
-│   │   ├── use-color-scheme.ts      # Native color scheme hook
-│   │   └── use-color-scheme.web.ts  # Web-safe color scheme hook
-│   └── global.css                   # Global styles
+│   │   └── use-color-scheme.ts      # Native color scheme observer
+│   ├── types/
+│   │   └── api.ts                   # Centralized TypeScript domain interfaces
+│   ├── components/                  # Reusable UI & design system primitives
+│   │   ├── icons.tsx                # Native SVG vector icon library (with Fingerprint, Image, Video)
+│   │   ├── offline-banner.tsx       # Real-time network status banner (expo-network)
+│   │   ├── themed-text.tsx          # Dynamic light/dark typography
+│   │   ├── themed-view.tsx          # Adaptive background container
+│   │   ├── animated-icon.tsx        # Motion-enhanced splash and logo
+│   │   ├── navigation/app-sidebar.tsx # Global slide-over drawer navigation
+│   │   └── ui/                      # GlassCard, Button, Badge, OtpInput, Skeleton
+│   ├── constants/
+│   │   ├── theme.ts                 # Design tokens (Electric Violet palette, Spacing, Radii)
+│   │   └── query-keys.ts            # Deterministic React Query cache keys
+│   └── stores/
+│       ├── auth.store.ts            # Zustand persistent auth store (biometrics, JWT, theme)
+│       ├── workspace.store.ts       # Active tenant & businessId selector store
+│       └── sidebar.store.ts         # Global drawer visibility store
 ├── assets/                          # App icons, splash screens, favicon
 ├── scripts/                         # Reset project & maintenance utilities
 ├── .env                             # Active local environment variables
@@ -71,8 +111,9 @@ bunx expo start --ios        # Launch in iOS Simulator
 bunx expo start --android    # Launch in Android Emulator
 bunx expo start --web        # Launch in Web Browser
 
-# Typechecking and linting
-npx tsc --noEmit             # TypeScript typecheck
+# Typechecking and testing
+npx tsc --noEmit             # TypeScript typecheck (0 errors)
+bun test                     # Run mobile test suites (40 tests)
 bunx expo lint               # Expo ESLint runner
 
 # Package management (ALWAYS use expo install to resolve SDK-compatible versions)
@@ -86,32 +127,25 @@ bunx expo-doctor             # Diagnose health of dependencies and configuration
 ## Core Development Guidelines
 
 ### 1. File-Based Routing with Expo Router
-- All screens live inside `src/app/`.
-- Every `.tsx` file in `src/app/` represents a route (e.g. `src/app/index.tsx` -> `/`, `src/app/explore.tsx` -> `/explore`).
-- `_layout.tsx` wraps child screens with navigators (Tabs, Stack, Drawer) and global providers (`QueryClientProvider`, theme contexts).
-- Never place non-route components directly inside `src/app/`; place them in `src/components/`.
+- All screens live inside `src/app/` categorized cleanly by route groups: `(auth)`, `(tabs)`, and `(user)`.
+- Root `_layout.tsx` mounts the global `QueryClientProvider`, `ThemeProvider`, `AnimatedSplashOverlay`, `OfflineBanner`, and slide-over `AppSidebar`.
+- Domain features reside in `(user)/` with their own stack navigator `src/app/(user)/_layout.tsx`.
+- Never duplicate routes across root and `(user)/`. Keep all user domain modules strictly consolidated in `(user)/`.
 - Use `router.push('/target')`, `router.replace()`, or `<Link href="/target">` from `expo-router` for type-safe navigation.
 
-### 2. Backend Connectivity & Environment Setup
-The mobile app communicates with the Next.js SaaS backend via `EXPO_PUBLIC_API_URL`:
-- **iOS Simulator**: `http://localhost:3000`
-- **Android Emulator**: `http://10.0.2.2:3000` (maps to host localhost)
-- **Physical Devices**: Set to your LAN IP: `http://192.168.x.x:3000`
+### 2. Direct Backend API Architecture
+The mobile app communicates with the Next.js SaaS backend directly through `src/lib/backend.ts` (`backendApi`):
+- Multi-tenancy headers (`x-business-id` and `Authorization: Bearer <token>`) are automatically attached via `buildHeaders()`.
+- Server data queries wrap `backendApi` in TanStack Query hooks under `src/hooks/queries/`.
+- Optimistic actions and updates wrap `backendApi` in TanStack Mutation hooks under `src/hooks/mutations/`.
+- When `EXPO_PUBLIC_ENABLE_OFFLINE_MOCK=true`, the app provides graceful fallback data if the local Next.js server is unreachable.
 
-```env
-# mobile-app/.env
-EXPO_PUBLIC_APP_ENV=development
-EXPO_PUBLIC_API_URL=http://localhost:3000
-EXPO_PUBLIC_WS_URL=ws://localhost:3000/ws
-EXPO_PUBLIC_ENABLE_OFFLINE_MOCK=true
-```
-
-When `EXPO_PUBLIC_ENABLE_OFFLINE_MOCK=true`, the app provides graceful fallback data if the local Next.js server is offline or unreachable during UI testing.
-
-### 3. State Management & Data Fetching
-- **Server Data**: Use `@tanstack/react-query` (`useQuery`, `useMutation`). Always define query keys systematically (`['posts', businessId]`, `['analytics', timeRange]`).
-- **Client/Session State**: Use Zustand (`zustand`) for user session, active workspace, filter selections, and cached UI states.
-- **Persistent Storage**: Use `@react-native-async-storage/async-storage` for auth tokens and user preferences.
+### 3. State Management & Multi-Tenancy
+- **Zustand Stores**:
+  - `auth.store.ts`: Session tokens, user profiles, biometric authentication toggles, and appearance theme modes (light/dark/system).
+  - `workspace.store.ts`: Active workspace state, tenant switching, and workspace creation.
+  - `sidebar.store.ts`: Global slide-over drawer drawer state (`isOpen`, `open()`, `close()`, `toggle()`).
+- **Persistent Storage**: `@react-native-async-storage/async-storage` for local token and preference persistence.
 
 ### 4. Continuous Native Generation (CNG) & Native Directories
 - **Never edit or commit `ios/` or `android/` folders manually**. They are generated dynamically via Prebuild / CNG.
@@ -124,5 +158,6 @@ When `EXPO_PUBLIC_ENABLE_OFFLINE_MOCK=true`, the app provides graceful fallback 
 
 ### 6. Theme & Responsive Design
 - Leverage `useTheme()` and `useColorScheme()` from `src/hooks/use-theme.ts` for automated light/dark mode adaptation.
-- Use `ThemedText` and `ThemedView` primitives to ensure consistent visual aesthetics across platforms.
+- Use `ThemedText`, `ThemedView`, and `GlassCard` primitives to ensure consistent visual aesthetics across platforms.
+- Use `lucide-react-native` vector icons via `src/components/icons.tsx`.
 - Wrap touchable elements with `HitSlop` (minimum 44x44 points) to adhere to iOS and Android accessibility guidelines.
