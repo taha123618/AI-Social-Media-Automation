@@ -13,8 +13,11 @@
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.3",
     "expo-glass-effect": "~57.0.2",
+    "expo-haptics": "~57.0.2",
     "expo-image": "~57.0.4",
+    "expo-image-picker": "~57.0.16",
     "expo-linking": "~57.0.9",
+    "expo-local-authentication": "^57.0.2",
     "expo-network": "^57.0.1",
     "expo-router": "~57.0.20",
     "expo-splash-screen": "~57.0.8",
@@ -44,7 +47,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
   },
   "private": true
 }

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const businessId = searchParams.get('businessId');
+    const businessId = searchParams.get('businessId') || request.headers.get('x-business-id');
     const days = parseInt(searchParams.get('days') || '30');
 
     if (!businessId) {

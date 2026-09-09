@@ -32,5 +32,6 @@ module.exports = {
     '/node_modules/',
     '/.next/',
     '/coverage/',
+    '/mobile-app/',
   ],
 };

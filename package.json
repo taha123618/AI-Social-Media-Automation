@@ -31,6 +31,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
+    "test:mobile": "bun test --cwd mobile-app",
+    "test:all": "jest && bun test --cwd mobile-app",
     "test:watch": "jest --watch",
     "-----> Prisma <-----": "",
     "prisma": "prisma",

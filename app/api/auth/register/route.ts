@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      token: (result as any).token || (result as any).session?.token,
       user: {
         id: result.user.id,
         name: result.user.name,

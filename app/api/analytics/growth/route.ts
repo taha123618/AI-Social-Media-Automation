@@ -5,7 +5,7 @@ import { getActiveWorkspaceIdSafe } from '@/app/(user)/actions/workspace';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const businessId = searchParams.get('businessId') || await getActiveWorkspaceIdSafe().catch(() => undefined);
+    const businessId = searchParams.get('businessId') || request.headers.get('x-business-id') || await getActiveWorkspaceIdSafe().catch(() => undefined);
 
     if (!businessId) {
       return NextResponse.json({ error: 'Business ID is required' }, { status: 400 });
