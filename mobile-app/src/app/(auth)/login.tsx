@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
-import * as LocalAuthentication from 'expo-local-authentication';
+
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
@@ -22,42 +21,11 @@ import { useAuthStore } from '@/stores/auth.store';
 export default function LoginScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { loginDemo, loginWithEmail } = useAuthStore();
+  const { loginWithEmail } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [biometricSupported, setBiometricSupported] = useState(false);
-
-  React.useEffect(() => {
-    (async () => {
-      try {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        setBiometricSupported(hasHardware && isEnrolled);
-      } catch {
-        setBiometricSupported(false);
-      }
-    })();
-  }, []);
-
-  const handleBiometricAuth = async () => {
-    try {
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate with Face ID / Biometrics',
-        fallbackLabel: 'Use Password',
-      });
-      if (result.success) {
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-        await loginDemo();
-        router.replace('/(tabs)');
-      }
-    } catch (err: any) {
-      Alert.alert('Authentication Error', err.message || 'Biometric authentication failed.');
-    }
-  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -75,15 +43,6 @@ export default function LoginScreen() {
     }
   };
 
-  const handleDemoAccess = async () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    setLoading(true);
-    await loginDemo();
-    setLoading(false);
-    router.replace('/(tabs)');
-  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -164,26 +123,6 @@ export default function LoginScreen() {
             style={styles.loginBtn}
           />
 
-          {biometricSupported && (
-            <Button
-              title="Unlock with Biometrics"
-              variant="outline"
-              onPress={handleBiometricAuth}
-              size="md"
-              icon={<Icons.Fingerprint size={18} color={theme.primary} />}
-              style={styles.biometricBtn}
-            />
-          )}
-
-          {/* Quick Demo Access Button */}
-          <Button
-            title="Instant Demo Explorer Access"
-            variant="secondary"
-            onPress={handleDemoAccess}
-            size="md"
-            icon={<Icons.Zap size={16} color={theme.primary} />}
-            style={styles.demoBtn}
-          />
         </View>
 
         {/* Footer Link */}

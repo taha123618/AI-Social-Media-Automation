@@ -23,7 +23,7 @@ type RegisterStep = 'DETAILS' | 'OTP_VERIFY';
 export default function RegisterScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { loginDemo, registerWithEmail } = useAuthStore();
+  const { registerWithEmail } = useAuthStore();
 
   const [step, setStep] = useState<RegisterStep>('DETAILS');
   const [email, setEmail] = useState('');

@@ -16,15 +16,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { email, password } = loginSchema.parse(body);
 
-    // Sign in with email and password
+    // Forward the incoming request headers so Better Auth can validate
+    // the request origin, host, and content-type properly.
+    // Without this, auth.api.signInEmail() can throw "User not found"
+    // even when credentials are correct (mobile clients, cross-origin calls).
     const result = await auth.api.signInEmail({
-      body: {
-        email,
-        password,
-      },
+      body: { email, password },
+      headers: request.headers,
     });
 
-    if (!result.user) {
+    if (!result?.user) {
       await SystemLogger.logAudit({
         action: "LOGIN",
         resource: "auth",
@@ -49,24 +50,36 @@ export async function POST(request: NextRequest) {
       userAgent,
     });
 
+    // Better Auth returns token on the result object for API (non-browser) clients
+    const token =
+      (result as any).token ??
+      (result as any).session?.token ??
+      null;
+
     return NextResponse.json({
       success: true,
-      token: (result as any).token || (result as any).session?.token,
+      token,
       user: {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
-        image: result.user.image,
+        image: result.user.image ?? null,
       },
     });
   } catch (error: any) {
-    console.error("Login error:", error);
+    // Surface the actual Better Auth error message to aid debugging
+    const betterAuthMsg: string =
+      error?.body?.message ||
+      error?.message ||
+      "Login failed";
+
+    console.error("Login error:", betterAuthMsg, error);
 
     await SystemLogger.logError({
-      message: error.message || "Login failed",
+      message: betterAuthMsg,
       source: "app/api/auth/login/route.ts",
       path: "/api/auth/login",
-      stack: error.stack,
+      stack: error?.stack,
     });
 
     if (error instanceof z.ZodError) {
@@ -76,9 +89,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Map Better Auth UNAUTHORIZED → 401, everything else → 500
+    const statusCode =
+      error?.statusCode === 401 || error?.status === "UNAUTHORIZED"
+        ? 401
+        : 500;
+
     return NextResponse.json(
-      { error: "Login failed" },
-      { status: 500 }
+      { error: betterAuthMsg },
+      { status: statusCode }
     );
   }
 }
+
