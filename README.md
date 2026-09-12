@@ -327,6 +327,22 @@ ai_social_media_automation/
 
 ---
 
+## 📚 Enterprise Documentation & System Specifications
+
+SocialAI is fully documented with enterprise-grade system requirement specifications and architectural design documents:
+
+| Specification Document | File Path | Scope & Core Contents |
+| :--- | :--- | :--- |
+| **Product Requirement Document (PRD)** | [`docs/PRD.md`](docs/PRD.md) | Product vision, user personas, 29 domain modules, user journeys, NFRs, and product KPIs. |
+| **Technical Requirement Document (TRD)** | [`docs/TRD.md`](docs/TRD.md) | Next.js 16 + React 19 architecture, 16 agents, 19 Zod tools, pgvector RAG, BullMQ, and mobile specs. |
+| **Business Requirement Document (BRD)** | [`docs/BRD.md`](docs/BRD.md) | Market sizing (TAM/SAM/SOM), commercial SaaS tiers, unit economics ($15.84 COGS), and compliance. |
+| **Functional Requirement Document (FRD)** | [`docs/FRD.md`](docs/FRD.md) | Module-by-module input/output specifications, state machines, Zod tool schemas, and mobile parity. |
+| **Model Requirement Document (MRD)** | [`docs/MRD.md`](docs/MRD.md) | Foundation LLM matrix (GPT-4o, Claude 3.5, Gemini, DeepSeek), Runway video, ElevenLabs audio, and hyperparameters. |
+| **Data Strategy Document** | [`docs/DATA_STRATEGY.md`](docs/DATA_STRATEGY.md) | PostgreSQL + pgvector lifecycle, multi-tenant isolation, HNSW indexing, analytics ingestion, and GDPR/CCPA. |
+| **AI Evaluation & Benchmark Framework** | [`docs/AI_EVALUATION_BENCHMARK_FRAMEWORK.md`](docs/AI_EVALUATION_BENCHMARK_FRAMEWORK.md) | 5-dimensional scoring rubric, Flesch-Kincaid readability, AI Model Arena benchmarks, and HITL quality gates. |
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions from the open-source community! Whether fixing a bug, adding an AI agent, improving documentation, or optimizing worker performance:
